@@ -35,7 +35,7 @@ add_executable(tests ${WEECHAT_RELAY_TESTS_SRC})
 target_link_libraries(tests
   weechat_relay_unit_tests_lib
   weechatrelay_static
-  ${CPPUTEST_LIBRARIES})
+  ${CPPUTEST_LDFLAGS})
 add_dependencies(tests
   weechat_relay_unit_tests_lib
   weechatrelay_static)
