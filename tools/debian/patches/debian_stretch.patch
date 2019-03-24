@@ -1,0 +1,40 @@
+diff --git a/debian-devel/compat b/debian-devel/compat
+index 48082f7..f599e28 100644
+--- a/debian-devel/compat
++++ b/debian-devel/compat
+@@ -1 +1 @@
+-12
++10
+diff --git a/debian-devel/control b/debian-devel/control
+index 3a1c80f..bc68cab 100644
+--- a/debian-devel/control
++++ b/debian-devel/control
+@@ -4,7 +4,7 @@ Priority: optional
+ Maintainer: Sébastien Helleu <flashcode@flashtux.org>
+ Build-Depends:
+     asciidoctor (>= 1.5.4),
+-    debhelper (>= 12),
++    debhelper (>= 10),
+     cmake, pkg-config,
+     libncursesw5-dev,
+     libgnutls28-dev,
+diff --git a/debian-stable/compat b/debian-stable/compat
+index 48082f7..f599e28 100644
+--- a/debian-stable/compat
++++ b/debian-stable/compat
+@@ -1 +1 @@
+-12
++10
+diff --git a/debian-stable/control b/debian-stable/control
+index 28d335e..7377733 100644
+--- a/debian-stable/control
++++ b/debian-stable/control
+@@ -4,7 +4,7 @@ Priority: optional
+ Maintainer: Sébastien Helleu <flashcode@flashtux.org>
+ Build-Depends:
+     asciidoctor (>= 1.5.4),
+-    debhelper (>= 12),
++    debhelper (>= 10),
+     cmake, pkg-config,
+     libncursesw5-dev,
+     libgnutls28-dev,

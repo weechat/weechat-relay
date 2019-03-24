@@ -1,0 +1,66 @@
+Source: weechatrelay
+Section: libs
+Priority: optional
+Maintainer: Sébastien Helleu <flashcode@flashtux.org>
+Build-Depends:
+    asciidoctor (>= 1.5.4),
+    debhelper (>= 12),
+    cmake, pkg-config,
+    libncursesw5-dev,
+    libgnutls28-dev,
+    zlib1g-dev
+Standards-Version: 4.3.0
+Homepage: https://weechat.org/
+Vcs-Git: https://github.com/weechat/weechat-relay.git
+Vcs-Browser: https://github.com/weechat/weechat-relay
+
+Package: libweechatrelay
+Architecture: any
+Depends:
+    ${misc:Depends},
+    ${shlibs:Depends}
+Suggests: weechatrelay-bin (= ${source:Version})
+Description: WeeChat Relay is a C library to communicate between WeeChat and
+ a client using the "weechat" relay protocol.
+ .
+ This package provides the library to communicate between WeeChat and a client
+ using the "weechat" relay protocol:
+ - build and send commands from a client to WeeChat
+ - build and send binary messages from WeeChat to a client
+ - decode binary messages received from WeeChat.
+
+Package: libweechatrelay-dev
+Section: libdevel
+Architecture: any
+Depends:
+    ${misc:Depends},
+    ${shlibs:Depends}
+Suggests:
+    weechatrelay-bin (= ${source:Version}),
+    weechatrelay-doc (= ${source:Version})
+Description: WeeChat Relay is a C library to communicate between WeeChat and
+ a client using the "weechat" relay protocol.
+ .
+ This package provides the WeeChat Relay development files.
+
+Package: weechatrelay-bin
+Section: net
+Architecture: any
+Depends:
+    ${misc:Depends},
+    libweechatrelay (= ${binary:Version})
+Suggests: weechatrelay-doc (= ${source:Version})
+Description: WeeChat Relay is a C library to communicate between WeeChat and
+ a client using the "weechat" relay protocol.
+ .
+ This package contains a command-line interface to the WeeChat Relay library,
+ which can be used for tests, debug or in shell scripts.
+
+Package: weechatrelay-doc
+Section: doc
+Architecture: all
+Depends: ${misc:Depends}
+Description: WeeChat Relay is a C library to communicate between WeeChat and
+ a client using the "weechat" relay protocol.
+ .
+ This package contains the html documentation for WeeChat Relay.

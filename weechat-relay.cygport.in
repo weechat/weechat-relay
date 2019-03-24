@@ -1,0 +1,125 @@
+#
+# Copyright (C) 2019 Sébastien Helleu <flashcode@flashtux.org>
+#
+# This file is part of WeeChat Relay.
+#
+# WeeChat Relay is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# WeeChat Relay is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with WeeChat Relay.  If not, see <https://www.gnu.org/licenses/>.
+#
+
+#
+# This file is used to build Cygwin packages using the "cygport" command.
+#
+# It must be used *ONLY* for a stable release (version "X.Y.Z"),
+# not for a development version (version "X.Y.Z-dev" or "X.Y.Z-rcN").
+#
+# Instructions:
+#
+#   1. install asciidoctor (to build man page/docs):
+#
+#      $ gem install -n /usr/local/bin asciidoctor
+#
+#   2. execute these commands inside your build directory, after running cmake
+#      or configure script (replace X.Y.Z by WeeChat Relay version):
+#
+#      $ cygport weechat-relay-X.Y.Z-1.cygport fetch
+#      $ cygport weechat-relay-X.Y.Z-1.cygport almostall
+#
+#      Packages are built in directory: ./weechat-relay-X.Y.Z-1.<arch>/dist/weechatrelay/
+#
+
+inherit cmake
+
+NAME="weechatrelay"
+VERSION=@VERSION@
+RELEASE=1
+
+# Default category (some packages have extra category)
+CATEGORY="Libs"
+
+HOMEPAGE="https://weechat.org/"
+SRC_URI="https://weechat.org/files/src/weechat-relay-${VERSION}.tar.xz"
+
+# Build dependencies only
+DEPEND="cmake libgnutls-devel pkg-config zlib-devel"
+
+#
+# CMake compilation of WeeChat Relay:
+#   1. set prefix to /usr
+#   2. enable build of:
+#        - command-line client
+#        - man pages
+#        - documentation
+#
+CYGCMAKE_ARGS="-DCMAKE_INSTALL_PREFIX=/usr -DBUILD_CLI=ON -DBUILD_DOC=ON \
+-DBUILD_MAN=ON"
+
+PKG_IGNORE="etc/postinstall/${PN}.sh"
+
+#
+# Build 4 Cygwin packages:
+#   weechatrelay
+#   libweechatrelay
+#   libweechatrelay-devel
+#   libweechatrelay-doc
+#
+PKG_NAMES="weechat-relay ${PN} ${PN}-devel ${PN}-doc"
+PKG_HINTS="setup devel doc"
+
+#
+# Package "weechatrelay": CLI test program
+#
+weechatrelay_SUMMARY="Command-line interface to the WeeChat Relay library"
+weechatrelay_DESCRIPTION="Command-line interface to the WeeChat Relay \
+library, which can be used for tests, debug or in shell scripts."
+weechatrelay_CONTENTS="
+    usr/bin/weechat-relay-cli
+    usr/share/icons/
+    usr/share/man/
+"
+
+#
+# Package "libweechatrelay": Implementation of WeeChat Relay protocol
+#
+libweechatrelay_SUMMARY="Implementation of WeeChat Relay protocol"
+libweechatrelay_DESCRIPTION="WeeChat Relay is a C library to communicate \
+between WeeChat and a client using the \"weechat\" relay protocol."
+libweechatrelay_CONTENTS="
+    usr/lib/libweechatrelay.dll
+    usr/share/doc/weechat/AUTHORS.adoc
+    usr/share/doc/weechat/ChangeLog.adoc
+    usr/share/doc/weechat/Contributing.adoc
+    usr/share/doc/weechat/COPYING
+    usr/share/doc/weechat/README.adoc
+    usr/share/doc/weechat/ReleaseNotes.adoc
+"
+libweechatrelay_REQUIRES="weechat"
+
+#
+# Package "libweechatrelay-devel": WeeChat Relay development files
+#
+weechat_devel_CATEGORY="Libs Devel"
+weechat_devel_SUMMARY="WeeChat Relay development files"
+weechat_devel_CONTENTS="
+    usr/include/
+    usr/lib/pkgconfig/
+"
+
+#
+# Package "weechatrelay-doc": WeeChat Relay documentation
+#
+weechat_doc_CATEGORY="Libs Doc"
+weechat_doc_SUMMARY="Documentation for WeeChat Relay"
+weechat_doc_CONTENTS="
+    usr/share/doc/weechat-relay/*.html
+"

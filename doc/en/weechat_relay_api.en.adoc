@@ -1,0 +1,21 @@
+= WeeChat Relay API
+:author: Sébastien Helleu
+:email: flashcode@flashtux.org
+:lang: en
+:toc: left
+:toclevels: 4
+:sectnums:
+:sectnumlevels: 3
+:docinfo1:
+
+
+This manual documents the API of WeeChat Relay library.
+
+Latest version of this document can be found on this page:
+https://weechat.org/doc
+
+
+[[introduction]]
+== Introduction
+
+...

@@ -1,0 +1,71 @@
+= weechat-relay-cli(1)
+:doctype: manpage
+:author: Sébastien Helleu
+:email: flashcode@flashtux.org
+:lang: fr
+:man manual: Manuel WeeChat Relay
+:man source: WeeChat Relay {revnumber}
+
+== NAME
+
+weechat-relay-cli - outil en ligne de commande pour tester la connexion à un relai WeeChat
+
+== SYNOPSIS
+
+[verse]
+*weechat-relay-cli* [-6|--ipv6] [-d|--debug] [-p|--port <port>] hôte
+*weechat-relay-cli* [-h|--help]
+*weechat-relay-cli* [-l|--license]
+*weechat-relay-cli* [-v|--version]
+
+== DESCRIPTION
+
+weechat-relay-cli est un outil en ligne de commande pour tester la connexion à
+un relai WeeChat.
+
+Il est utilisé pour se connecter à un WeeChat qui tourne, envoyer des commandes
+et afficher les messages binaires reçus de WeeChat.
+
+== OPTIONS
+
+*-6*, *--ipv6*::
+    Se connecter en utilisant l'IPv6.
+
+*-d*, *--debug*::
+    Activer les messages de debug.  Avec deux -d : afficher les messages bruts.
+
+*-h*, *--help*::
+    Afficher l'aide et quitter.
+
+*-l*, *--license*::
+    Afficher la licence et quitter.
+
+*-p*, *--port*::
+    Le port de connexion (par défaut  9000).
+
+*-v*, *--version*::
+    Afficher la version et quitter.
+
+*hôte*::
+    Hôte sur lequel se connecter. Un WeeChat qui tourne avec un relai (de type
+    "weechat") doit être configuré sur cet hôte.
+
+== COPYRIGHT
+
+WeeChat Relay est écrit par Sébastien Helleu et des contributeurs (la liste
+complète est dans le fichier AUTHORS.adoc).
+
+Copyright (C) 2019 {author}
+
+WeeChat Relay est un logiciel libre; vous pouvez le redistribuer et/ou le modifier
+sous les termes de la GNU General Public License telle que publiée par la
+Free Software Foundation; soit la version 3 de la licence, ou (selon votre
+choix) toute version ultérieure.
+
+Merci de consulter le fichier COPYING pour plus d'informations.
+
+Site web : https://weechat.org/
+
+== SUPPORT / SIGNALER DES BUGS
+
+Pour de l'aide ou signaler un bug : https://weechat.org/dev/support

@@ -1,0 +1,10 @@
+Document: weechat-relay-api-en
+Title: WeeChat Relay library API (English)
+Author: Sébastien Helleu
+Abstract: This document describes the API of the WeeChat Relay library
+ (English version).
+Section: Programming/C
+
+Format: HTML
+Index: /usr/share/doc/weechatrelay-doc/html/weechat_relay_api.en.html
+Files: /usr/share/doc/weechatrelay-doc/html/weechat_relay_api.en.html

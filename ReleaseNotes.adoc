@@ -1,0 +1,23 @@
+= WeeChat Relay Release Notes
+:author: Sébastien Helleu
+:email: flashcode@flashtux.org
+:lang: en
+:toc: left
+:docinfo1:
+
+
+This document lists important changes for each version, that require manual
+actions (the latest formatted version of this document can be found
+https://weechat.org/files/releasenotes/relay/ReleaseNotes-devel.html[here]). +
+It is recommended to read it when upgrading to a new stable
+version.
+
+For a complete list of changes, please look at
+https://weechat.org/files/changelog/relay/ChangeLog-devel.html[ChangeLog]
+(file _ChangeLog.adoc_ in sources).
+
+
+[[v1.0.0]]
+== Version 1.0.0 (under dev)
+
+No release note.

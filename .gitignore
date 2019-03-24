@@ -1,0 +1,8 @@
+# ignored files for Git
+
+build*/*
+debian
+!tools/debian
+debian-devel/changelog
+debian-devel/*.log
+debian-stable/*.log

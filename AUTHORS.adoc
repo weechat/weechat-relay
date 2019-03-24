@@ -1,0 +1,10 @@
+= WeeChat Relay Authors
+:author: Sébastien Helleu
+:email: flashcode@flashtux.org
+:lang: en
+
+
+== Developers
+
+* General code
+** Sébastien Helleu (FlashCode) <flashcode@flashtux.org>

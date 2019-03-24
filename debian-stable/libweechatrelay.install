@@ -1,0 +1,3 @@
+usr/lib/*/libweechatrelay.a
+usr/lib/*/libweechatrelay.so
+usr/lib/*/pkgconfig/*
