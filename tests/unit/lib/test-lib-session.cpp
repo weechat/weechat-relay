@@ -45,18 +45,18 @@ TEST_GROUP(LibSession)
 TEST(LibSession, Init)
 {
     struct t_weechat_relay_session *session;
-    gnutls_session_t *gnutls_sess;
+    void *gnutls_session;
 
     session = weechat_relay_session_init (123, NULL);
     LONGS_EQUAL(123, session->sock);
     LONGS_EQUAL(0, session->ssl);
-    POINTERS_EQUAL(NULL, session->gnutls_sess);
+    POINTERS_EQUAL(NULL, session->gnutls_session);
     weechat_relay_session_free (session);
 
-    gnutls_sess = (gnutls_session_t *)0x123abc;
-    session = weechat_relay_session_init (456, gnutls_sess);
+    gnutls_session = (void *)0x123abc;
+    session = weechat_relay_session_init (456, gnutls_session);
     LONGS_EQUAL(456, session->sock);
     LONGS_EQUAL(1, session->ssl);
-    POINTERS_EQUAL(gnutls_sess, session->gnutls_sess);
+    POINTERS_EQUAL(gnutls_session, session->gnutls_session);
     weechat_relay_session_free (session);
 }

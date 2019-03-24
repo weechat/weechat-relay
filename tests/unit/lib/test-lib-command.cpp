@@ -51,7 +51,7 @@ TEST_GROUP(LibCommand)
         pipe (fd_pipe);
         relay_session.sock = fd_pipe[1];
         relay_session.ssl = 0;
-        relay_session.gnutls_sess = NULL;
+        relay_session.gnutls_session = NULL;
     }
 
     void teardown()

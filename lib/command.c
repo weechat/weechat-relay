@@ -32,6 +32,8 @@
 #include <arpa/inet.h>
 #include <errno.h>
 
+#include <gnutls/gnutls.h>
+
 #include "weechat-relay.h"
 
 
@@ -94,9 +96,14 @@ weechat_relay_cmd_raw (struct t_weechat_relay_session *session,
         return -1;
 
     if (session->ssl)
-        rc = gnutls_record_send (*(session->gnutls_sess), buffer, size);
+    {
+        rc = gnutls_record_send (*((gnutls_session_t *)session->gnutls_session),
+                                 buffer, size);
+    }
     else
+    {
         rc = write (session->sock, buffer, size);
+    }
 
     if (rc < 0)
         return -1;

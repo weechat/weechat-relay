@@ -25,6 +25,8 @@
 
 #include <stdlib.h>
 
+#include <gnutls/gnutls.h>
+
 #include "weechat-relay.h"
 
 
@@ -38,7 +40,7 @@
  */
 
 struct t_weechat_relay_session *
-weechat_relay_session_init (int sock, gnutls_session_t *gnutls_sess)
+weechat_relay_session_init (int sock, void *gnutls_session)
 {
     struct t_weechat_relay_session *session;
 
@@ -47,8 +49,8 @@ weechat_relay_session_init (int sock, gnutls_session_t *gnutls_sess)
         return NULL;
 
     session->sock = sock;
-    session->ssl = (gnutls_sess != NULL) ? 1 : 0;
-    session->gnutls_sess = gnutls_sess;
+    session->ssl = (gnutls_session) ? 1 : 0;
+    session->gnutls_session = gnutls_session;
 
     return session;
 }

@@ -20,8 +20,6 @@
 #ifndef WEECHAT_RELAY_H
 #define WEECHAT_RELAY_H
 
-#include <gnutls/gnutls.h>
-
 /* WeeChat Relay version */
 
 #define WEECHAT_RELAY_VERSION "@VERSION@"
@@ -43,11 +41,11 @@ struct t_weechat_relay_session
 {
     int sock;                          /* socket for I/O with WeeChat       */
     int ssl;                           /* connection with SSL               */
-    gnutls_session_t *gnutls_sess;     /* gnutls session (only if SSL)      */
+    void *gnutls_session;              /* GnuTLS session (only if SSL)      */
 };
 
 extern struct t_weechat_relay_session *weechat_relay_session_init (int sock,
-                                                                   gnutls_session_t *gnutls_sess);
+                                                                   void *gnutls_session);
 extern void weechat_relay_session_free (struct t_weechat_relay_session *session);
 
 /* Relay commands (client -> WeeChat) */
