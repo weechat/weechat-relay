@@ -37,7 +37,7 @@
 #define WEECHAT_RELAY_COMPRESSION_OFF  "off"
 #define WEECHAT_RELAY_COMPRESSION_ZLIB "zlib"
 
-/* Relay session */
+/* Relay sessions */
 
 struct t_weechat_relay_session
 {
@@ -49,6 +49,9 @@ struct t_weechat_relay_session
 extern struct t_weechat_relay_session *weechat_relay_session_init (int sock,
                                                                    gnutls_session_t *gnutls_sess);
 extern void weechat_relay_session_free (struct t_weechat_relay_session *session);
+
+/* Relay commands (client -> WeeChat) */
+
 extern int weechat_relay_cmd_raw (struct t_weechat_relay_session *session,
                                   const char *buffer,
                                   size_t size);
