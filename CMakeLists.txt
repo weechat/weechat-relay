@@ -17,8 +17,8 @@
 # along with WeeChat Relay.  If not, see <https://www.gnu.org/licenses/>.
 #
 
-cmake_minimum_required(VERSION 2.6)
-cmake_policy(VERSION 2.6)
+cmake_minimum_required(VERSION 3.0)
+cmake_policy(VERSION 3.0)
 
 project(weechat-relay C)
 
