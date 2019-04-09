@@ -51,25 +51,25 @@ relay_network_connect (const char *hostname, int port, int use_ipv6)
     sock = socket (AF_INET, SOCK_STREAM, 0);
     if (sock < 0)
     {
-        printf ("ERROR: failed to create socket\n");
+        fprintf (stderr, "ERROR: failed to create socket\n");
         exit (EXIT_FAILURE);
     }
 
-    if ((host = gethostbyname(hostname)) == NULL)
+    host = gethostbyname (hostname);
+    if (!host)
     {
-        //gethostbyname failed
-        printf ("Failed to resolve %s\n", hostname);
-        exit(EXIT_FAILURE);
+        fprintf (stderr, "ERROR: failed to resolve %s\n", hostname);
+        exit (EXIT_FAILURE);
     }
-    addr.sin_addr.s_addr = *(long*) host->h_addr_list[0];
+    addr.sin_addr.s_addr = *((long *)host->h_addr_list[0]);
     addr.sin_family = AF_INET;
     addr.sin_port = htons (port);
 
     if (connect (sock, (struct sockaddr *)&addr, sizeof (addr)) < 0)
     {
         close (sock);
-        printf ("ERROR: connection failed on %s port %d: %s\n",
-                hostname, port, strerror (errno));
+        fprintf (stderr, "ERROR: connection failed on %s port %d: %s\n",
+                 hostname, port, strerror (errno));
         exit (EXIT_FAILURE);
     }
     printf ("Connected to %s\n", hostname);
