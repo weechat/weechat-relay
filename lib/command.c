@@ -31,10 +31,13 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <errno.h>
-
 #include <gnutls/gnutls.h>
 
 #include "weechat-relay.h"
+
+
+const char *weechat_relay_compression_string[WEECHAT_RELAY_NUM_COMPRESSIONS] =
+{ "off", "zlib" };
 
 
 /*
@@ -180,36 +183,34 @@ weechat_relay_cmd (struct t_weechat_relay_session *session,
 
 int
 weechat_relay_cmd_init (struct t_weechat_relay_session *session,
-                        const char *password, const char *compression)
+                        const char *password,
+                        enum t_weechat_relay_compression compression)
 {
-    char *password2, *compression2, *options;
-    const char *args[2];
+    char *password2, *options;
+    const char *args[2], *ptr_compression;
     int rc, length;
 
     rc = -1;
 
     password2 = NULL;
-    compression2 = NULL;
     options = NULL;
 
     password2 = weechat_relay_cmd_escape (password, ",");
-    compression2 = weechat_relay_cmd_escape (
-        (compression) ? compression : WEECHAT_RELAY_COMPRESSION_ZLIB,
-        ",");
+
+    ptr_compression = weechat_relay_compression_string[compression];
 
     length = 128 + strlen ((password2) ? password2 : "") +
-        strlen ((compression2) ? compression2 : "") + 1;
+        strlen (ptr_compression) + 1;
     options = malloc (length);
     if (!options)
         goto end;
 
     snprintf (options, length,
-              "%s%s%s%s%s",
+              "%s%s%scompression=%s",
               (password2) ? "password=" : "",
               (password2) ? password2 : "",
               (password2) ? "," : "",
-              (compression2) ? "compression=" : "",
-              (compression2) ? compression2 : "");
+              ptr_compression);
 
     args[0] = options;
     args[1] = NULL;
@@ -219,8 +220,6 @@ weechat_relay_cmd_init (struct t_weechat_relay_session *session,
 end:
     if (password2)
         free (password2);
-    if (compression2)
-        free (compression2);
     if (options)
         free (options);
 

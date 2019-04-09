@@ -155,35 +155,24 @@ TEST(LibCommand, Cmd)
 
 TEST(LibCommand, CmdInit)
 {
-    LONGS_EQUAL(-1, weechat_relay_cmd_init (NULL, NULL, NULL));
-
-    LONGS_EQUAL(18, weechat_relay_cmd_init (&relay_session, NULL, ""));
-    RELAY_CMD_EQUAL("init compression=\n");
+    LONGS_EQUAL(-1, weechat_relay_cmd_init (NULL, NULL,
+                                            WEECHAT_RELAY_COMPRESSION_OFF));
 
     LONGS_EQUAL(21, weechat_relay_cmd_init (&relay_session, NULL,
                                             WEECHAT_RELAY_COMPRESSION_OFF));
-    RELAY_CMD_EQUAL("init compression=" WEECHAT_RELAY_COMPRESSION_OFF "\n");
+    RELAY_CMD_EQUAL("init compression=off\n");
 
     LONGS_EQUAL(22, weechat_relay_cmd_init (&relay_session, NULL,
                                             WEECHAT_RELAY_COMPRESSION_ZLIB));
-    RELAY_CMD_EQUAL("init compression=" WEECHAT_RELAY_COMPRESSION_ZLIB "\n");
-
-    LONGS_EQUAL(38, weechat_relay_cmd_init (&relay_session, "secret", NULL));
-    RELAY_CMD_EQUAL("init password=secret,"
-                    "compression=" WEECHAT_RELAY_COMPRESSION_ZLIB "\n");
-
-    LONGS_EQUAL(34, weechat_relay_cmd_init (&relay_session, "secret", ""));
-    RELAY_CMD_EQUAL("init password=secret,compression=\n");
+    RELAY_CMD_EQUAL("init compression=zlib\n");
 
     LONGS_EQUAL(38, weechat_relay_cmd_init (&relay_session, "secret",
                                             WEECHAT_RELAY_COMPRESSION_ZLIB));
-    RELAY_CMD_EQUAL("init password=secret,"
-                    "compression=" WEECHAT_RELAY_COMPRESSION_ZLIB "\n");
+    RELAY_CMD_EQUAL("init password=secret,compression=zlib\n");
 
     LONGS_EQUAL(40, weechat_relay_cmd_init (&relay_session, "sec,ret",
                                             WEECHAT_RELAY_COMPRESSION_ZLIB));
-    RELAY_CMD_EQUAL("init password=sec\\,ret,"
-                    "compression=" WEECHAT_RELAY_COMPRESSION_ZLIB "\n");
+    RELAY_CMD_EQUAL("init password=sec\\,ret,compression=zlib\n");
 }
 
 /*

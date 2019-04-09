@@ -17,7 +17,7 @@
 # along with WeeChat Relay.  If not, see <https://www.gnu.org/licenses/>.
 #
 
-set(WEECHAT_RELAY_SRC command.c session.c)
+set(WEECHAT_RELAY_SRC command.c message.c session.c)
 
 include_directories(${CMAKE_BINARY_DIR} ${CMAKE_CURRENT_BINARY_DIR})
 

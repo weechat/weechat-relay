@@ -25,6 +25,7 @@ include_directories(${CPPUTEST_INCLUDE_DIRS} ${PROJECT_BINARY_DIR} ${PROJECT_SOU
 # unit tests (library)
 set(LIB_WEECHAT_RELAY_UNIT_TESTS_LIB_SRC
   unit/lib/test-lib-command.cpp
+  unit/lib/test-lib-message.cpp
   unit/lib/test-lib-session.cpp
 )
 add_library(weechat_relay_unit_tests_lib STATIC ${LIB_WEECHAT_RELAY_UNIT_TESTS_LIB_SRC})

@@ -35,6 +35,7 @@ extern "C"
 /* import tests from libs */
 /* library */
 IMPORT_TEST_GROUP(LibCommand);
+IMPORT_TEST_GROUP(LibMessage);
 IMPORT_TEST_GROUP(LibSession);
 
 
