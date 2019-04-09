@@ -31,6 +31,7 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <errno.h>
+#include <netdb.h>
 
 
 /*
@@ -41,6 +42,7 @@ void
 relay_network_connect (const char *hostname, int port, int use_ipv6)
 {
     int sock;
+    struct hostent* host;
     struct sockaddr_in addr;
 
     /* TODO: implement connection with IPv6 */
@@ -53,7 +55,13 @@ relay_network_connect (const char *hostname, int port, int use_ipv6)
         exit (EXIT_FAILURE);
     }
 
-    addr.sin_addr.s_addr = inet_addr (hostname);
+    if ((host = gethostbyname(hostname)) == NULL)
+    {
+        //gethostbyname failed
+        printf ("Failed to resolve %s\n", hostname);
+        exit(EXIT_FAILURE);
+    }
+    addr.sin_addr.s_addr = *(long*) host->h_addr_list[0];
     addr.sin_family = AF_INET;
     addr.sin_port = htons (port);
 
@@ -64,6 +72,7 @@ relay_network_connect (const char *hostname, int port, int use_ipv6)
                 hostname, port, strerror (errno));
         exit (EXIT_FAILURE);
     }
+    printf ("Connected to %s\n", hostname);
 
     close (sock);
 }
