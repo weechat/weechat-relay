@@ -8,3 +8,9 @@
 
 * General code
 ** Sébastien Helleu (FlashCode) <flashcode@flashtux.org>
+
+== Contributors
+
+Alphabetically:
+
+* Abhilash Raj
