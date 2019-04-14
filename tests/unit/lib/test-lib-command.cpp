@@ -29,8 +29,10 @@ extern "C"
 #include <unistd.h>
 #include <string.h>
 #include "tests/tests.h"
-#include "lib/command.h"
 #include "lib/weechat-relay.h"
+
+extern char *weechat_relay_cmd_escape (const char *string,
+                                       const char *chars_to_escape);
 }
 
 #define RELAY_CMD_EQUAL(__command)                                      \
