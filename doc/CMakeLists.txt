@@ -23,7 +23,7 @@ if(BUILD_DOC OR BUILD_MAN)
 
   if(ASCIIDOCTOR_FOUND)
 
-    set(ASCIIDOCTOR_ARGS -a experimental -a icons=font -a revnumber="${VERSION}" -a sectanchors -a source-highlighter=prettify)
+    set(ASCIIDOCTOR_ARGS -a experimental -a "prewrap!" -a icons=font -a revnumber="${VERSION}" -a sectanchors -a source-highlighter=prettify)
 
     add_subdirectory(en)
     add_subdirectory(fr)
