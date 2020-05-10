@@ -21,12 +21,6 @@ set(WEECHAT_RELAY_SRC command.c message.c session.c)
 
 include_directories(${CMAKE_BINARY_DIR} ${CMAKE_CURRENT_BINARY_DIR})
 
-set(LINK_LIBS)
-
-find_package(GnuTLS REQUIRED)
-include_directories(${GNUTLS_INCLUDE_DIR})
-list(APPEND LINK_LIBS ${GNUTLS_LIBRARY})
-
 add_library(weechatrelay_static STATIC ${WEECHAT_RELAY_SRC})
 add_library(weechatrelay_shared SHARED ${WEECHAT_RELAY_SRC})
 

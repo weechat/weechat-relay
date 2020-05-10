@@ -66,10 +66,16 @@ option(CODE_COVERAGE "Enable code coverage"          OFF)
 
 add_library(coverage_config INTERFACE)
 
+set(LINK_LIBS)
+
 if(CODE_COVERAGE)
   target_compile_options(coverage_config INTERFACE -O0 -g --coverage)
   target_link_libraries(coverage_config INTERFACE --coverage)
 endif()
+
+find_package(GnuTLS REQUIRED)
+include_directories(${GNUTLS_INCLUDE_DIR})
+list(APPEND LINK_LIBS ${GNUTLS_LIBRARY})
 
 configure_file(config.h.cmake config.h @ONLY)
 add_definitions(-DHAVE_CONFIG_H)
