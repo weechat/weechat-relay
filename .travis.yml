@@ -6,7 +6,7 @@ compiler:
   - clang
 
 before_script:
-  - travis_retry sudo apt-get -y install cmake pkg-config libgnutls-dev zlib1g-dev libcpputest-dev lcov
+  - travis_retry sudo apt-get -y install cmake pkg-config libgnutls-dev zlib1g-dev libreadline-dev libcpputest-dev lcov
 
 script:
   - ./tools/build-debian.sh test-patches
