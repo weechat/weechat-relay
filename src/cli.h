@@ -36,4 +36,6 @@
     "You should have received a copy of the GNU General Public License\n" \
     "along with WeeChat Relay.  If not, see <https://www.gnu.org/licenses/>.\n"
 
+#define RELAY_CLI_DEFAULT_PORT "9000"
+
 #endif /* RELAY_CLI_H */

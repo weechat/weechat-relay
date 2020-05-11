@@ -20,7 +20,13 @@
 #ifndef RELAY_NETWORK_H
 #define RELAY_NETWORK_H
 
-extern void relay_network_connect (const char *hostname, int port,
-                                   int use_ipv6);
+#include <gnutls/gnutls.h>
+
+extern void relay_network_init ();
+extern int relay_network_connect (const char *hostname, const char *port,
+                                  int force_ipv4, int force_ipv6,
+                                  gnutls_session_t *gnutls_sess);
+extern void relay_network_disconnect (gnutls_session_t *gnutls_sess);
+extern void relay_network_end ();
 
 #endif /* RELAY_NETWORK_H */

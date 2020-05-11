@@ -17,15 +17,25 @@
 # along with WeeChat Relay.  If not, see <https://www.gnu.org/licenses/>.
 #
 
-find_package(GnuTLS REQUIRED)
-find_package(ZLIB REQUIRED)
+if(BUILD_CLI)
 
-set(WEECHAT_RELAY_CLI_SRC cli.c network.c)
+  set(WEECHAT_RELAY_CLI_SRC cli.c network.c)
 
-set(EXECUTABLE weechat-relay-cli)
+  set(EXECUTABLE weechat-relay-cli)
 
-include_directories(${CMAKE_BINARY_DIR} ${PROJECT_SOURCE_DIR}/lib)
-add_executable(${EXECUTABLE} ${WEECHAT_RELAY_CLI_SRC})
-add_dependencies(${EXECUTABLE} weechatrelay_static)
+  include(FindPkgConfig)
 
-install(TARGETS ${EXECUTABLE} RUNTIME DESTINATION bin)
+  find_package(GnuTLS REQUIRED)
+  find_package(ZLIB REQUIRED)
+
+  pkg_check_modules(READLINE readline REQUIRED)
+  list(APPEND LINK_LIBS ${READLINE_LDFLAGS})
+
+  include_directories(${CMAKE_BINARY_DIR} ${PROJECT_SOURCE_DIR}/lib ${READLINE_INCLUDE_DIRS})
+  add_executable(${EXECUTABLE} ${WEECHAT_RELAY_CLI_SRC})
+  add_dependencies(${EXECUTABLE} weechatrelay_static)
+  target_link_libraries(${EXECUTABLE} ${LINK_LIBS})
+
+  install(TARGETS ${EXECUTABLE} RUNTIME DESTINATION bin)
+
+endif()

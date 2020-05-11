@@ -28,51 +28,151 @@
 #include <stdio.h>
 #include <string.h>
 #include <sys/socket.h>
+#include <sys/types.h>
 #include <netinet/in.h>
+#include <netinet/tcp.h>
 #include <arpa/inet.h>
+#include <arpa/nameser.h>
 #include <errno.h>
 #include <netdb.h>
+#include <resolv.h>
+
+#include <gnutls/gnutls.h>
+
+
+gnutls_certificate_credentials_t gnutls_xcred;
 
 
 /*
- * Connection to WeeChat.
+ * Initialized network.
  */
 
 void
-relay_network_connect (const char *hostname, int port, int use_ipv6)
+relay_network_init ()
 {
-    int sock;
-    struct hostent* host;
-    struct sockaddr_in addr;
+    gnutls_global_init ();
+    gnutls_certificate_allocate_credentials (&gnutls_xcred);
+}
 
-    /* TODO: implement connection with IPv6 */
-    (void) use_ipv6;
+/*
+ * Connection to WeeChat.
+ *
+ * Returns socket number, -1 if error.
+ */
 
-    sock = socket (AF_INET, SOCK_STREAM, 0);
-    if (sock < 0)
+int
+relay_network_connect (const char *hostname, const char *port,
+                       int force_ipv4, int force_ipv6,
+                       gnutls_session_t *gnutls_sess)
+{
+    struct addrinfo hints, *res_remote, *ptr_res;
+    char str_ip[NI_MAXHOST];
+    int rc, sock, flags;
+    gnutls_anon_client_credentials_t anoncred;
+
+    res_remote = NULL;
+    sock = -1;
+
+    if (gnutls_sess)
     {
-        fprintf (stderr, "ERROR: failed to create socket\n");
-        exit (EXIT_FAILURE);
+        gnutls_init (gnutls_sess, GNUTLS_CLIENT);
+        gnutls_anon_allocate_client_credentials (&anoncred);
     }
 
-    host = gethostbyname (hostname);
-    if (!host)
-    {
-        fprintf (stderr, "ERROR: failed to resolve %s\n", hostname);
-        exit (EXIT_FAILURE);
-    }
-    addr.sin_addr.s_addr = *((long *)host->h_addr_list[0]);
-    addr.sin_family = AF_INET;
-    addr.sin_port = htons (port);
+    res_init ();
+    memset (&hints, 0, sizeof (hints));
+    hints.ai_socktype = SOCK_STREAM;
+    hints.ai_family = (force_ipv4) ?
+        AF_INET : ((force_ipv6) ? AF_INET6 : AF_UNSPEC);
+    hints.ai_protocol = 0;
+    hints.ai_flags = AI_ADDRCONFIG;
+    res_remote = NULL;
+    rc = getaddrinfo (hostname, port, &hints, &res_remote);
+    if ((rc != 0) || !res_remote)
+        goto error;
 
-    if (connect (sock, (struct sockaddr *)&addr, sizeof (addr)) < 0)
+    for (ptr_res = res_remote; ptr_res; ptr_res = ptr_res->ai_next)
     {
+        sock = socket (ptr_res->ai_family, ptr_res->ai_socktype,
+                       ptr_res->ai_protocol);
+        if (sock >= 0)
+            break;
+    }
+
+    if (!ptr_res || (sock < 0))
+        goto error;
+
+    /* set TCP_NODELAY to send data immediately */
+    flags = 1;
+    setsockopt (sock, IPPROTO_TCP, TCP_NODELAY, &flags, sizeof (flags));
+
+    if (connect (sock, ptr_res->ai_addr, ptr_res->ai_addrlen) != 0)
+        goto error;
+
+    if (getnameinfo (res_remote->ai_addr, res_remote->ai_addrlen,
+                     str_ip, sizeof (str_ip), NULL, 0, NI_NUMERICHOST) != 0)
+    {
+        goto error;
+    }
+
+    if (gnutls_sess)
+    {
+        gnutls_set_default_priority (*gnutls_sess);
+        gnutls_credentials_set (*gnutls_sess, GNUTLS_CRD_CERTIFICATE,
+                                gnutls_xcred);
+        gnutls_transport_set_int (*gnutls_sess, sock);
+        do {
+            rc = gnutls_handshake (*gnutls_sess);
+        }
+        while ((rc < 0) && (gnutls_error_is_fatal (rc) == 0));
+        if (rc < 0)
+        {
+            gnutls_perror (rc);
+            goto error2;
+        }
+    }
+
+    printf ("Connected to %s%s\n",
+            str_ip,
+            (gnutls_sess) ? " (SSL)" : "");
+
+    freeaddrinfo (res_remote);
+
+    return sock;
+
+error:
+    perror ("ERROR: connection");
+error2:
+    if (gnutls_sess)
+        gnutls_deinit (*gnutls_sess);
+    if (res_remote)
+        freeaddrinfo(res_remote);
+    if (sock >= 0)
         close (sock);
-        fprintf (stderr, "ERROR: connection failed on %s port %d: %s\n",
-                 hostname, port, strerror (errno));
-        exit (EXIT_FAILURE);
-    }
-    printf ("Connected to %s\n", hostname);
+    return -1;
+}
 
-    close (sock);
+/*
+ * Disconnects from WeeChat
+ */
+
+void
+relay_network_disconnect (gnutls_session_t *gnutls_sess)
+{
+    if (gnutls_sess)
+    {
+        gnutls_bye (*gnutls_sess, GNUTLS_SHUT_RDWR);
+        gnutls_deinit (*gnutls_sess);
+    }
+}
+
+/*
+ * Ends network.
+ */
+
+void
+relay_network_end ()
+{
+    gnutls_certificate_free_credentials (gnutls_xcred);
+    gnutls_global_deinit ();
 }

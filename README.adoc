@@ -32,7 +32,8 @@ Homepage: https://weechat.org/
 Following packages are *required*:
 
 * CMake
-* gnutls
+* GnuTLS
+* GNU Readline (for `weechat-relay-cli`)
 * zlib
 
 === Compile
@@ -74,6 +75,17 @@ They can be launched after compilation from the build directory:
 
 ----
 $ ctest -V
+----
+
+== Command-line interface
+
+The binary `weechat-relay-cli` can be used to debug communication between
+a client and WeeChat relay.
+
+For help:
+
+----
+weechat-relay-cli --help
 ----
 
 == Copyright
