@@ -1,10 +1,9 @@
+dist: bionic
 language: c
 
 compiler:
   - gcc
   - clang
-
-dist: xenial
 
 before_script:
   - travis_retry sudo apt-get -y install cmake pkg-config libgnutls-dev zlib1g-dev libcpputest-dev lcov
