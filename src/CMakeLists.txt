@@ -23,13 +23,11 @@ if(BUILD_CLI)
 
   set(EXECUTABLE weechat-relay-cli)
 
-  include(FindPkgConfig)
-
   find_package(GnuTLS REQUIRED)
   find_package(ZLIB REQUIRED)
+  find_package(Readline REQUIRED)
 
-  pkg_check_modules(READLINE readline REQUIRED)
-  list(APPEND LINK_LIBS ${READLINE_LDFLAGS})
+  list(APPEND LINK_LIBS ${READLINE_LIBRARY})
 
   include_directories(${CMAKE_BINARY_DIR} ${PROJECT_SOURCE_DIR}/lib ${READLINE_INCLUDE_DIRS})
   add_executable(${EXECUTABLE} ${WEECHAT_RELAY_CLI_SRC})
