@@ -17,21 +17,21 @@
 # along with WeeChat Relay.  If not, see <https://www.gnu.org/licenses/>.
 #
 
-# - Find CppUTest
-# This module finds if CppUTest is installed and determines where the include
+# - Find Readline
+# This module finds if Readline is installed and determines where the include
 # files and libraries are. It also determines what the name of the library is.
 # This code sets the following variables:
 #
-# CPPUTEST_FOUND        = CppUTest is installed
-# CPPUTEST_INCLUDE_DIRS = CppUTest include directory
-# CPPUTEST_LIBRARIES    = Link options to compile with CppUTest
+# READLINE_FOUND        = Readline is installed
+# READLINE_INCLUDE_DIRS = Readline include directory
+# READLINE_LIBRARIES    = Link options to compile with Readline
 
 include(FindPkgConfig)
 
 pkg_check_modules(READLINE readline)
 
 if(READLINE_FOUND)
-  set(READLINE_LIBRARY ${READLINE_LDFLAGS})
+  set(READLINE_LIBRARIES ${READLINE_LDFLAGS})
 else()
   find_path(READLINE_ROOT_DIR
     NAMES include/readline/readline.h
@@ -40,16 +40,16 @@ else()
     NAMES readline.h
     HINTS ${READLINE_ROOT_DIR}/include/readline
   )
-  find_library(READLINE_LIBRARY
+  find_library(READLINE_LIBRARIES
     NAMES readline
     HINTS ${READLINE_ROOT_DIR}/lib
   )
-  if(READLINE_INCLUDE_DIRS AND READLINE_LIBRARY)
+  if(READLINE_INCLUDE_DIRS AND READLINE_LIBRARIES)
     set(READLINE_FOUND TRUE)
   endif()
 endif()
 
 mark_as_advanced(
   READLINE_INCLUDE_DIRS
-  READLINE_LIBRARY
+  READLINE_LIBRARIES
 )

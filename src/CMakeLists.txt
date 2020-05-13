@@ -27,7 +27,7 @@ if(BUILD_CLI)
   find_package(ZLIB REQUIRED)
   find_package(Readline REQUIRED)
 
-  list(APPEND LINK_LIBS ${READLINE_LIBRARY})
+  list(APPEND LINK_LIBS ${READLINE_LIBRARIES})
 
   include_directories(${CMAKE_BINARY_DIR} ${PROJECT_SOURCE_DIR}/lib ${READLINE_INCLUDE_DIRS})
   add_executable(${EXECUTABLE} ${WEECHAT_RELAY_CLI_SRC})
