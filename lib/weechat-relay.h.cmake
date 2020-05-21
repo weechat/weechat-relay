@@ -115,6 +115,11 @@ extern int weechat_relay_cmd_input (struct t_weechat_relay_session *session,
                                     const char *msg_id,
                                     const char *buffer,
                                     const char *data);
+extern int weechat_relay_cmd_completion (struct t_weechat_relay_session *session,
+                                         const char *msg_id,
+                                         const char *buffer,
+                                         int position,
+                                         const char *data);
 extern int weechat_relay_cmd_sync (struct t_weechat_relay_session *session,
                                    const char *msg_id,
                                    const char *buffers,

@@ -338,6 +338,34 @@ TEST(LibCommand, CmdInput)
 
 /*
  * Tests functions:
+ *   weechat_relay_cmd_completion
+ */
+
+TEST(LibCommand, CmdCompletion)
+{
+    LONGS_EQUAL(-1, weechat_relay_cmd_completion (NULL, NULL, NULL, 0, NULL));
+
+    LONGS_EQUAL(11, weechat_relay_cmd_completion (&relay_session, NULL,
+                                                 NULL, 0, NULL));
+    RELAY_CMD_EQUAL("completion\n");
+
+    LONGS_EQUAL(19, weechat_relay_cmd_completion (&relay_session, "my_id",
+                                                  NULL, 0, NULL));
+    RELAY_CMD_EQUAL("(my_id) completion\n");
+
+    LONGS_EQUAL(34, weechat_relay_cmd_completion (&relay_session, "my_id",
+                                                  "core.weechat", 0, NULL));
+    RELAY_CMD_EQUAL("(my_id) completion core.weechat 0\n");
+
+    LONGS_EQUAL(44, weechat_relay_cmd_completion (&relay_session, "my_id",
+                                                  "core.weechat",
+                                                  -1,
+                                                  "/help fi"));
+    RELAY_CMD_EQUAL("(my_id) completion core.weechat -1 /help fi\n");
+}
+
+/*
+ * Tests functions:
  *   weechat_relay_cmd_sync
  */
 

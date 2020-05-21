@@ -386,6 +386,32 @@ weechat_relay_cmd_input (struct t_weechat_relay_session *session,
 }
 
 /*
+ * Sends the relay "completion" command to WeeChat.
+ *
+ * Returns the number of bytes sent, -1 if error.
+ */
+
+int
+weechat_relay_cmd_completion (struct t_weechat_relay_session *session,
+                              const char *msg_id,
+                              const char *buffer,
+                              int position,
+                              const char *data)
+{
+    const char *args[3];
+    char str_position[128];
+
+    snprintf (str_position, sizeof (str_position), "%d", position);
+
+    args[0] = buffer;
+    args[1] = str_position;
+    args[2] = data;
+    args[3] = NULL;
+
+    return weechat_relay_cmd (session, msg_id, "completion", args);
+}
+
+/*
  * Sends the relay "sync" command to WeeChat.
  *
  * Returns the number of bytes sent, -1 if error.
