@@ -398,7 +398,7 @@ weechat_relay_cmd_completion (struct t_weechat_relay_session *session,
                               int position,
                               const char *data)
 {
-    const char *args[3];
+    const char *args[4];
     char str_position[128];
 
     snprintf (str_position, sizeof (str_position), "%d", position);
