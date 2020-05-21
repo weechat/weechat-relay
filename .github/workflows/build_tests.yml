@@ -1,0 +1,80 @@
+name: build_tests
+
+on: [push, pull_request]
+
+jobs:
+
+  build:
+
+    name: ${{ matrix.config.name }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      max-parallel: 4
+      matrix:
+        config:
+        - {
+            name: "gcc",
+            cc: "gcc",
+            cxx: "g++",
+            cmake_options: ""
+          }
+        - {
+            name: "gcc_coverage",
+            cc: "gcc",
+            cxx: "g++",
+            cmake_options: "-DCODE_COVERAGE=ON"
+          }
+        - {
+            name: "clang",
+            cc: "clang",
+            cxx: "clang++",
+            cmake_options: ""
+          }
+
+    steps:
+
+    - uses: actions/checkout@v2
+
+    - name: Install dependencies
+      run: sudo apt-get -y install cmake pkg-config libgnutls28-dev zlib1g-dev libreadline-dev libcpputest-dev lcov
+
+    - name: Test patches
+      run: ./tools/build-debian.sh test-patches
+
+    - name: Build (${{ matrix.config.name }})
+      env:
+        CC: ${{ matrix.config.cc }}
+        CXX: ${{ matrix.config.cxx }}
+        CMAKE_OPTIONS: ${{ matrix.config.cmake_options }}
+      run: |
+        mkdir build
+        cd build
+        cmake -DBUILD_DOC=ON -DBUILD_MAN=ON -DBUILD_TESTS=ON ${CMAKE_OPTIONS} ..
+        make VERBOSE=1 -j$(nproc)
+        sudo make install
+
+    - name: Run tests
+      run: |
+        cd build
+        ctest -V
+
+    - name: Run command-line interface (version)
+      run: weechat-relay-cli --version
+
+    - name: Run command-line interface (help)
+      run: weechat-relay-cli --help
+
+    - name: Run command-line interface (license)
+      run: weechat-relay-cli --license
+
+    - name: Code coverage
+      if: ${{ matrix.config.name == 'gcc_coverage' }}
+      env:
+        CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+      run: |
+        cd build
+        lcov --directory . --capture --output-file coverage.info
+        lcov --remove coverage.info '/usr/*' --output-file coverage.info
+        lcov --list coverage.info
+        bash <(curl -s https://codecov.io/bash) -f coverage.info || echo 'Codecov error'
