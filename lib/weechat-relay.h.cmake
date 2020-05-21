@@ -89,6 +89,7 @@ extern int weechat_relay_cmd (struct t_weechat_relay_session *session,
                               const char *command,
                               const char *arguments[]);
 extern int weechat_relay_cmd_init (struct t_weechat_relay_session *session,
+                                   const char *msg_id,
                                    const char *password,
                                    enum t_weechat_relay_compression compression);
 extern int weechat_relay_cmd_hdata (struct t_weechat_relay_session *session,
@@ -107,18 +108,24 @@ extern int weechat_relay_cmd_nicklist (struct t_weechat_relay_session *session,
                                        const char *msg_id,
                                        const char *buffer);
 extern int weechat_relay_cmd_input (struct t_weechat_relay_session *session,
+                                    const char *msg_id,
                                     const char *buffer,
                                     const char *data);
 extern int weechat_relay_cmd_sync (struct t_weechat_relay_session *session,
+                                   const char *msg_id,
                                    const char *buffers,
                                    const char *options);
 extern int weechat_relay_cmd_desync (struct t_weechat_relay_session *session,
+                                     const char *msg_id,
                                      const char *buffers,
                                      const char *options);
-extern int weechat_relay_cmd_test (struct t_weechat_relay_session *session);
+extern int weechat_relay_cmd_test (struct t_weechat_relay_session *session,
+                                   const char *msg_id);
 extern int weechat_relay_cmd_ping (struct t_weechat_relay_session *session,
+                                   const char *msg_id,
                                    const char *arguments);
-extern int weechat_relay_cmd_quit (struct t_weechat_relay_session *session);
+extern int weechat_relay_cmd_quit (struct t_weechat_relay_session *session,
+                                   const char *msg_id);
 
 /* Relay messages (WeeChat -> client) */
 

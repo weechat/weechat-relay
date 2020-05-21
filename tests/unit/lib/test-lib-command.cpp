@@ -157,24 +157,24 @@ TEST(LibCommand, Cmd)
 
 TEST(LibCommand, CmdInit)
 {
-    LONGS_EQUAL(-1, weechat_relay_cmd_init (NULL, NULL,
+    LONGS_EQUAL(-1, weechat_relay_cmd_init (NULL, NULL, NULL,
                                             WEECHAT_RELAY_COMPRESSION_OFF));
 
-    LONGS_EQUAL(21, weechat_relay_cmd_init (&relay_session, NULL,
+    LONGS_EQUAL(29, weechat_relay_cmd_init (&relay_session, "my_id", NULL,
                                             WEECHAT_RELAY_COMPRESSION_OFF));
-    RELAY_CMD_EQUAL("init compression=off\n");
+    RELAY_CMD_EQUAL("(my_id) init compression=off\n");
 
-    LONGS_EQUAL(22, weechat_relay_cmd_init (&relay_session, NULL,
+    LONGS_EQUAL(30, weechat_relay_cmd_init (&relay_session, "my_id", NULL,
                                             WEECHAT_RELAY_COMPRESSION_ZLIB));
-    RELAY_CMD_EQUAL("init compression=zlib\n");
+    RELAY_CMD_EQUAL("(my_id) init compression=zlib\n");
 
-    LONGS_EQUAL(38, weechat_relay_cmd_init (&relay_session, "secret",
+    LONGS_EQUAL(46, weechat_relay_cmd_init (&relay_session, "my_id", "secret",
                                             WEECHAT_RELAY_COMPRESSION_ZLIB));
-    RELAY_CMD_EQUAL("init password=secret,compression=zlib\n");
+    RELAY_CMD_EQUAL("(my_id) init password=secret,compression=zlib\n");
 
-    LONGS_EQUAL(40, weechat_relay_cmd_init (&relay_session, "sec,ret",
+    LONGS_EQUAL(48, weechat_relay_cmd_init (&relay_session, "my_id", "sec,ret",
                                             WEECHAT_RELAY_COMPRESSION_ZLIB));
-    RELAY_CMD_EQUAL("init password=sec\\,ret,compression=zlib\n");
+    RELAY_CMD_EQUAL("(my_id) init password=sec\\,ret,compression=zlib\n");
 }
 
 /*
@@ -189,21 +189,25 @@ TEST(LibCommand, CmdHdata)
     LONGS_EQUAL(6, weechat_relay_cmd_hdata (&relay_session, NULL, NULL, NULL));
     RELAY_CMD_EQUAL("hdata\n");
 
-    LONGS_EQUAL(11, weechat_relay_cmd_hdata (&relay_session, "id",
+    LONGS_EQUAL(14, weechat_relay_cmd_hdata (&relay_session, "my_id",
                                              NULL, NULL));
-    RELAY_CMD_EQUAL("(id) hdata\n");
+    RELAY_CMD_EQUAL("(my_id) hdata\n");
 
-    LONGS_EQUAL(16, weechat_relay_cmd_hdata (&relay_session, "id",
+    LONGS_EQUAL(14, weechat_relay_cmd_hdata (&relay_session, "my_id",
+                                             NULL, NULL));
+    RELAY_CMD_EQUAL("(my_id) hdata\n");
+
+    LONGS_EQUAL(19, weechat_relay_cmd_hdata (&relay_session, "my_id",
                                              "path", NULL));
-    RELAY_CMD_EQUAL("(id) hdata path\n");
+    RELAY_CMD_EQUAL("(my_id) hdata path\n");
 
-    LONGS_EQUAL(11, weechat_relay_cmd_hdata (&relay_session, "id",
+    LONGS_EQUAL(14, weechat_relay_cmd_hdata (&relay_session, "my_id",
                                              NULL, "keys"));
-    RELAY_CMD_EQUAL("(id) hdata\n");
+    RELAY_CMD_EQUAL("(my_id) hdata\n");
 
-    LONGS_EQUAL(21, weechat_relay_cmd_hdata (&relay_session, "id",
+    LONGS_EQUAL(24, weechat_relay_cmd_hdata (&relay_session, "my_id",
                                              "path", "keys"));
-    RELAY_CMD_EQUAL("(id) hdata path keys\n");
+    RELAY_CMD_EQUAL("(my_id) hdata path keys\n");
 }
 
 /*
@@ -218,11 +222,11 @@ TEST(LibCommand, CmdInfo)
     LONGS_EQUAL(5, weechat_relay_cmd_info (&relay_session, NULL, NULL));
     RELAY_CMD_EQUAL("info\n");
 
-    LONGS_EQUAL(10, weechat_relay_cmd_info (&relay_session, "id", NULL));
-    RELAY_CMD_EQUAL("(id) info\n");
+    LONGS_EQUAL(13, weechat_relay_cmd_info (&relay_session, "my_id", NULL));
+    RELAY_CMD_EQUAL("(my_id) info\n");
 
-    LONGS_EQUAL(15, weechat_relay_cmd_info (&relay_session, "id", "name"));
-    RELAY_CMD_EQUAL("(id) info name\n");
+    LONGS_EQUAL(18, weechat_relay_cmd_info (&relay_session, "my_id", "name"));
+    RELAY_CMD_EQUAL("(my_id) info name\n");
 }
 
 /*
@@ -238,21 +242,21 @@ TEST(LibCommand, CmdInfolist)
                                                NULL, NULL, NULL));
     RELAY_CMD_EQUAL("infolist\n");
 
-    LONGS_EQUAL(14, weechat_relay_cmd_infolist (&relay_session, "id",
+    LONGS_EQUAL(17, weechat_relay_cmd_infolist (&relay_session, "my_id",
                                                 NULL, NULL, NULL));
-    RELAY_CMD_EQUAL("(id) infolist\n");
+    RELAY_CMD_EQUAL("(my_id) infolist\n");
 
-    LONGS_EQUAL(19, weechat_relay_cmd_infolist (&relay_session, "id",
+    LONGS_EQUAL(22, weechat_relay_cmd_infolist (&relay_session, "my_id",
                                                 "name", NULL, NULL));
-    RELAY_CMD_EQUAL("(id) infolist name\n");
+    RELAY_CMD_EQUAL("(my_id) infolist name\n");
 
-    LONGS_EQUAL(28, weechat_relay_cmd_infolist (&relay_session, "id",
+    LONGS_EQUAL(31, weechat_relay_cmd_infolist (&relay_session, "my_id",
                                                 "name", "0x123abc", NULL));
-    RELAY_CMD_EQUAL("(id) infolist name 0x123abc\n");
+    RELAY_CMD_EQUAL("(my_id) infolist name 0x123abc\n");
 
-    LONGS_EQUAL(33, weechat_relay_cmd_infolist (&relay_session, "id",
+    LONGS_EQUAL(36, weechat_relay_cmd_infolist (&relay_session, "my_id",
                                                 "name", "0x123abc", "args"));
-    RELAY_CMD_EQUAL("(id) infolist name 0x123abc args\n");
+    RELAY_CMD_EQUAL("(my_id) infolist name 0x123abc args\n");
 }
 
 /*
@@ -267,12 +271,13 @@ TEST(LibCommand, CmdNicklist)
     LONGS_EQUAL(9, weechat_relay_cmd_nicklist (&relay_session, NULL, NULL));
     RELAY_CMD_EQUAL("nicklist\n");
 
-    LONGS_EQUAL(14, weechat_relay_cmd_nicklist (&relay_session, "id", NULL));
-    RELAY_CMD_EQUAL("(id) nicklist\n");
+    LONGS_EQUAL(17, weechat_relay_cmd_nicklist (&relay_session, "my_id",
+                                                NULL));
+    RELAY_CMD_EQUAL("(my_id) nicklist\n");
 
-    LONGS_EQUAL(27, weechat_relay_cmd_nicklist (&relay_session, "id",
+    LONGS_EQUAL(30, weechat_relay_cmd_nicklist (&relay_session, "my_id",
                                                 "core.weechat"));
-    RELAY_CMD_EQUAL("(id) nicklist core.weechat\n");
+    RELAY_CMD_EQUAL("(my_id) nicklist core.weechat\n");
 }
 
 /*
@@ -282,18 +287,22 @@ TEST(LibCommand, CmdNicklist)
 
 TEST(LibCommand, CmdInput)
 {
-    LONGS_EQUAL(-1, weechat_relay_cmd_input (NULL, NULL, NULL));
+    LONGS_EQUAL(-1, weechat_relay_cmd_input (NULL, NULL, NULL, NULL));
 
-    LONGS_EQUAL(6, weechat_relay_cmd_input (&relay_session, NULL, NULL));
+    LONGS_EQUAL(6, weechat_relay_cmd_input (&relay_session, NULL, NULL, NULL));
     RELAY_CMD_EQUAL("input\n");
 
-    LONGS_EQUAL(19, weechat_relay_cmd_input (&relay_session,
-                                             "core.weechat", NULL));
-    RELAY_CMD_EQUAL("input core.weechat\n");
+    LONGS_EQUAL(14, weechat_relay_cmd_input (&relay_session, "my_id",
+                                             NULL, NULL));
+    RELAY_CMD_EQUAL("(my_id) input\n");
 
-    LONGS_EQUAL(32, weechat_relay_cmd_input (&relay_session,
+    LONGS_EQUAL(27, weechat_relay_cmd_input (&relay_session, "my_id",
+                                             "core.weechat", NULL));
+    RELAY_CMD_EQUAL("(my_id) input core.weechat\n");
+
+    LONGS_EQUAL(40, weechat_relay_cmd_input (&relay_session, "my_id",
                                              "core.weechat", "/help filter"));
-    RELAY_CMD_EQUAL("input core.weechat /help filter\n");
+    RELAY_CMD_EQUAL("(my_id) input core.weechat /help filter\n");
 }
 
 /*
@@ -303,19 +312,23 @@ TEST(LibCommand, CmdInput)
 
 TEST(LibCommand, CmdSync)
 {
-    LONGS_EQUAL(-1, weechat_relay_cmd_sync (NULL, NULL, NULL));
+    LONGS_EQUAL(-1, weechat_relay_cmd_sync (NULL, NULL, NULL, NULL));
 
-    LONGS_EQUAL(5, weechat_relay_cmd_sync (&relay_session, NULL, NULL));
+    LONGS_EQUAL(5, weechat_relay_cmd_sync (&relay_session, NULL, NULL, NULL));
     RELAY_CMD_EQUAL("sync\n");
 
-    LONGS_EQUAL(27, weechat_relay_cmd_sync (&relay_session,
-                                            "irc.freenode.#weechat", NULL));
-    RELAY_CMD_EQUAL("sync irc.freenode.#weechat\n");
+    LONGS_EQUAL(13, weechat_relay_cmd_sync (&relay_session, "my_id",
+                                            NULL, NULL));
+    RELAY_CMD_EQUAL("(my_id) sync\n");
 
-    LONGS_EQUAL(34, weechat_relay_cmd_sync (&relay_session,
+    LONGS_EQUAL(35, weechat_relay_cmd_sync (&relay_session, "my_id",
+                                            "irc.freenode.#weechat", NULL));
+    RELAY_CMD_EQUAL("(my_id) sync irc.freenode.#weechat\n");
+
+    LONGS_EQUAL(42, weechat_relay_cmd_sync (&relay_session, "my_id",
                                             "irc.freenode.#weechat",
                                             "buffer"));
-    RELAY_CMD_EQUAL("sync irc.freenode.#weechat buffer\n");
+    RELAY_CMD_EQUAL("(my_id) sync irc.freenode.#weechat buffer\n");
 }
 
 /*
@@ -325,19 +338,23 @@ TEST(LibCommand, CmdSync)
 
 TEST(LibCommand, CmdDesync)
 {
-    LONGS_EQUAL(-1, weechat_relay_cmd_desync (NULL, NULL, NULL));
+    LONGS_EQUAL(-1, weechat_relay_cmd_desync (NULL, NULL, NULL, NULL));
 
-    LONGS_EQUAL(7, weechat_relay_cmd_desync (&relay_session, NULL, NULL));
+    LONGS_EQUAL(7, weechat_relay_cmd_desync (&relay_session, NULL, NULL, NULL));
     RELAY_CMD_EQUAL("desync\n");
 
-    LONGS_EQUAL(29, weechat_relay_cmd_desync (&relay_session,
-                                              "irc.freenode.#weechat", NULL));
-    RELAY_CMD_EQUAL("desync irc.freenode.#weechat\n");
+    LONGS_EQUAL(15, weechat_relay_cmd_desync (&relay_session, "my_id",
+                                             NULL, NULL));
+    RELAY_CMD_EQUAL("(my_id) desync\n");
 
-    LONGS_EQUAL(36, weechat_relay_cmd_desync (&relay_session,
+    LONGS_EQUAL(37, weechat_relay_cmd_desync (&relay_session, "my_id",
+                                              "irc.freenode.#weechat", NULL));
+    RELAY_CMD_EQUAL("(my_id) desync irc.freenode.#weechat\n");
+
+    LONGS_EQUAL(44, weechat_relay_cmd_desync (&relay_session, "my_id",
                                               "irc.freenode.#weechat",
                                               "buffer"));
-    RELAY_CMD_EQUAL("desync irc.freenode.#weechat buffer\n");
+    RELAY_CMD_EQUAL("(my_id) desync irc.freenode.#weechat buffer\n");
 }
 
 /*
@@ -347,10 +364,13 @@ TEST(LibCommand, CmdDesync)
 
 TEST(LibCommand, CmdTest)
 {
-    LONGS_EQUAL(-1, weechat_relay_cmd_test (NULL));
+    LONGS_EQUAL(-1, weechat_relay_cmd_test (NULL, NULL));
 
-    LONGS_EQUAL(5, weechat_relay_cmd_test (&relay_session));
+    LONGS_EQUAL(5, weechat_relay_cmd_test (&relay_session, NULL));
     RELAY_CMD_EQUAL("test\n");
+
+    LONGS_EQUAL(13, weechat_relay_cmd_test (&relay_session, "my_id"));
+    RELAY_CMD_EQUAL("(my_id) test\n");
 }
 
 /*
@@ -360,13 +380,17 @@ TEST(LibCommand, CmdTest)
 
 TEST(LibCommand, CmdPing)
 {
-    LONGS_EQUAL(-1, weechat_relay_cmd_ping (NULL, NULL));
+    LONGS_EQUAL(-1, weechat_relay_cmd_ping (NULL, NULL, NULL));
 
-    LONGS_EQUAL(5, weechat_relay_cmd_ping (&relay_session, NULL));
+    LONGS_EQUAL(5, weechat_relay_cmd_ping (&relay_session, NULL, NULL));
     RELAY_CMD_EQUAL("ping\n");
 
-    LONGS_EQUAL(15, weechat_relay_cmd_ping (&relay_session, "test args"));
-    RELAY_CMD_EQUAL("ping test args\n");
+    LONGS_EQUAL(13, weechat_relay_cmd_ping (&relay_session, "my_id", NULL));
+    RELAY_CMD_EQUAL("(my_id) ping\n");
+
+    LONGS_EQUAL(23, weechat_relay_cmd_ping (&relay_session, "my_id",
+                                            "test args"));
+    RELAY_CMD_EQUAL("(my_id) ping test args\n");
 }
 
 /*
@@ -376,8 +400,11 @@ TEST(LibCommand, CmdPing)
 
 TEST(LibCommand, CmdQuit)
 {
-    LONGS_EQUAL(-1, weechat_relay_cmd_quit (NULL));
+    LONGS_EQUAL(-1, weechat_relay_cmd_quit (NULL, NULL));
 
-    LONGS_EQUAL(5, weechat_relay_cmd_quit (&relay_session));
+    LONGS_EQUAL(5, weechat_relay_cmd_quit (&relay_session, NULL));
     RELAY_CMD_EQUAL("quit\n");
+
+    LONGS_EQUAL(13, weechat_relay_cmd_quit (&relay_session, "my_id"));
+    RELAY_CMD_EQUAL("(my_id) quit\n");
 }
