@@ -88,6 +88,10 @@ extern int weechat_relay_cmd (struct t_weechat_relay_session *session,
                               const char *msg_id,
                               const char *command,
                               const char *arguments[]);
+extern int weechat_relay_cmd_handshake (struct t_weechat_relay_session *session,
+                                        const char *msg_id,
+                                        const char *password_hash_algo,
+                                        enum t_weechat_relay_compression compression);
 extern int weechat_relay_cmd_init (struct t_weechat_relay_session *session,
                                    const char *msg_id,
                                    const char *password,

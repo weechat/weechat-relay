@@ -152,6 +152,37 @@ TEST(LibCommand, Cmd)
 
 /*
  * Tests functions:
+ *   weechat_relay_cmd_handshake
+ */
+
+TEST(LibCommand, CmdHandshake)
+{
+    LONGS_EQUAL(-1,
+                weechat_relay_cmd_handshake (NULL, NULL, NULL,
+                                             WEECHAT_RELAY_COMPRESSION_OFF));
+
+    LONGS_EQUAL(34,
+                weechat_relay_cmd_handshake (&relay_session, "my_id", NULL,
+                                             WEECHAT_RELAY_COMPRESSION_OFF));
+    RELAY_CMD_EQUAL("(my_id) handshake compression=off\n");
+
+    LONGS_EQUAL(35,
+                weechat_relay_cmd_handshake (&relay_session, "my_id", NULL,
+                                             WEECHAT_RELAY_COMPRESSION_ZLIB));
+    RELAY_CMD_EQUAL("(my_id) handshake compression=zlib\n");
+
+    LONGS_EQUAL(81,
+                weechat_relay_cmd_handshake (
+                    &relay_session,
+                    "my_id",
+                    "plain:sha256:pbkdf2+sha256",
+                    WEECHAT_RELAY_COMPRESSION_ZLIB));
+    RELAY_CMD_EQUAL("(my_id) handshake password_hash_algo=plain:sha256:"
+                    "pbkdf2+sha256,compression=zlib\n");
+}
+
+/*
+ * Tests functions:
  *   weechat_relay_cmd_init
  */
 

@@ -176,6 +176,57 @@ weechat_relay_cmd (struct t_weechat_relay_session *session,
 }
 
 /*
+ * Sends the relay "handshake" command to WeeChat.
+ *
+ * Returns the number of bytes sent, -1 if error.
+ */
+
+int
+weechat_relay_cmd_handshake (struct t_weechat_relay_session *session,
+                             const char *msg_id,
+                             const char *password_hash_algo,
+                             enum t_weechat_relay_compression compression)
+{
+    char *options;
+    const char *args[2], *ptr_compression;
+    int rc, length;
+
+    rc = -1;
+
+    options = NULL;
+
+    ptr_compression = weechat_relay_compression_string[compression];
+
+    length = 128 + strlen ((password_hash_algo) ? password_hash_algo : "") +
+        strlen (ptr_compression) + 1;
+    options = malloc (length);
+    if (!options)
+        goto end;
+
+    options[0] = '\0';
+    if (password_hash_algo)
+    {
+        strcat (options, "password_hash_algo=");
+        strcat (options, password_hash_algo);
+    }
+    if (options[0])
+        strcat (options, ",");
+    strcat (options, "compression=");
+    strcat (options, ptr_compression);
+
+    args[0] = options;
+    args[1] = NULL;
+
+    rc = weechat_relay_cmd (session, msg_id, "handshake", args);
+
+end:
+    if (options)
+        free (options);
+
+    return rc;
+}
+
+/*
  * Sends the relay "init" command to WeeChat.
  *
  * Returns the number of bytes sent, -1 if error.
@@ -206,12 +257,16 @@ weechat_relay_cmd_init (struct t_weechat_relay_session *session,
     if (!options)
         goto end;
 
-    snprintf (options, length,
-              "%s%s%scompression=%s",
-              (password2) ? "password=" : "",
-              (password2) ? password2 : "",
-              (password2) ? "," : "",
-              ptr_compression);
+    options[0] = '\0';
+    if (password2)
+    {
+        strcat (options, "password=");
+        strcat (options, password2);
+    }
+    if (options[0])
+        strcat (options, ",");
+    strcat (options, "compression=");
+    strcat (options, ptr_compression);
 
     args[0] = options;
     args[1] = NULL;
