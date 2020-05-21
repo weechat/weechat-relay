@@ -13,24 +13,9 @@ jobs:
       max-parallel: 4
       matrix:
         config:
-        - {
-            name: "gcc",
-            cc: "gcc",
-            cxx: "g++",
-            cmake_options: ""
-          }
-        - {
-            name: "gcc_coverage",
-            cc: "gcc",
-            cxx: "g++",
-            cmake_options: "-DCODE_COVERAGE=ON"
-          }
-        - {
-            name: "clang",
-            cc: "clang",
-            cxx: "clang++",
-            cmake_options: ""
-          }
+          - { name: "gcc", cc: "gcc", cxx: "g++", cmake_options: "" }
+          - { name: "gcc_coverage", cc: "gcc", cxx: "g++", cmake_options: "-DCODE_COVERAGE=ON" }
+          - { name: "clang", cc: "clang", cxx: "clang++", cmake_options: "" }
 
     steps:
 
@@ -42,7 +27,7 @@ jobs:
     - name: Test patches
       run: ./tools/build-debian.sh test-patches
 
-    - name: Build (${{ matrix.config.name }})
+    - name: Build with ${{ matrix.config.cc }}
       env:
         CC: ${{ matrix.config.cc }}
         CXX: ${{ matrix.config.cxx }}
