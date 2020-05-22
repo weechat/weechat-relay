@@ -21,7 +21,10 @@ jobs:
     - uses: actions/checkout@v2
 
     - name: Install dependencies
-      run: sudo apt-get -y install cmake pkg-config libgnutls28-dev zlib1g-dev libreadline-dev libcpputest-dev lcov
+      run: |
+        echo 'APT::Install-Recommends "false";' | sudo tee -a /etc/apt/apt.conf
+        sudo apt-get update -qq
+        sudo apt-get -y install cmake pkg-config libgnutls28-dev zlib1g-dev libreadline-dev libcpputest-dev lcov
 
     - name: Test patches
       run: ./tools/build-debian.sh test-patches
