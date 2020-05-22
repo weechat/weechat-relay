@@ -18,47 +18,47 @@ jobs:
 
     steps:
 
-    - uses: actions/checkout@v2
+      - uses: actions/checkout@v2
 
-    - name: Install dependencies
-      run: |
-        echo 'APT::Install-Recommends "false";' | sudo tee -a /etc/apt/apt.conf
-        sudo apt-get update -qq
-        sudo apt-get -y install cmake pkg-config libgnutls28-dev zlib1g-dev libreadline-dev libcpputest-dev lcov
+      - name: Install dependencies
+        run: |
+          echo 'APT::Install-Recommends "false";' | sudo tee -a /etc/apt/apt.conf
+          sudo apt-get update -qq
+          sudo apt-get -y install cmake pkg-config libgnutls28-dev zlib1g-dev libreadline-dev libcpputest-dev lcov
 
-    - name: Test patches
-      run: ./tools/build-debian.sh test-patches
+      - name: Test patches
+        run: ./tools/build-debian.sh test-patches
 
-    - name: Build
-      env:
-        CC: ${{ matrix.config.cc }}
-        CXX: ${{ matrix.config.cxx }}
-        CMAKE_OPTIONS: ${{ matrix.config.cmake_options }}
-      run: |
-        mkdir build
-        cd build
-        cmake -DBUILD_DOC=ON -DBUILD_MAN=ON -DBUILD_TESTS=ON ${CMAKE_OPTIONS} ..
-        make VERBOSE=1 -j$(nproc)
-        sudo make install
+      - name: Build
+        env:
+          CC: ${{ matrix.config.cc }}
+          CXX: ${{ matrix.config.cxx }}
+          CMAKE_OPTIONS: ${{ matrix.config.cmake_options }}
+        run: |
+          mkdir build
+          cd build
+          cmake -DBUILD_DOC=ON -DBUILD_MAN=ON -DBUILD_TESTS=ON ${CMAKE_OPTIONS} ..
+          make VERBOSE=1 -j$(nproc)
+          sudo make install
 
-    - name: Run tests
-      run: |
-        cd build
-        ctest -V
+      - name: Run tests
+        run: |
+          cd build
+          ctest -V
 
-    - name: Run command-line interface
-      run: |
-        weechat-relay-cli --version
-        weechat-relay-cli --help
-        weechat-relay-cli --license
+      - name: Run command-line interface
+        run: |
+          weechat-relay-cli --version
+          weechat-relay-cli --help
+          weechat-relay-cli --license
 
-    - name: Code coverage
-      if: ${{ matrix.config.name == 'gcc_coverage' }}
-      env:
-        CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
-      run: |
-        cd build
-        lcov --directory . --capture --output-file coverage.info
-        lcov --remove coverage.info '/usr/*' --output-file coverage.info
-        lcov --list coverage.info
-        bash <(curl -s https://codecov.io/bash) -f coverage.info || echo 'Codecov error'
+      - name: Code coverage
+        if: ${{ matrix.config.name == 'gcc_coverage' }}
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+        run: |
+          cd build
+          lcov --directory . --capture --output-file coverage.info
+          lcov --remove coverage.info '/usr/*' --output-file coverage.info
+          lcov --list coverage.info
+          bash <(curl -s https://codecov.io/bash) -f coverage.info || echo 'Codecov error'
