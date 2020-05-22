@@ -4,7 +4,7 @@
 :lang: en
 
 
-image:https://github.com/weechat/weechat-relay/workflows/build_tests/badge.svg["Build", link="https://github.com/weechat/weechat-relay/actions"]
+image:https://github.com/weechat/weechat-relay/workflows/CI/badge.svg["CI", link="https://github.com/weechat/weechat-relay/actions"]
 image:https://codecov.io/gh/weechat/weechat-relay/branch/master/graph/badge.svg["Code coverage", link="https://codecov.io/gh/weechat/weechat-relay"]
 
 WeeChat Relay is a C library to communicate between WeeChat and a client using
