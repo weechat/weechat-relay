@@ -46,14 +46,11 @@ jobs:
         cd build
         ctest -V
 
-    - name: Run command-line interface (version)
-      run: weechat-relay-cli --version
-
-    - name: Run command-line interface (help)
-      run: weechat-relay-cli --help
-
-    - name: Run command-line interface (license)
-      run: weechat-relay-cli --license
+    - name: Run command-line interface
+      run: |
+        weechat-relay-cli --version
+        weechat-relay-cli --help
+        weechat-relay-cli --license
 
     - name: Code coverage
       if: ${{ matrix.config.name == 'gcc_coverage' }}
