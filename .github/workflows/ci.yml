@@ -29,7 +29,7 @@ jobs:
     - name: Test patches
       run: ./tools/build-debian.sh test-patches
 
-    - name: Build with ${{ matrix.config.cc }}
+    - name: Build
       env:
         CC: ${{ matrix.config.cc }}
         CXX: ${{ matrix.config.cxx }}
