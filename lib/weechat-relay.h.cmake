@@ -62,8 +62,8 @@ struct t_weechat_relay_msg
 {
     char *id;                          /* message id                        */
     char *data;                        /* binary buffer                     */
-    int data_alloc;                    /* currently allocated size          */
-    int data_size;                     /* current size of buffer            */
+    size_t data_alloc;                 /* currently allocated size          */
+    size_t data_size;                  /* current size of buffer            */
 };
 
 /* Relay sessions (client -> WeeChat and WeeChat -> client) */
@@ -72,78 +72,79 @@ struct t_weechat_relay_session
 {
     int sock;                          /* socket for I/O with peer          */
     int ssl;                           /* connection with SSL               */
-    void *gnutls_session;              /* GnuTLS session (only if SSL)      */
+    void *gnutls_sess;                 /* GnuTLS session (only if SSL)      */
 };
 
 extern struct t_weechat_relay_session *weechat_relay_session_init (int sock,
                                                                    void *gnutls_session);
+extern ssize_t weechat_relay_session_send (struct t_weechat_relay_session *session,
+                                           void *buffer, size_t length);
+extern ssize_t weechat_relay_session_recv (struct t_weechat_relay_session *session,
+                                           void *buffer, size_t length);
 extern void weechat_relay_session_free (struct t_weechat_relay_session *session);
 
 /* Relay commands (client -> WeeChat) */
 
-extern int weechat_relay_cmd_raw (struct t_weechat_relay_session *session,
-                                  const char *buffer,
-                                  size_t size);
-extern int weechat_relay_cmd (struct t_weechat_relay_session *session,
-                              const char *msg_id,
-                              const char *command,
-                              const char *arguments[]);
-extern int weechat_relay_cmd_handshake (struct t_weechat_relay_session *session,
+extern ssize_t weechat_relay_cmd (struct t_weechat_relay_session *session,
+                                  const char *msg_id,
+                                  const char *command,
+                                  const char *arguments[]);
+extern ssize_t weechat_relay_cmd_handshake (struct t_weechat_relay_session *session,
+                                            const char *msg_id,
+                                            const char *password_hash_algo,
+                                           enum t_weechat_relay_compression compression);
+extern ssize_t weechat_relay_cmd_init (struct t_weechat_relay_session *session,
+                                       const char *msg_id,
+                                       const char *password,
+                                       enum t_weechat_relay_compression compression);
+extern ssize_t weechat_relay_cmd_hdata (struct t_weechat_relay_session *session,
                                         const char *msg_id,
-                                        const char *password_hash_algo,
-                                        enum t_weechat_relay_compression compression);
-extern int weechat_relay_cmd_init (struct t_weechat_relay_session *session,
-                                   const char *msg_id,
-                                   const char *password,
-                                   enum t_weechat_relay_compression compression);
-extern int weechat_relay_cmd_hdata (struct t_weechat_relay_session *session,
-                                    const char *msg_id,
-                                    const char *path,
-                                    const char *keys);
-extern int weechat_relay_cmd_info (struct t_weechat_relay_session *session,
-                                   const char *msg_id,
-                                   const char *name);
-extern int weechat_relay_cmd_infolist (struct t_weechat_relay_session *session,
+                                        const char *path,
+                                        const char *keys);
+extern ssize_t weechat_relay_cmd_info (struct t_weechat_relay_session *session,
                                        const char *msg_id,
-                                       const char *name,
-                                       const char *pointer,
-                                       const char *arguments);
-extern int weechat_relay_cmd_nicklist (struct t_weechat_relay_session *session,
+                                       const char *name);
+extern ssize_t weechat_relay_cmd_infolist (struct t_weechat_relay_session *session,
+                                           const char *msg_id,
+                                           const char *name,
+                                           const char *pointer,
+                                           const char *arguments);
+extern ssize_t weechat_relay_cmd_nicklist (struct t_weechat_relay_session *session,
+                                           const char *msg_id,
+                                           const char *buffer);
+extern ssize_t weechat_relay_cmd_input (struct t_weechat_relay_session *session,
+                                        const char *msg_id,
+                                        const char *buffer,
+                                        const char *data);
+extern ssize_t weechat_relay_cmd_completion (struct t_weechat_relay_session *session,
+                                             const char *msg_id,
+                                             const char *buffer,
+                                             int position,
+                                             const char *data);
+extern ssize_t weechat_relay_cmd_sync (struct t_weechat_relay_session *session,
                                        const char *msg_id,
-                                       const char *buffer);
-extern int weechat_relay_cmd_input (struct t_weechat_relay_session *session,
-                                    const char *msg_id,
-                                    const char *buffer,
-                                    const char *data);
-extern int weechat_relay_cmd_completion (struct t_weechat_relay_session *session,
+                                       const char *buffers,
+                                       const char *options);
+extern ssize_t weechat_relay_cmd_desync (struct t_weechat_relay_session *session,
                                          const char *msg_id,
-                                         const char *buffer,
-                                         int position,
-                                         const char *data);
-extern int weechat_relay_cmd_sync (struct t_weechat_relay_session *session,
-                                   const char *msg_id,
-                                   const char *buffers,
-                                   const char *options);
-extern int weechat_relay_cmd_desync (struct t_weechat_relay_session *session,
-                                     const char *msg_id,
-                                     const char *buffers,
-                                     const char *options);
-extern int weechat_relay_cmd_test (struct t_weechat_relay_session *session,
-                                   const char *msg_id);
-extern int weechat_relay_cmd_ping (struct t_weechat_relay_session *session,
-                                   const char *msg_id,
-                                   const char *arguments);
-extern int weechat_relay_cmd_quit (struct t_weechat_relay_session *session,
-                                   const char *msg_id);
+                                         const char *buffers,
+                                         const char *options);
+extern ssize_t weechat_relay_cmd_test (struct t_weechat_relay_session *session,
+                                       const char *msg_id);
+extern ssize_t weechat_relay_cmd_ping (struct t_weechat_relay_session *session,
+                                       const char *msg_id,
+                                       const char *arguments);
+extern ssize_t weechat_relay_cmd_quit (struct t_weechat_relay_session *session,
+                                       const char *msg_id);
 
 /* Relay messages (WeeChat -> client) */
 
 extern struct t_weechat_relay_msg *weechat_relay_msg_new (const char *id);
 extern int weechat_relay_msg_add_bytes (struct t_weechat_relay_msg *msg,
-                                        const void *buffer, int size);
+                                        const void *buffer, size_t size);
 extern int weechat_relay_msg_set_bytes (struct t_weechat_relay_msg *msg,
                                         int position, const void *buffer,
-                                        int size);
+                                        size_t size);
 extern int weechat_relay_msg_add_type (struct t_weechat_relay_msg *msg,
                                        const char *string);
 extern int weechat_relay_msg_add_char (struct t_weechat_relay_msg *msg,
@@ -155,7 +156,7 @@ extern int weechat_relay_msg_add_long (struct t_weechat_relay_msg *msg,
 extern int weechat_relay_msg_add_string (struct t_weechat_relay_msg *msg,
                                          const char *string);
 extern int weechat_relay_msg_add_buffer (struct t_weechat_relay_msg *msg,
-                                         const void *data, int length);
+                                         const void *data, size_t length);
 extern int weechat_relay_msg_add_pointer (struct t_weechat_relay_msg *msg,
                                           void *pointer);
 extern int weechat_relay_msg_add_time (struct t_weechat_relay_msg *msg,

@@ -54,8 +54,7 @@ const char *relay_port = NULL;         /* pointer to port argument          */
 
 /* other variables */
 int relay_quit = 0;                    /* 1 to exit program                 */
-int relay_socket = -1;                 /* socket for I/O with WeeChat       */
-gnutls_session_t gnutls_sess;          /* GnuTLS session                    */
+struct t_weechat_relay_session *relay_session = NULL; /* relay session      */
 
 
 /*
@@ -218,7 +217,7 @@ void
 relay_send_command (const char *command)
 {
     char *buffer;
-    int size;
+    size_t size;
     ssize_t num_sent;
 
     size = strlen (command) + 1 + 1;
@@ -229,10 +228,7 @@ relay_send_command (const char *command)
     printf ("<-- %s ", command);
     snprintf (buffer, size, "%s\n", command);
 
-    if (relay_ssl)
-        num_sent = gnutls_record_send (gnutls_sess, buffer, size);
-    else
-        num_sent = send (relay_socket, buffer, size, 0);
+    num_sent = weechat_relay_session_send (relay_session, buffer, size);
 
     if (num_sent < 0)
     {
@@ -265,10 +261,8 @@ relay_recv_message ()
     ssize_t num_recv;
     char buffer[4096];
 
-    if (relay_ssl)
-        num_recv = gnutls_record_recv (gnutls_sess, buffer, sizeof (buffer));
-    else
-        num_recv = recv (relay_socket, buffer, sizeof (buffer), 0);
+    num_recv = weechat_relay_session_recv (relay_session,
+                                           buffer, sizeof (buffer));
 
     if (num_recv < 0)
     {
@@ -322,21 +316,31 @@ relay_line_handler (char *line)
 void
 relay_main_loop ()
 {
-    int stdin_fd, max_fd, rc;
+    int sock, stdin_fd, max_fd, rc;
     fd_set read_fds;
     struct timeval tv;
+    gnutls_session_t gnutls_sess, *ptr_gnutls_sess;
 
     relay_quit = 0;
 
     /* connect to WeeChat */
-    relay_socket = relay_network_connect (
+    ptr_gnutls_sess = (relay_ssl) ? &gnutls_sess : NULL;
+    sock = relay_network_connect (
         relay_hostname,
         (relay_port) ? relay_port : RELAY_CLI_DEFAULT_PORT,
         relay_force_ipv4,
         relay_force_ipv6,
-        (relay_ssl) ? &gnutls_sess : NULL);
-    if (relay_socket < 0)
+        ptr_gnutls_sess);
+    if (sock < 0)
         return;
+
+    /* initialize relay session */
+    relay_session = weechat_relay_session_init (sock, ptr_gnutls_sess);
+    if (!relay_session)
+    {
+        fprintf (stderr, "ERROR: unable to initialize relay session\n");
+        return;
+    }
 
     rl_callback_handler_install ("weechat-relay> ", relay_line_handler);
 
@@ -347,8 +351,8 @@ relay_main_loop ()
     {
         FD_ZERO(&read_fds);
         FD_SET(stdin_fd, &read_fds);
-        FD_SET(relay_socket, &read_fds);
-        max_fd = (relay_socket > stdin_fd) ? relay_socket : stdin_fd;
+        FD_SET(sock, &read_fds);
+        max_fd = (sock > stdin_fd) ? sock : stdin_fd;
         tv.tv_sec = 1;
         tv.tv_usec = 0;
         rc = select (max_fd + 1, &read_fds, NULL, NULL, &tv);
@@ -364,7 +368,7 @@ relay_main_loop ()
                 rl_callback_read_char ();
 
             /* read socket: message from WeeChat */
-            if (FD_ISSET(relay_socket, &read_fds))
+            if (FD_ISSET(sock, &read_fds))
                 relay_recv_message ();
         }
     }
@@ -372,6 +376,8 @@ relay_main_loop ()
     relay_network_disconnect ((relay_ssl) ? &gnutls_sess : NULL);
 
     rl_callback_handler_remove ();
+
+    weechat_relay_session_free (relay_session);
 }
 
 /*

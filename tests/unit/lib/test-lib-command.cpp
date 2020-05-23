@@ -41,19 +41,19 @@ extern char *weechat_relay_cmd_escape (const char *string,
     LONGS_EQUAL(strlen (__command), num_read);                          \
     STRCMP_EQUAL(__command, read_buffer);
 
-struct t_weechat_relay_session relay_session;
-int fd_pipe[2];
-char read_buffer[4096];
-ssize_t num_read;
-
 TEST_GROUP(LibCommand)
 {
+    struct t_weechat_relay_session relay_session;
+    int fd_pipe[2];
+    char read_buffer[4096];
+    ssize_t num_read;
+
     void setup()
     {
         pipe (fd_pipe);
         relay_session.sock = fd_pipe[1];
         relay_session.ssl = 0;
-        relay_session.gnutls_session = NULL;
+        relay_session.gnutls_sess = NULL;
     }
 
     void teardown()
@@ -100,24 +100,6 @@ TEST(LibCommand, CmdEscape)
     result = weechat_relay_cmd_escape ("abc.def,ghi;jkl/mno", ".,;");
     STRCMP_EQUAL("abc\\.def\\,ghi\\;jkl/mno", result);
     free (result);
-}
-
-/*
- * Tests functions:
- *   weechat_relay_cmd_raw
- */
-
-TEST(LibCommand, CmdRaw)
-{
-    LONGS_EQUAL(-1, weechat_relay_cmd_raw (NULL, NULL, 0));
-    LONGS_EQUAL(-1, weechat_relay_cmd_raw (&relay_session, NULL, 0));
-    LONGS_EQUAL(-1, weechat_relay_cmd_raw (&relay_session, "abc", 0));
-
-    LONGS_EQUAL(3, weechat_relay_cmd_raw (&relay_session, "abc", 3));
-    RELAY_CMD_EQUAL("abc");
-
-    LONGS_EQUAL(8, weechat_relay_cmd_raw (&relay_session, "abc def\n", 8));
-    RELAY_CMD_EQUAL("abc def\n");
 }
 
 /*

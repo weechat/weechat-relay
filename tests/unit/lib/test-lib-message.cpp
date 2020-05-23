@@ -82,7 +82,6 @@ TEST(LibMessage, MsgAddBytes)
     LONGS_EQUAL(0, weechat_relay_msg_add_bytes (NULL, NULL, 0));
     LONGS_EQUAL(0, weechat_relay_msg_add_bytes (msg, NULL, 0));
     LONGS_EQUAL(0, weechat_relay_msg_add_bytes (msg, str, 0));
-    LONGS_EQUAL(0, weechat_relay_msg_add_bytes (msg, str, -1));
 
     LONGS_EQUAL(1, weechat_relay_msg_add_bytes (msg, str, strlen (str)));
     LONGS_EQUAL(WEECHAT_RELAY_MSG_INITIAL_ALLOC, msg->data_alloc);
@@ -114,7 +113,6 @@ TEST(LibMessage, MsgSetBytes)
     LONGS_EQUAL(0, weechat_relay_msg_set_bytes (NULL, 0, NULL, 0));
     LONGS_EQUAL(0, weechat_relay_msg_set_bytes (msg, 0, NULL, 0));
     LONGS_EQUAL(0, weechat_relay_msg_set_bytes (msg, 0, str1, 0));
-    LONGS_EQUAL(0, weechat_relay_msg_set_bytes (msg, 0, str1, -1));
     LONGS_EQUAL(0, weechat_relay_msg_set_bytes (msg, -1, str1, 1));
     LONGS_EQUAL(0, weechat_relay_msg_set_bytes (msg, 0, str1,
                                                 WEECHAT_RELAY_MSG_INITIAL_ALLOC + 1));
@@ -296,10 +294,8 @@ TEST(LibMessage, MsgAddBuffer)
 
     msg = weechat_relay_msg_new ("test");
 
-    LONGS_EQUAL(0, weechat_relay_msg_add_buffer (NULL, NULL, 1));
-    LONGS_EQUAL(0, weechat_relay_msg_add_buffer (NULL, str, 1));
-    LONGS_EQUAL(0, weechat_relay_msg_add_buffer (msg, NULL, -1));
-    LONGS_EQUAL(0, weechat_relay_msg_add_buffer (msg, str, -1));
+    LONGS_EQUAL(0, weechat_relay_msg_add_buffer (NULL, NULL, 0));
+    LONGS_EQUAL(0, weechat_relay_msg_add_buffer (NULL, str, 0));
 
     /* NULL buffer: length = -1, no content */
     LONGS_EQUAL(1, weechat_relay_msg_add_buffer (msg, NULL, 0));

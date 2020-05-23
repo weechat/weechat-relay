@@ -83,12 +83,12 @@ weechat_relay_msg_new (const char *id)
 
 int
 weechat_relay_msg_add_bytes (struct t_weechat_relay_msg *msg,
-                             const void *buffer, int size)
+                             const void *buffer, size_t size)
 {
     char *ptr;
-    int old_data_alloc;
+    size_t old_data_alloc;
 
-    if (!msg || !msg->data || !buffer || (size <= 0))
+    if (!msg || !msg->data || !buffer || (size == 0))
         return 0;
 
     old_data_alloc = msg->data_alloc;
@@ -127,9 +127,9 @@ weechat_relay_msg_add_bytes (struct t_weechat_relay_msg *msg,
 
 int
 weechat_relay_msg_set_bytes (struct t_weechat_relay_msg *msg,
-                             int position, const void *buffer, int size)
+                             int position, const void *buffer, size_t size)
 {
-    if (!msg || !msg->data || (position < 0) || !buffer || (size <= 0)
+    if (!msg || !msg->data || (position < 0) || !buffer || (size == 0)
         || (position + size) > msg->data_size)
     {
         return 0;
@@ -222,7 +222,7 @@ int
 weechat_relay_msg_add_string (struct t_weechat_relay_msg *msg,
                               const char *string)
 {
-    int length;
+    size_t length;
 
     if (string)
     {
@@ -250,11 +250,8 @@ weechat_relay_msg_add_string (struct t_weechat_relay_msg *msg,
 
 int
 weechat_relay_msg_add_buffer (struct t_weechat_relay_msg *msg,
-                              const void *buffer, int length)
+                              const void *buffer, size_t length)
 {
-    if (length < 0)
-        return 0;
-
     if (buffer)
     {
         if (!weechat_relay_msg_add_int (msg, length))

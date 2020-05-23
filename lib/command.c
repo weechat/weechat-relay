@@ -49,7 +49,7 @@ const char *weechat_relay_compression_string[WEECHAT_RELAY_NUM_COMPRESSIONS] =
 char *
 weechat_relay_cmd_escape (const char *string, const char *chars_to_escape)
 {
-    int length;
+    size_t length;
     char *escaped, *ptr_escaped;
     const char *ptr_string;
 
@@ -84,50 +84,21 @@ weechat_relay_cmd_escape (const char *string, const char *chars_to_escape)
 }
 
 /*
- * Sends a command to WeeChat (raw data as input).
- *
- * Returns the number of bytes sent, -1 if error.
- */
-
-int
-weechat_relay_cmd_raw (struct t_weechat_relay_session *session,
-                       const char *buffer, size_t size)
-{
-    int rc;
-
-    if (!session || (size == 0))
-        return -1;
-
-    if (session->ssl)
-    {
-        rc = gnutls_record_send (*((gnutls_session_t *)session->gnutls_session),
-                                 buffer, size);
-    }
-    else
-    {
-        rc = write (session->sock, buffer, size);
-    }
-
-    if (rc < 0)
-        return -1;
-
-    return rc;
-}
-
-/*
  * Sends a command to WeeChat.
  *
  * Returns the number of bytes sent, -1 if error.
  */
 
-int
+ssize_t
 weechat_relay_cmd (struct t_weechat_relay_session *session,
                    const char *msg_id,
                    const char *command,
                    const char *arguments[])
 {
     char *message;
-    int length, i, rc;
+    size_t length;
+    ssize_t num_sent;
+    int i;
 
     if (!session || !command)
         return -1;
@@ -168,11 +139,11 @@ weechat_relay_cmd (struct t_weechat_relay_session *session,
 
     strcat (message, "\n");
 
-    rc = weechat_relay_cmd_raw (session, message, strlen (message));
+    num_sent = weechat_relay_session_send (session, message, strlen (message));
 
     free (message);
 
-    return rc;
+    return num_sent;
 }
 
 /*
@@ -181,7 +152,7 @@ weechat_relay_cmd (struct t_weechat_relay_session *session,
  * Returns the number of bytes sent, -1 if error.
  */
 
-int
+ssize_t
 weechat_relay_cmd_handshake (struct t_weechat_relay_session *session,
                              const char *msg_id,
                              const char *password_hash_algo,
@@ -189,9 +160,10 @@ weechat_relay_cmd_handshake (struct t_weechat_relay_session *session,
 {
     char *options;
     const char *args[2], *ptr_compression;
-    int rc, length;
+    size_t length;
+    ssize_t num_sent;
 
-    rc = -1;
+    num_sent = -1;
 
     options = NULL;
 
@@ -217,13 +189,13 @@ weechat_relay_cmd_handshake (struct t_weechat_relay_session *session,
     args[0] = options;
     args[1] = NULL;
 
-    rc = weechat_relay_cmd (session, msg_id, "handshake", args);
+    num_sent = weechat_relay_cmd (session, msg_id, "handshake", args);
 
 end:
     if (options)
         free (options);
 
-    return rc;
+    return num_sent;
 }
 
 /*
@@ -232,7 +204,7 @@ end:
  * Returns the number of bytes sent, -1 if error.
  */
 
-int
+ssize_t
 weechat_relay_cmd_init (struct t_weechat_relay_session *session,
                         const char *msg_id,
                         const char *password,
@@ -240,9 +212,10 @@ weechat_relay_cmd_init (struct t_weechat_relay_session *session,
 {
     char *password2, *options;
     const char *args[2], *ptr_compression;
-    int rc, length;
+    size_t length;
+    ssize_t num_sent;
 
-    rc = -1;
+    num_sent = -1;
 
     password2 = NULL;
     options = NULL;
@@ -271,7 +244,7 @@ weechat_relay_cmd_init (struct t_weechat_relay_session *session,
     args[0] = options;
     args[1] = NULL;
 
-    rc = weechat_relay_cmd (session, msg_id, "init", args);
+    num_sent = weechat_relay_cmd (session, msg_id, "init", args);
 
 end:
     if (password2)
@@ -279,7 +252,7 @@ end:
     if (options)
         free (options);
 
-    return rc;
+    return num_sent;
 }
 
 /*
@@ -288,7 +261,7 @@ end:
  * Returns the number of bytes sent, -1 if error.
  */
 
-int
+ssize_t
 weechat_relay_cmd_hdata (struct t_weechat_relay_session *session,
                          const char *msg_id,
                          const char *path,
@@ -309,7 +282,7 @@ weechat_relay_cmd_hdata (struct t_weechat_relay_session *session,
  * Returns the number of bytes sent, -1 if error.
  */
 
-int
+ssize_t
 weechat_relay_cmd_info (struct t_weechat_relay_session *session,
                         const char *msg_id,
                         const char *name)
@@ -328,7 +301,7 @@ weechat_relay_cmd_info (struct t_weechat_relay_session *session,
  * Returns the number of bytes sent, -1 if error.
  */
 
-int
+ssize_t
 weechat_relay_cmd_infolist (struct t_weechat_relay_session *session,
                             const char *msg_id,
                             const char *name,
@@ -351,7 +324,7 @@ weechat_relay_cmd_infolist (struct t_weechat_relay_session *session,
  * Returns the number of bytes sent, -1 if error.
  */
 
-int
+ssize_t
 weechat_relay_cmd_nicklist (struct t_weechat_relay_session *session,
                             const char *msg_id,
                             const char *buffer)
@@ -370,7 +343,7 @@ weechat_relay_cmd_nicklist (struct t_weechat_relay_session *session,
  * Returns the number of bytes sent, -1 if error.
  */
 
-int
+ssize_t
 weechat_relay_cmd_input (struct t_weechat_relay_session *session,
                          const char *msg_id,
                          const char *buffer,
@@ -391,7 +364,7 @@ weechat_relay_cmd_input (struct t_weechat_relay_session *session,
  * Returns the number of bytes sent, -1 if error.
  */
 
-int
+ssize_t
 weechat_relay_cmd_completion (struct t_weechat_relay_session *session,
                               const char *msg_id,
                               const char *buffer,
@@ -417,7 +390,7 @@ weechat_relay_cmd_completion (struct t_weechat_relay_session *session,
  * Returns the number of bytes sent, -1 if error.
  */
 
-int
+ssize_t
 weechat_relay_cmd_sync (struct t_weechat_relay_session *session,
                         const char *msg_id,
                         const char *buffers,
@@ -438,7 +411,7 @@ weechat_relay_cmd_sync (struct t_weechat_relay_session *session,
  * Returns the number of bytes sent, -1 if error.
  */
 
-int
+ssize_t
 weechat_relay_cmd_desync (struct t_weechat_relay_session *session,
                           const char *msg_id,
                           const char *buffers,
@@ -459,7 +432,7 @@ weechat_relay_cmd_desync (struct t_weechat_relay_session *session,
  * Returns the number of bytes sent, -1 if error.
  */
 
-int
+ssize_t
 weechat_relay_cmd_test (struct t_weechat_relay_session *session,
                         const char *msg_id)
 {
@@ -472,7 +445,7 @@ weechat_relay_cmd_test (struct t_weechat_relay_session *session,
  * Returns the number of bytes sent, -1 if error.
  */
 
-int
+ssize_t
 weechat_relay_cmd_ping (struct t_weechat_relay_session *session,
                         const char *msg_id,
                         const char *arguments)
@@ -491,7 +464,7 @@ weechat_relay_cmd_ping (struct t_weechat_relay_session *session,
  * Returns the number of bytes sent, -1 if error.
  */
 
-int
+ssize_t
 weechat_relay_cmd_quit (struct t_weechat_relay_session *session,
                         const char *msg_id)
 {
