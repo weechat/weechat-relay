@@ -32,7 +32,7 @@ if(BUILD_CLI)
   include_directories(${CMAKE_BINARY_DIR} ${PROJECT_SOURCE_DIR}/lib ${READLINE_INCLUDE_DIRS})
   add_executable(${EXECUTABLE} ${WEECHAT_RELAY_CLI_SRC})
   add_dependencies(${EXECUTABLE} weechatrelay_static)
-  target_link_libraries(${EXECUTABLE} ${LINK_LIBS})
+  target_link_libraries(${EXECUTABLE} ${LINK_LIBS} weechatrelay_static)
 
   install(TARGETS ${EXECUTABLE} RUNTIME DESTINATION bin)
 
