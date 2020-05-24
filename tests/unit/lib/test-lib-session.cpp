@@ -28,7 +28,6 @@ extern "C"
 #endif
 #include <unistd.h>
 #include <string.h>
-#include "tests/tests.h"
 #include "lib/weechat-relay.h"
 }
 

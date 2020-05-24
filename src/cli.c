@@ -45,16 +45,16 @@
 
 /* command line arguments */
 const char *ptr_argv0;                 /* pointer to first argv             */
-int relay_debug = 0;                   /* debug level                       */
-int relay_force_ipv4 = 0;              /* force IPv4 connection             */
-int relay_force_ipv6 = 0;              /* force IPv6 connection             */
-int relay_ssl = 0;                     /* use SSL/TLS                       */
-const char *relay_hostname = NULL;     /* pointer to hostname argument      */
-const char *relay_port = NULL;         /* pointer to port argument          */
+int relay_cli_debug = 0;               /* debug level                       */
+int relay_cli_force_ipv4 = 0;          /* force IPv4 connection             */
+int relay_cli_force_ipv6 = 0;          /* force IPv6 connection             */
+int relay_cli_ssl = 0;                 /* use SSL/TLS                       */
+const char *relay_cli_hostname = NULL; /* pointer to hostname argument      */
+const char *relay_cli_port = NULL;     /* pointer to port argument          */
 
 /* other variables */
-int relay_quit = 0;                    /* 1 to exit program                 */
-struct t_weechat_relay_session *relay_session = NULL; /* relay session      */
+int relay_cli_quit = 0;                /* 1 to exit program                 */
+struct t_weechat_relay_session *relay_cli_session = NULL; /* relay session  */
 
 
 /*
@@ -62,7 +62,7 @@ struct t_weechat_relay_session *relay_session = NULL; /* relay session      */
  */
 
 void
-display_copyright ()
+relay_cli_display_copyright ()
 {
     printf ("\n");
     printf ("%s %s (%s) Copyright %s, compiled on %s %s\n"
@@ -83,7 +83,7 @@ display_copyright ()
  */
 
 void
-display_license ()
+relay_cli_display_license ()
 {
     printf ("\n");
     printf ("%s", RELAY_CLI_LICENSE_TEXT);
@@ -95,9 +95,9 @@ display_license ()
  */
 
 void
-display_usage ()
+relay_cli_display_usage ()
 {
-    display_copyright ();
+    relay_cli_display_copyright ();
     printf ("\n");
     printf ("Usage: %s [option...] hostname\n", ptr_argv0);
     printf ("\n");
@@ -121,23 +121,27 @@ display_usage ()
  */
 
 void
-exit_arg_error (const char *error)
+relay_cli_display_arg_error (const char *error)
 {
-    printf ("ERROR: %s\n", error);
-    display_usage ();
-    exit (EXIT_FAILURE);
+    fprintf (stderr, "ERROR: %s\n", error);
+    relay_cli_display_usage ();
 }
 
 /*
  * Parses command line arguments.
  *
  * Arguments argc and argv come from main() function.
+ *
+ * Returns:
+ *    1: OK, connection will be done
+ *    0: OK, exit with return code 0
+ *   -1: error in parsing of arguments, exit with return code 1
  */
 
-void
-relay_parse_args (int argc, char *argv[])
+int
+relay_cli_parse_args (int argc, char *argv[])
 {
-    int opt, long_index;
+    int rc, opt, long_index;
     struct option long_options[] = {
         { "ipv4",     no_argument,       NULL, '4' },
         { "ipv6",     no_argument,       NULL, '6' },
@@ -150,13 +154,15 @@ relay_parse_args (int argc, char *argv[])
         { NULL,       0,                 NULL, 0   },
     };
 
+    rc = 1;
+
     ptr_argv0 = argv[0];
-    relay_debug = 0;
-    relay_force_ipv4 = 0;
-    relay_force_ipv6 = 0;
-    relay_ssl = 0;
-    relay_hostname = NULL;
-    relay_port = NULL;
+    relay_cli_debug = 0;
+    relay_cli_force_ipv4 = 0;
+    relay_cli_force_ipv6 = 0;
+    relay_cli_ssl = 0;
+    relay_cli_hostname = NULL;
+    relay_cli_port = NULL;
     long_index = 0;
 
     while ((opt = getopt_long (argc, argv, "46sdhlp:v",
@@ -165,124 +171,145 @@ relay_parse_args (int argc, char *argv[])
         switch (opt)
         {
             case '4':
-                relay_force_ipv4 = 1;
+                relay_cli_force_ipv4 = 1;
                 break;
             case '6':
-                relay_force_ipv6 = 1;
+                relay_cli_force_ipv6 = 1;
                 break;
             case 's':
-                relay_ssl = 1;
+                relay_cli_ssl = 1;
                 break;
             case 'd':
-                relay_debug++;
+                relay_cli_debug++;
                 break;
             case 'h':
-                display_usage ();
-                exit (0);
+                relay_cli_display_usage ();
+                rc = 0;
                 break;
             case 'l':
-                display_copyright ();
-                display_license ();
-                exit (0);
+                relay_cli_display_copyright ();
+                relay_cli_display_license ();
+                rc = 0;
                 break;
             case 'p':
-                relay_port = optarg;
+                relay_cli_port = optarg;
                 break;
             case 'v':
                 printf ("%s (%s)\n",
                         WEECHAT_RELAY_VERSION, WEECHAT_RELAY_VERSION_GIT);
-                exit (0);
+                rc = 0;
                 break;
             default:
-                display_usage ();
-                exit (0);
+                relay_cli_display_usage ();
+                rc = -1;
                 break;
         }
     }
 
-    if (relay_force_ipv4 && relay_force_ipv6)
-        exit_arg_error ("ipv4 and ipv6 are incompatible options");
+    if ((rc == 1) && relay_cli_force_ipv4 && relay_cli_force_ipv6)
+    {
+        relay_cli_display_arg_error ("ipv4 and ipv6 are incompatible options");
+        rc = -1;
+    }
 
-    if (optind >= argc)
-        exit_arg_error ("missing hostname");
+    if ((rc == 1) && (optind >= argc))
+    {
+        relay_cli_display_arg_error ("missing hostname");
+        rc = -1;
+    }
 
-    relay_hostname = argv[optind];
+    if (rc == 1)
+        relay_cli_hostname = argv[optind];
+
+    return rc;
 }
 
 /*
  * Sends a command to WeeChat.
+ *
+ * Returns number of bytes sent, -1 if error.
  */
 
-void
-relay_send_command (const char *command)
+ssize_t
+relay_cli_send_command (const char *command)
 {
     char *buffer;
     size_t size;
     ssize_t num_sent;
 
+    if (!command)
+        return -1;
+
     size = strlen (command) + 1 + 1;
     buffer = malloc (size);
     if (!buffer)
-        return;
+        return -1;
 
     printf ("<-- %s ", command);
     snprintf (buffer, size, "%s\n", command);
 
-    num_sent = weechat_relay_session_send (relay_session, buffer, size);
+    num_sent = weechat_relay_session_send (relay_cli_session,
+                                           buffer, strlen (buffer));
 
     if (num_sent < 0)
     {
         printf ("\r\n");
-        if (relay_ssl)
+        if (relay_cli_ssl)
             gnutls_perror (num_sent);
         else
             perror ("ERROR: send");
     }
     else
     {
-        if (relay_debug)
+        if (relay_cli_debug)
             printf("  (%ld bytes)", num_sent);
         printf ("\n");
     }
 
     if (strcmp (command, "quit") == 0)
-        relay_quit = 1;
+        relay_cli_quit = 1;
 
     free (buffer);
+
+    return num_sent;
 }
 
 /*
  * Receives a message from WeeChat.
+ *
+ * Returns number of bytes received, -1 if error.
  */
 
-void
-relay_recv_message ()
+ssize_t
+relay_cli_recv_message ()
 {
     ssize_t num_recv;
     char buffer[4096];
 
-    num_recv = weechat_relay_session_recv (relay_session,
+    num_recv = weechat_relay_session_recv (relay_cli_session,
                                            buffer, sizeof (buffer));
 
     if (num_recv < 0)
     {
         printf ("\r\n");
-        if (relay_ssl)
+        if (relay_cli_ssl)
             gnutls_perror (num_recv);
         else
             perror ("ERROR: recv");
-        relay_quit = 1;
+        relay_cli_quit = 1;
     }
     else if (num_recv == 0)
     {
         printf ("\r\nDisconnected\n");
-        relay_quit = 1;
+        relay_cli_quit = 1;
     }
     else
     {
         printf ("\r--> %ld bytes received\n", num_recv);
         rl_forced_update_display ();
     }
+
+    return num_recv;
 }
 
 /*
@@ -290,19 +317,19 @@ relay_recv_message ()
  */
 
 void
-relay_line_handler (char *line)
+relay_cli_line_handler (char *line)
 {
     if (!line)
     {
         printf ("\r\n");
-        relay_send_command ("quit");
+        relay_cli_send_command ("quit");
         rl_callback_handler_remove ();
-        relay_quit = 1;
+        relay_cli_quit = 1;
     }
     else if (line && line[0])
     {
         add_history (line);
-        relay_send_command (line);
+        relay_cli_send_command (line);
     }
 
     if (line)
@@ -310,44 +337,48 @@ relay_line_handler (char *line)
 }
 
 /*
- * Main loop.
+ * Main loop for command-line interface.
+ *
+ * Returns:
+ *   1: OK
+ *   0: error
  */
 
-void
-relay_main_loop ()
+int
+relay_cli_main_loop ()
 {
     int sock, stdin_fd, max_fd, rc;
     fd_set read_fds;
     struct timeval tv;
     gnutls_session_t gnutls_sess, *ptr_gnutls_sess;
 
-    relay_quit = 0;
+    relay_cli_quit = 0;
 
     /* connect to WeeChat */
-    ptr_gnutls_sess = (relay_ssl) ? &gnutls_sess : NULL;
+    ptr_gnutls_sess = (relay_cli_ssl) ? &gnutls_sess : NULL;
     sock = relay_network_connect (
-        relay_hostname,
-        (relay_port) ? relay_port : RELAY_CLI_DEFAULT_PORT,
-        relay_force_ipv4,
-        relay_force_ipv6,
+        relay_cli_hostname,
+        (relay_cli_port) ? relay_cli_port : RELAY_CLI_DEFAULT_PORT,
+        relay_cli_force_ipv4,
+        relay_cli_force_ipv6,
         ptr_gnutls_sess);
     if (sock < 0)
-        return;
+        return 0;
 
     /* initialize relay session */
-    relay_session = weechat_relay_session_init (sock, ptr_gnutls_sess);
-    if (!relay_session)
+    relay_cli_session = weechat_relay_session_init (sock, ptr_gnutls_sess);
+    if (!relay_cli_session)
     {
         fprintf (stderr, "ERROR: unable to initialize relay session\n");
-        return;
+        return 0;
     }
 
-    rl_callback_handler_install ("weechat-relay> ", relay_line_handler);
+    rl_callback_handler_install ("weechat-relay> ", relay_cli_line_handler);
 
     stdin_fd = fileno (stdin);
 
     /* main loop */
-    while (!relay_quit)
+    while (!relay_cli_quit)
     {
         FD_ZERO(&read_fds);
         FD_SET(stdin_fd, &read_fds);
@@ -369,15 +400,17 @@ relay_main_loop ()
 
             /* read socket: message from WeeChat */
             if (FD_ISSET(sock, &read_fds))
-                relay_recv_message ();
+                relay_cli_recv_message ();
         }
     }
 
-    relay_network_disconnect ((relay_ssl) ? &gnutls_sess : NULL);
+    relay_network_disconnect ((relay_cli_ssl) ? &gnutls_sess : NULL);
 
     rl_callback_handler_remove ();
 
-    weechat_relay_session_free (relay_session);
+    weechat_relay_session_free (relay_cli_session);
+
+    return 1;
 }
 
 /*
@@ -385,12 +418,19 @@ relay_main_loop ()
  */
 
 int
-main (int argc, char *argv[])
+relay_cli_main (int argc, char *argv[])
 {
+    int rc;
+
     relay_network_init ();
-    relay_parse_args (argc, argv);
-    relay_main_loop ();
+
+    rc = relay_cli_parse_args (argc, argv);
+    if (rc < 1)
+        return (rc == 0) ? 0 : 1;
+
+    rc = relay_cli_main_loop ();
+
     relay_network_end ();
 
-    return 0;
+    return (rc) ? 0 : 1;
 }

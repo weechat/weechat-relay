@@ -1,5 +1,5 @@
 /*
- * tests.cpp - run WeeChat Relay tests
+ * main.c - main function for WeeChat relay command line tool
  *
  * Copyright (C) 2019-2020 Sébastien Helleu <flashcode@flashtux.org>
  *
@@ -19,33 +19,19 @@
  * along with WeeChat Relay.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <iostream>
-#include <stdlib.h>
-#include <stdio.h>
-
-extern "C"
-{
-#ifndef HAVE_CONFIG_H
-#define HAVE_CONFIG_H
+#ifdef HAVE_CONFIG_H
+#include "config.h"
 #endif
-}
 
-#include "CppUTest/CommandLineTestRunner.h"
+#include "cli.h"
 
-/* import tests from libs */
 
-/* library */
-IMPORT_TEST_GROUP(LibCommand);
-IMPORT_TEST_GROUP(LibMessage);
-IMPORT_TEST_GROUP(LibSession);
-
-/* cli */
-IMPORT_TEST_GROUP(SrcCli);
-IMPORT_TEST_GROUP(SrcNetwork);
-
+/*
+ * Main function.
+ */
 
 int
 main (int argc, char *argv[])
 {
-    return CommandLineTestRunner::RunAllTests (argc, argv);
+    return relay_cli_main (argc, argv);
 }

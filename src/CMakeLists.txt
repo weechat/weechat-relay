@@ -19,10 +19,6 @@
 
 if(BUILD_CLI)
 
-  set(WEECHAT_RELAY_CLI_SRC cli.c network.c)
-
-  set(EXECUTABLE weechat-relay-cli)
-
   find_package(GnuTLS REQUIRED)
   find_package(ZLIB REQUIRED)
   find_package(Readline REQUIRED)
@@ -30,9 +26,19 @@ if(BUILD_CLI)
   list(APPEND LINK_LIBS ${READLINE_LIBRARIES})
 
   include_directories(${CMAKE_BINARY_DIR} ${PROJECT_SOURCE_DIR}/lib ${READLINE_INCLUDE_DIRS})
-  add_executable(${EXECUTABLE} ${WEECHAT_RELAY_CLI_SRC})
-  add_dependencies(${EXECUTABLE} weechatrelay_static)
-  target_link_libraries(${EXECUTABLE} ${LINK_LIBS} weechatrelay_static)
+
+  set(RELAY_LIB_CLI_SRC
+    cli.c cli.h
+    network.c network.h)
+  add_library(relay_cli_static STATIC ${RELAY_LIB_CLI_SRC})
+  add_dependencies(relay_cli_static weechatrelay_static)
+  target_link_libraries(relay_cli_static ${LINK_LIBS} weechatrelay_static coverage_config)
+
+  set(RELAY_CLI_MAIN_SRC main.c)
+  set(EXECUTABLE weechat-relay-cli)
+  add_executable(${EXECUTABLE} ${RELAY_CLI_MAIN_SRC})
+  add_dependencies(${EXECUTABLE} relay_cli_static)
+  target_link_libraries(${EXECUTABLE} ${LINK_LIBS} weechatrelay_static relay_cli_static)
 
   install(TARGETS ${EXECUTABLE} RUNTIME DESTINATION bin)
 

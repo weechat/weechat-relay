@@ -38,4 +38,6 @@
 
 #define RELAY_CLI_DEFAULT_PORT "9000"
 
+extern int relay_cli_main (int argc, char *argv[]);
+
 #endif /* RELAY_CLI_H */

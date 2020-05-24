@@ -27,19 +27,23 @@ set(LIB_WEECHAT_RELAY_UNIT_TESTS_LIB_SRC
   unit/lib/test-lib-command.cpp
   unit/lib/test-lib-message.cpp
   unit/lib/test-lib-session.cpp
+  unit/src/test-src-cli.cpp
+  unit/src/test-src-network.cpp
 )
 add_library(weechat_relay_unit_tests_lib STATIC ${LIB_WEECHAT_RELAY_UNIT_TESTS_LIB_SRC})
 
 # binary to run tests
-set(WEECHAT_RELAY_TESTS_SRC tests.cpp tests.h)
+set(WEECHAT_RELAY_TESTS_SRC tests.cpp)
 add_executable(tests ${WEECHAT_RELAY_TESTS_SRC})
 target_link_libraries(tests
   weechat_relay_unit_tests_lib
   weechatrelay_static
+  relay_cli_static
   ${CPPUTEST_LDFLAGS})
 add_dependencies(tests
   weechat_relay_unit_tests_lib
-  weechatrelay_static)
+  weechatrelay_static
+  relay_cli_static)
 
 # test for cmake (ctest)
 add_test(NAME unit
