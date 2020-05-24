@@ -19,6 +19,10 @@
 
 set(WEECHAT_RELAY_SRC command.c message.c session.c)
 
+find_package(ZLIB REQUIRED)
+
+list(APPEND LINK_LIBS ${ZLIB_LIBRARY})
+
 include_directories(${CMAKE_BINARY_DIR} ${CMAKE_CURRENT_BINARY_DIR})
 
 add_library(weechatrelay_static STATIC ${WEECHAT_RELAY_SRC})

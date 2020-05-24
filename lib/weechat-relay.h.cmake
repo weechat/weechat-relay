@@ -161,6 +161,9 @@ extern int weechat_relay_msg_add_pointer (struct t_weechat_relay_msg *msg,
                                           void *pointer);
 extern int weechat_relay_msg_add_time (struct t_weechat_relay_msg *msg,
                                        time_t time);
+extern void *weechat_relay_msg_compress (struct t_weechat_relay_msg *msg,
+                                         int compression_level,
+                                         size_t *size);
 extern void weechat_relay_msg_free (struct t_weechat_relay_msg *msg);
 
 #endif /* WEECHAT_RELAY_H */

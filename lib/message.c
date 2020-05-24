@@ -311,6 +311,56 @@ weechat_relay_msg_add_time (struct t_weechat_relay_msg *msg, time_t time)
 }
 
 /*
+ * Compresses a message.
+ *
+ * The variable "size" is set with the size of buffer returned (in bytes).
+ *
+ * Returns a pointer to the compressed message, NULL if error.
+ */
+
+void *
+weechat_relay_msg_compress (struct t_weechat_relay_msg *msg,
+                            int compression_level,
+                            size_t *size)
+{
+    int rc;
+    Bytef *dest;
+    uLongf dest_size;
+    uint32_t size32;
+
+    if (!msg || !size)
+        return NULL;
+
+    *size = 0;
+
+    dest_size = compressBound (msg->data_size - 5);
+    dest = malloc (dest_size + 5);
+    if (!dest)
+        return NULL;
+
+    rc = compress2 (dest + 5,
+                    &dest_size,
+                    (Bytef *)(msg->data + 5),
+                    msg->data_size - 5,
+                    compression_level);
+
+    if (rc != Z_OK)
+    {
+        free (dest);
+        return NULL;
+    }
+
+    *size = dest_size + 5;
+
+    /* set size and compression flag */
+    size32 = htonl ((uint32_t)(*size));
+    memcpy (dest, &size32, 4);
+    dest[4] = WEECHAT_RELAY_COMPRESSION_ZLIB;
+
+    return dest;
+}
+
+/*
  * Frees a message.
  */
 
