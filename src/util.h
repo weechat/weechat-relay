@@ -17,16 +17,11 @@
  * along with WeeChat Relay.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef RELAY_CLI_NETWORK_H
-#define RELAY_CLI_NETWORK_H
+#ifndef RELAY_CLI_UTIL_H
+#define RELAY_CLI_UTIL_H
 
-#include <gnutls/gnutls.h>
+extern char *string_hex_dump (const char *data, size_t size,
+                              int bytes_per_line,
+                              const char *prefix, const char *suffix);
 
-extern void relay_network_init ();
-extern int relay_network_connect (const char *hostname, const char *port,
-                                  int force_ipv4, int force_ipv6,
-                                  gnutls_session_t *gnutls_sess);
-extern void relay_network_disconnect (gnutls_session_t *gnutls_sess);
-extern void relay_network_end ();
-
-#endif /* RELAY_CLI_NETWORK_H */
+#endif /* RELAY_CLI_UTIL_H */

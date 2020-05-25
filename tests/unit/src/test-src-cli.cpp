@@ -44,6 +44,7 @@ extern void relay_cli_display_license ();
 extern void relay_cli_display_usage ();
 extern void relay_cli_display_arg_error (const char *error);
 extern int relay_cli_parse_args (int argc, char *argv[]);
+extern void relay_cli_display_hex_dump (const void *buffer, size_t size);
 extern ssize_t relay_cli_send_command (const char *command);
 extern ssize_t relay_cli_recv_message ();
 extern void relay_cli_line_handler (char *line);
@@ -357,6 +358,20 @@ TEST(SrcCli, ParseArgs)
     argv[8] = NULL;
     RELAY_CHECK_CLI_ARGS(1, DEBUG_2, IPV4_OFF, IPV6_ON, SSL_ON,
                          HOSTNAME_LOCALHOST, PORT_15000);
+}
+
+/*
+ * Tests functions:
+ *   relay_cli_display_hex_dump
+ */
+
+TEST(SrcCli, DisplayHexDump)
+{
+    const char *string = "abcdefghijklmnopqrstuvwzyz";
+
+    relay_cli_display_hex_dump (NULL, 0);
+    relay_cli_display_hex_dump (string, 0);
+    relay_cli_display_hex_dump (string, strlen (string));
 }
 
 /*

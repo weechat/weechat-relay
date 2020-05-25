@@ -41,6 +41,7 @@
 
 #include "cli.h"
 #include "network.h"
+#include "util.h"
 
 
 /* command line arguments */
@@ -225,6 +226,26 @@ relay_cli_parse_args (int argc, char *argv[])
 }
 
 /*
+ * Displays hexadecimal dump of a message.
+ */
+
+void
+relay_cli_display_hex_dump (const void *buffer, size_t size)
+{
+    char *str_dump;
+
+    if (!buffer || (size == 0))
+        return;
+
+    str_dump = string_hex_dump (buffer, size, 16, "      ", NULL);
+    if (str_dump)
+    {
+        printf ("%s\n", str_dump);
+        free (str_dump);
+    }
+}
+
+/*
  * Sends a command to WeeChat.
  *
  * Returns number of bytes sent, -1 if error.
@@ -245,7 +266,7 @@ relay_cli_send_command (const char *command)
     if (!buffer)
         return -1;
 
-    printf ("<-- %s ", command);
+    printf ("<-- %s", command);
     snprintf (buffer, size, "%s\n", command);
 
     num_sent = weechat_relay_session_send (relay_cli_session,
@@ -262,8 +283,10 @@ relay_cli_send_command (const char *command)
     else
     {
         if (relay_cli_debug)
-            printf("  (%ld bytes)", num_sent);
+            printf(" (%ld bytes)", num_sent);
         printf ("\n");
+        if (relay_cli_debug >= 2)
+            relay_cli_display_hex_dump (buffer, strlen (buffer));
     }
 
     if (strcmp (command, "quit") == 0)
@@ -306,6 +329,8 @@ relay_cli_recv_message ()
     else
     {
         printf ("\r--> %ld bytes received\n", num_recv);
+        if (relay_cli_debug >= 2)
+            relay_cli_display_hex_dump (buffer, num_recv);
         rl_forced_update_display ();
     }
 

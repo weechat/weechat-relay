@@ -29,6 +29,7 @@ set(LIB_WEECHAT_RELAY_UNIT_TESTS_LIB_SRC
   unit/lib/test-lib-session.cpp
   unit/src/test-src-cli.cpp
   unit/src/test-src-network.cpp
+  unit/src/test-src-util.cpp
 )
 add_library(weechat_relay_unit_tests_lib STATIC ${LIB_WEECHAT_RELAY_UNIT_TESTS_LIB_SRC})
 

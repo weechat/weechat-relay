@@ -42,6 +42,7 @@ IMPORT_TEST_GROUP(LibSession);
 /* cli */
 IMPORT_TEST_GROUP(SrcCli);
 IMPORT_TEST_GROUP(SrcNetwork);
+IMPORT_TEST_GROUP(SrcUtil);
 
 
 int

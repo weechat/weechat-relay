@@ -28,7 +28,9 @@ if(BUILD_CLI)
 
   set(RELAY_LIB_CLI_SRC
     cli.c cli.h
-    network.c network.h)
+    network.c network.h
+    util.c util.h
+  )
   add_library(relay_cli_static STATIC ${RELAY_LIB_CLI_SRC})
   add_dependencies(relay_cli_static weechatrelay_static)
   target_link_libraries(relay_cli_static ${LINK_LIBS} weechatrelay_static coverage_config)

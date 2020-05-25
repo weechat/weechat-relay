@@ -17,8 +17,8 @@
  * along with WeeChat Relay.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef RELAY_CLI_H
-#define RELAY_CLI_H
+#ifndef RELAY_CLI_CLI_H
+#define RELAY_CLI_CLI_H
 
 #define RELAY_CLI_COPYRIGHT_DATE   "(C) 2019-2020"
 #define RELAY_CLI_WEB_SITE         "https://weechat.org/"
@@ -40,4 +40,4 @@
 
 extern int relay_cli_main (int argc, char *argv[]);
 
-#endif /* RELAY_CLI_H */
+#endif /* RELAY_CLI_CLI_H */
