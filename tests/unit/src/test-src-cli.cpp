@@ -37,6 +37,8 @@ extern int relay_cli_force_ipv6;
 extern int relay_cli_ssl;
 extern const char *relay_cli_hostname;
 extern const char *relay_cli_port;
+extern const char *relay_cli_commands[];
+extern int relay_cli_num_commands;
 extern struct t_weechat_relay_session *relay_cli_session;
 
 extern void relay_cli_display_copyright ();
@@ -92,6 +94,22 @@ extern void relay_cli_line_handler (char *line);
     else                                                                \
     {                                                                   \
         STRCMP_EQUAL(__port, relay_cli_port);                           \
+    }
+
+#define RELAY_CHECK_CLI_COMMANDS(__count)                               \
+    LONGS_EQUAL(__count, relay_cli_num_commands);                       \
+    for (i = 0; i < RELAY_CLI_MAX_COMMANDS; i++)                        \
+    {                                                                   \
+        if (i >= __count)                                               \
+        {                                                               \
+            POINTERS_EQUAL(NULL, relay_cli_commands[i]);                \
+        }                                                               \
+        else                                                            \
+        {                                                               \
+            snprintf (str_command, sizeof (str_command),                \
+                      "cmd%d", i + 1);                                  \
+            STRCMP_EQUAL(str_command, relay_cli_commands[i]);           \
+        }                                                               \
     }
 
 #define RELAY_CHECK_RECV(__command)                                     \
@@ -173,8 +191,14 @@ TEST(SrcCli, DisplayArgError)
 
 TEST(SrcCli, ParseArgs)
 {
-    const char *argv[16];
-    int argc;
+    const char *argv[64];
+    char str_command[128], commands[RELAY_CLI_MAX_COMMANDS + 1][32];
+    int argc, i, j;
+
+    for (i = 0; i < RELAY_CLI_MAX_COMMANDS + 1; i++)
+    {
+        snprintf (commands[i], sizeof (commands[i]), "cmd%d", i + 1);
+    }
 
     argv[0] = "weechat-relay-cli";
 
@@ -182,16 +206,19 @@ TEST(SrcCli, ParseArgs)
     argv[1] = NULL;
     RELAY_CHECK_CLI_ARGS(-1, DEBUG_0, IPV4_OFF, IPV6_OFF, SSL_OFF,
                          HOSTNAME_NULL, PORT_NULL);
+    RELAY_CHECK_CLI_COMMANDS(0);
 
     /* unknown option */
     argv[1] = "-Z";
     argv[2] = NULL;
     RELAY_CHECK_CLI_ARGS(-1, DEBUG_0, IPV4_OFF, IPV6_OFF, SSL_OFF,
                          HOSTNAME_NULL, PORT_NULL);
+    RELAY_CHECK_CLI_COMMANDS(0);
     argv[1] = "--unknown-option";
     argv[2] = NULL;
     RELAY_CHECK_CLI_ARGS(-1, DEBUG_0, IPV4_OFF, IPV6_OFF, SSL_OFF,
                          HOSTNAME_NULL, PORT_NULL);
+    RELAY_CHECK_CLI_COMMANDS(0);
 
     /* missing port */
     argv[1] = "localhost";
@@ -199,11 +226,51 @@ TEST(SrcCli, ParseArgs)
     argv[3] = NULL;
     RELAY_CHECK_CLI_ARGS(-1, DEBUG_0, IPV4_OFF, IPV6_OFF, SSL_OFF,
                          HOSTNAME_NULL, PORT_NULL);
+    RELAY_CHECK_CLI_COMMANDS(0);
     argv[1] = "localhost";
     argv[2] = "--port";
     argv[3] = NULL;
     RELAY_CHECK_CLI_ARGS(-1, DEBUG_0, IPV4_OFF, IPV6_OFF, SSL_OFF,
                          HOSTNAME_NULL, PORT_NULL);
+    RELAY_CHECK_CLI_COMMANDS(0);
+
+    /* missing command */
+    argv[1] = "localhost";
+    argv[2] = "-c";
+    argv[3] = NULL;
+    RELAY_CHECK_CLI_ARGS(-1, DEBUG_0, IPV4_OFF, IPV6_OFF, SSL_OFF,
+                         HOSTNAME_NULL, PORT_NULL);
+    RELAY_CHECK_CLI_COMMANDS(0);
+    argv[1] = "localhost";
+    argv[2] = "--command";
+    argv[3] = NULL;
+    RELAY_CHECK_CLI_ARGS(-1, DEBUG_0, IPV4_OFF, IPV6_OFF, SSL_OFF,
+                         HOSTNAME_NULL, PORT_NULL);
+    RELAY_CHECK_CLI_COMMANDS(0);
+
+    /* too many commands */
+    j = 1;
+    for (i = 0; i < RELAY_CLI_MAX_COMMANDS + 1; i++)
+    {
+        argv[j++] = "-c";
+        argv[j++] = commands[i];
+    }
+    argv[j++] = "localhost";
+    argv[j++] = NULL;
+    RELAY_CHECK_CLI_ARGS(-1, DEBUG_0, IPV4_OFF, IPV6_OFF, SSL_OFF,
+                         HOSTNAME_NULL, PORT_NULL);
+    RELAY_CHECK_CLI_COMMANDS(RELAY_CLI_MAX_COMMANDS);
+    j = 1;
+    for (i = 0; i < RELAY_CLI_MAX_COMMANDS + 1; i++)
+    {
+        argv[j++] = "-c";
+        argv[j++] = commands[i];
+    }
+    argv[j++] = "localhost";
+    argv[j++] = NULL;
+    RELAY_CHECK_CLI_ARGS(-1, DEBUG_0, IPV4_OFF, IPV6_OFF, SSL_OFF,
+                         HOSTNAME_NULL, PORT_NULL);
+    RELAY_CHECK_CLI_COMMANDS(RELAY_CLI_MAX_COMMANDS);
 
     /* incompatible flags: ipv4 and ipv6 */
     argv[1] = "-4";
@@ -211,47 +278,56 @@ TEST(SrcCli, ParseArgs)
     argv[3] = NULL;
     RELAY_CHECK_CLI_ARGS(-1, DEBUG_0, IPV4_ON, IPV6_ON, SSL_OFF,
                          HOSTNAME_NULL, PORT_NULL);
+    RELAY_CHECK_CLI_COMMANDS(0);
     argv[1] = "--ipv4";
     argv[2] = "--ipv6";
     argv[3] = NULL;
     RELAY_CHECK_CLI_ARGS(-1, DEBUG_0, IPV4_ON, IPV6_ON, SSL_OFF,
                          HOSTNAME_NULL, PORT_NULL);
+    RELAY_CHECK_CLI_COMMANDS(0);
 
     /* OK */
     argv[1] = "localhost";
     argv[2] = NULL;
     RELAY_CHECK_CLI_ARGS(1, DEBUG_0, IPV4_OFF, IPV6_OFF, SSL_OFF,
                          HOSTNAME_LOCALHOST, PORT_NULL);
+    RELAY_CHECK_CLI_COMMANDS(0);
 
     /* OK: help */
     argv[1] = "-h";
     argv[2] = NULL;
     RELAY_CHECK_CLI_ARGS(0, DEBUG_0, IPV4_OFF, IPV6_OFF, SSL_OFF,
                          HOSTNAME_NULL, PORT_NULL);
+    RELAY_CHECK_CLI_COMMANDS(0);
     argv[1] = "--help";
     argv[2] = NULL;
     RELAY_CHECK_CLI_ARGS(0, DEBUG_0, IPV4_OFF, IPV6_OFF, SSL_OFF,
                          HOSTNAME_NULL, PORT_NULL);
+    RELAY_CHECK_CLI_COMMANDS(0);
 
     /* OK: license */
     argv[1] = "-l";
     argv[2] = NULL;
     RELAY_CHECK_CLI_ARGS(0, DEBUG_0, IPV4_OFF, IPV6_OFF, SSL_OFF,
                          HOSTNAME_NULL, PORT_NULL);
+    RELAY_CHECK_CLI_COMMANDS(0);
     argv[1] = "--license";
     argv[2] = NULL;
     RELAY_CHECK_CLI_ARGS(0, DEBUG_0, IPV4_OFF, IPV6_OFF, SSL_OFF,
                          HOSTNAME_NULL, PORT_NULL);
+    RELAY_CHECK_CLI_COMMANDS(0);
 
     /* OK: version */
     argv[1] = "-v";
     argv[2] = NULL;
     RELAY_CHECK_CLI_ARGS(0, DEBUG_0, IPV4_OFF, IPV6_OFF, SSL_OFF,
                          HOSTNAME_NULL, PORT_NULL);
+    RELAY_CHECK_CLI_COMMANDS(0);
     argv[1] = "--version";
     argv[2] = NULL;
     RELAY_CHECK_CLI_ARGS(0, DEBUG_0, IPV4_OFF, IPV6_OFF, SSL_OFF,
                          HOSTNAME_NULL, PORT_NULL);
+    RELAY_CHECK_CLI_COMMANDS(0);
 
     /* OK with debug (1) */
     argv[1] = "-d";
@@ -259,11 +335,13 @@ TEST(SrcCli, ParseArgs)
     argv[3] = NULL;
     RELAY_CHECK_CLI_ARGS(1, DEBUG_1, IPV4_OFF, IPV6_OFF, SSL_OFF,
                          HOSTNAME_LOCALHOST, PORT_NULL);
+    RELAY_CHECK_CLI_COMMANDS(0);
     argv[1] = "--debug";
     argv[2] = "localhost";
     argv[3] = NULL;
     RELAY_CHECK_CLI_ARGS(1, DEBUG_1, IPV4_OFF, IPV6_OFF, SSL_OFF,
                          HOSTNAME_LOCALHOST, PORT_NULL);
+    RELAY_CHECK_CLI_COMMANDS(0);
 
     /* OK with debug (2) */
     argv[1] = "-d";
@@ -272,12 +350,14 @@ TEST(SrcCli, ParseArgs)
     argv[4] = NULL;
     RELAY_CHECK_CLI_ARGS(1, DEBUG_2, IPV4_OFF, IPV6_OFF, SSL_OFF,
                          HOSTNAME_LOCALHOST, PORT_NULL);
+    RELAY_CHECK_CLI_COMMANDS(0);
     argv[1] = "--debug";
     argv[2] = "--debug";
     argv[3] = "localhost";
     argv[4] = NULL;
     RELAY_CHECK_CLI_ARGS(1, DEBUG_2, IPV4_OFF, IPV6_OFF, SSL_OFF,
                          HOSTNAME_LOCALHOST, PORT_NULL);
+    RELAY_CHECK_CLI_COMMANDS(0);
 
     /* OK with SSL */
     argv[1] = "-s";
@@ -285,11 +365,13 @@ TEST(SrcCli, ParseArgs)
     argv[3] = NULL;
     RELAY_CHECK_CLI_ARGS(1, DEBUG_0, IPV4_OFF, IPV6_OFF, SSL_ON,
                          HOSTNAME_LOCALHOST, PORT_NULL);
+    RELAY_CHECK_CLI_COMMANDS(0);
     argv[1] = "--ssl";
     argv[2] = "localhost";
     argv[3] = NULL;
     RELAY_CHECK_CLI_ARGS(1, DEBUG_0, IPV4_OFF, IPV6_OFF, SSL_ON,
                          HOSTNAME_LOCALHOST, PORT_NULL);
+    RELAY_CHECK_CLI_COMMANDS(0);
 
     /* OK with SSL + IPv4 */
     argv[1] = "-s";
@@ -298,12 +380,14 @@ TEST(SrcCli, ParseArgs)
     argv[4] = NULL;
     RELAY_CHECK_CLI_ARGS(1, DEBUG_0, IPV4_ON, IPV6_OFF, SSL_ON,
                          HOSTNAME_LOCALHOST, PORT_NULL);
+    RELAY_CHECK_CLI_COMMANDS(0);
     argv[1] = "--ssl";
     argv[2] = "--ipv4";
     argv[3] = "localhost";
     argv[4] = NULL;
     RELAY_CHECK_CLI_ARGS(1, DEBUG_0, IPV4_ON, IPV6_OFF, SSL_ON,
                          HOSTNAME_LOCALHOST, PORT_NULL);
+    RELAY_CHECK_CLI_COMMANDS(0);
 
     /* OK with SSL + IPv6 */
     argv[1] = "-s";
@@ -312,12 +396,14 @@ TEST(SrcCli, ParseArgs)
     argv[4] = NULL;
     RELAY_CHECK_CLI_ARGS(1, DEBUG_0, IPV4_OFF, IPV6_ON, SSL_ON,
                          HOSTNAME_LOCALHOST, PORT_NULL);
+    RELAY_CHECK_CLI_COMMANDS(0);
     argv[1] = "--ssl";
     argv[2] = "--ipv6";
     argv[3] = "localhost";
     argv[4] = NULL;
     RELAY_CHECK_CLI_ARGS(1, DEBUG_0, IPV4_OFF, IPV6_ON, SSL_ON,
                          HOSTNAME_LOCALHOST, PORT_NULL);
+    RELAY_CHECK_CLI_COMMANDS(0);
 
     /* OK with port + SSL + IPv6 */
     argv[1] = "-s";
@@ -328,6 +414,7 @@ TEST(SrcCli, ParseArgs)
     argv[6] = NULL;
     RELAY_CHECK_CLI_ARGS(1, DEBUG_0, IPV4_OFF, IPV6_ON, SSL_ON,
                          HOSTNAME_LOCALHOST, PORT_15000);
+    RELAY_CHECK_CLI_COMMANDS(0);
     argv[1] = "--ssl";
     argv[2] = "--port";
     argv[3] = "15000";
@@ -336,6 +423,7 @@ TEST(SrcCli, ParseArgs)
     argv[6] = NULL;
     RELAY_CHECK_CLI_ARGS(1, DEBUG_0, IPV4_OFF, IPV6_ON, SSL_ON,
                          HOSTNAME_LOCALHOST, PORT_15000);
+    RELAY_CHECK_CLI_COMMANDS(0);
 
     /* OK with debug (2) + port + SSL + IPv6 */
     argv[1] = "-d";
@@ -348,6 +436,7 @@ TEST(SrcCli, ParseArgs)
     argv[8] = NULL;
     RELAY_CHECK_CLI_ARGS(1, DEBUG_2, IPV4_OFF, IPV6_ON, SSL_ON,
                          HOSTNAME_LOCALHOST, PORT_15000);
+    RELAY_CHECK_CLI_COMMANDS(0);
     argv[1] = "--debug";
     argv[2] = "--debug";
     argv[3] = "--ssl";
@@ -358,6 +447,67 @@ TEST(SrcCli, ParseArgs)
     argv[8] = NULL;
     RELAY_CHECK_CLI_ARGS(1, DEBUG_2, IPV4_OFF, IPV6_ON, SSL_ON,
                          HOSTNAME_LOCALHOST, PORT_15000);
+    RELAY_CHECK_CLI_COMMANDS(0);
+
+    /* OK with 1 command */
+    argv[1] = "-c";
+    argv[2] = commands[0];
+    argv[3] = "localhost";
+    argv[4] = NULL;
+    RELAY_CHECK_CLI_ARGS(1, DEBUG_0, IPV4_OFF, IPV6_OFF, SSL_OFF,
+                         HOSTNAME_LOCALHOST, PORT_NULL);
+    RELAY_CHECK_CLI_COMMANDS(1);
+    argv[1] = "--command";
+    argv[2] = commands[0];
+    argv[3] = "localhost";
+    argv[4] = NULL;
+    RELAY_CHECK_CLI_ARGS(1, DEBUG_0, IPV4_OFF, IPV6_OFF, SSL_OFF,
+                         HOSTNAME_LOCALHOST, PORT_NULL);
+    RELAY_CHECK_CLI_COMMANDS(1);
+
+    /* OK with 2 commands */
+    argv[1] = "-c";
+    argv[2] = commands[0];
+    argv[3] = "-c";
+    argv[4] = commands[1];
+    argv[5] = "localhost";
+    argv[6] = NULL;
+    RELAY_CHECK_CLI_ARGS(1, DEBUG_0, IPV4_OFF, IPV6_OFF, SSL_OFF,
+                         HOSTNAME_LOCALHOST, PORT_NULL);
+    RELAY_CHECK_CLI_COMMANDS(2);
+    argv[1] = "--command";
+    argv[2] = commands[0];
+    argv[3] = "--command";
+    argv[4] = commands[1];
+    argv[5] = "localhost";
+    argv[6] = NULL;
+    RELAY_CHECK_CLI_ARGS(1, DEBUG_0, IPV4_OFF, IPV6_OFF, SSL_OFF,
+                         HOSTNAME_LOCALHOST, PORT_NULL);
+    RELAY_CHECK_CLI_COMMANDS(2);
+
+    /* OK with max commands allowed */
+    j = 1;
+    for (i = 0; i < RELAY_CLI_MAX_COMMANDS; i++)
+    {
+        argv[j++] = "-c";
+        argv[j++] = commands[i];
+    }
+    argv[j++] = "localhost";
+    argv[j++] = NULL;
+    RELAY_CHECK_CLI_ARGS(1, DEBUG_0, IPV4_OFF, IPV6_OFF, SSL_OFF,
+                         HOSTNAME_LOCALHOST, PORT_NULL);
+    RELAY_CHECK_CLI_COMMANDS(RELAY_CLI_MAX_COMMANDS);
+    j = 1;
+    for (i = 0; i < RELAY_CLI_MAX_COMMANDS; i++)
+    {
+        argv[j++] = "--command";
+        argv[j++] = commands[i];
+    }
+    argv[j++] = "localhost";
+    argv[j++] = NULL;
+    RELAY_CHECK_CLI_ARGS(1, DEBUG_0, IPV4_OFF, IPV6_OFF, SSL_OFF,
+                         HOSTNAME_LOCALHOST, PORT_NULL);
+    RELAY_CHECK_CLI_COMMANDS(RELAY_CLI_MAX_COMMANDS);
 }
 
 /*

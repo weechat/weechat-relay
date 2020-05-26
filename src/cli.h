@@ -36,7 +36,9 @@
     "You should have received a copy of the GNU General Public License\n" \
     "along with WeeChat Relay.  If not, see <https://www.gnu.org/licenses/>.\n"
 
-#define RELAY_CLI_DEFAULT_PORT "9000"
+#define RELAY_CLI_DEFAULT_PORT     "9000"
+#define RELAY_CLI_MAX_COMMANDS     16
+#define RELAY_CLI_MAX_COMMANDS_STR "16"
 
 extern int relay_cli_main (int argc, char *argv[]);
 

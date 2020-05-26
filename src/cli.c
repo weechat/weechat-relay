@@ -52,6 +52,9 @@ int relay_cli_force_ipv6 = 0;          /* force IPv6 connection             */
 int relay_cli_ssl = 0;                 /* use SSL/TLS                       */
 const char *relay_cli_hostname = NULL; /* pointer to hostname argument      */
 const char *relay_cli_port = NULL;     /* pointer to port argument          */
+const char *relay_cli_commands[RELAY_CLI_MAX_COMMANDS];
+                                       /* commands to send once connected   */
+int relay_cli_num_commands = 0;        /* number of commands to send        */
 
 /* other variables */
 int relay_cli_quit = 0;                /* 1 to exit program                 */
@@ -105,13 +108,15 @@ relay_cli_display_usage ()
     printf (
         "  -4, --ipv4         force connection with IPv4 (default: auto)\n"
         "  -6, --ipv6         force connection with IPv6 (default: auto)\n"
-        "  -s, --ssl          use SSL/TLS\n"
+        "  -c, --command      send commands once connected "
+        "(up to " RELAY_CLI_MAX_COMMANDS_STR " commands are allowed)\n"
         "  -d, --debug        debug mode: long objects view; "
         "with two -d: display raw messages\n"
         "  -h, --help         display help and exit\n"
         "  -l, --license      display license and exit\n"
         "  -p, --port <port>  the port to connect to "
         "(default: " RELAY_CLI_DEFAULT_PORT ")\n"
+        "  -s, --ssl          use SSL/TLS\n"
         "  -v, --version      display version and exit\n"
         "  hostname           hostname with running WeeChat\n");
     printf ("\n");
@@ -142,15 +147,16 @@ relay_cli_display_arg_error (const char *error)
 int
 relay_cli_parse_args (int argc, char *argv[])
 {
-    int rc, opt, long_index;
+    int rc, i, opt, long_index;
     struct option long_options[] = {
         { "ipv4",     no_argument,       NULL, '4' },
         { "ipv6",     no_argument,       NULL, '6' },
-        { "ssl",      no_argument,       NULL, 's' },
+        { "command",  required_argument, NULL, 'c' },
         { "debug",    no_argument,       NULL, 'd' },
         { "help",     no_argument,       NULL, 'h' },
         { "license",  no_argument,       NULL, 'l' },
         { "port",     required_argument, NULL, 'p' },
+        { "ssl",      no_argument,       NULL, 's' },
         { "version",  no_argument,       NULL, 'v' },
         { NULL,       0,                 NULL, 0   },
     };
@@ -164,9 +170,15 @@ relay_cli_parse_args (int argc, char *argv[])
     relay_cli_ssl = 0;
     relay_cli_hostname = NULL;
     relay_cli_port = NULL;
+    for (i = 0; i < RELAY_CLI_MAX_COMMANDS; i++)
+    {
+        relay_cli_commands[i] = NULL;
+    }
+    relay_cli_num_commands = 0;
+
     long_index = 0;
 
-    while ((opt = getopt_long (argc, argv, "46sdhlp:v",
+    while ((opt = getopt_long (argc, argv, "46c:dhlp:sv",
                                long_options, &long_index)) != -1)
     {
         switch (opt)
@@ -177,8 +189,16 @@ relay_cli_parse_args (int argc, char *argv[])
             case '6':
                 relay_cli_force_ipv6 = 1;
                 break;
-            case 's':
-                relay_cli_ssl = 1;
+            case 'c':
+                if (relay_cli_num_commands == RELAY_CLI_MAX_COMMANDS)
+                {
+                    relay_cli_display_arg_error ("too many commands");
+                    rc = -1;
+                }
+                else
+                {
+                    relay_cli_commands[relay_cli_num_commands++] = optarg;
+                }
                 break;
             case 'd':
                 relay_cli_debug++;
@@ -194,6 +214,9 @@ relay_cli_parse_args (int argc, char *argv[])
                 break;
             case 'p':
                 relay_cli_port = optarg;
+                break;
+            case 's':
+                relay_cli_ssl = 1;
                 break;
             case 'v':
                 printf ("%s (%s)\n",
@@ -372,7 +395,8 @@ relay_cli_line_handler (char *line)
 int
 relay_cli_main_loop ()
 {
-    int sock, stdin_fd, max_fd, rc;
+    int i,sock, stdin_fd, max_fd, rc;
+    char *line;
     fd_set read_fds;
     struct timeval tv;
     gnutls_session_t gnutls_sess, *ptr_gnutls_sess;
@@ -401,6 +425,18 @@ relay_cli_main_loop ()
     rl_callback_handler_install ("weechat-relay> ", relay_cli_line_handler);
 
     stdin_fd = fileno (stdin);
+
+    /* send command(s) received with option -c/--command */
+    if (relay_cli_num_commands > 0)
+    {
+        printf ("\r");
+        for (i = 0; i < relay_cli_num_commands; i++)
+        {
+            line = strdup (relay_cli_commands[i]);
+            relay_cli_line_handler (line);
+        }
+        rl_forced_update_display ();
+    }
 
     /* main loop */
     while (!relay_cli_quit)
