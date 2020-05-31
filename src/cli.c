@@ -487,9 +487,13 @@ relay_cli_main (int argc, char *argv[])
 
     rc = relay_cli_parse_args (argc, argv);
     if (rc < 1)
-        return (rc == 0) ? 0 : 1;
-
-    rc = relay_cli_main_loop ();
+    {
+        rc = (rc == 0) ? 1 : 0;
+    }
+    else
+    {
+        rc = relay_cli_main_loop ();
+    }
 
     relay_network_end ();
 
