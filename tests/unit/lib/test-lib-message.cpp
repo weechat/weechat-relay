@@ -429,4 +429,6 @@ TEST(LibMessage, Compress)
     buffer = weechat_relay_msg_compress (msg, 9, &size);
     CHECK(size < 1056);
     free (buffer);
+
+    weechat_relay_msg_free (msg);
 }
