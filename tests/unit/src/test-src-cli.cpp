@@ -28,6 +28,7 @@ extern "C"
 #endif
 #include <unistd.h>
 #include <string.h>
+#include "tests/tests.h"
 #include "lib/weechat-relay.h"
 #include "src/cli.h"
 
@@ -47,7 +48,9 @@ extern void relay_cli_display_usage ();
 extern void relay_cli_display_arg_error (const char *error);
 extern int relay_cli_parse_args (int argc, char *argv[]);
 extern void relay_cli_display_hex_dump (const void *buffer, size_t size);
+extern void relay_cli_display_message (const void *buffer, size_t size);
 extern ssize_t relay_cli_send_command (const char *command);
+extern int relay_cli_check_pending ();
 extern ssize_t relay_cli_recv_message ();
 extern void relay_cli_line_handler (char *line);
 }
@@ -122,23 +125,27 @@ extern void relay_cli_line_handler (char *line);
 
 TEST_GROUP(SrcCli)
 {
-    struct t_weechat_relay_session relay_session;
+    struct t_weechat_relay_session *relay_session;
     int fd_pipe[2];
     char read_buffer[4096];
     ssize_t num_read;
 
     void setup()
     {
+        relay_cli_debug = 999999;
+        relay_session = weechat_relay_session_init (0, NULL);
         pipe (fd_pipe);
-        relay_session.sock = fd_pipe[1];
-        relay_session.ssl = 0;
-        relay_session.gnutls_sess = NULL;
+        relay_session->sock = fd_pipe[1];
+        relay_session->ssl = 0;
+        relay_session->gnutls_sess = NULL;
     }
 
     void teardown()
     {
         close (fd_pipe[0]);
         close (fd_pipe[1]);
+        weechat_relay_session_free (relay_session);
+        relay_cli_debug = 0;
     }
 };
 
@@ -526,24 +533,46 @@ TEST(SrcCli, DisplayHexDump)
 
 /*
  * Tests functions:
+ *   relay_cli_display_message
+ */
+
+TEST(SrcCli, DisplayMessage)
+{
+    unsigned char msg_string[] = { MESSAGE_STRING };
+
+    relay_cli_display_message (msg_string, sizeof (msg_string));
+}
+
+/*
+ * Tests functions:
  *   relay_cli_send_command
  */
 
 TEST(SrcCli, SendCommand)
 {
-    relay_cli_session = &relay_session;
+    relay_cli_session = relay_session;
     relay_cli_debug = 1;
 
     LONGS_EQUAL(-1, relay_cli_send_command (NULL));
 
     /* failed: invalid socket */
-    relay_session.sock = -1;
+    relay_session->sock = -1;
     LONGS_EQUAL(-1, relay_cli_send_command ("test"));
-    relay_session.sock = fd_pipe[1];
+    relay_session->sock = fd_pipe[1];
 
     /* success: "test\n" sent */
     LONGS_EQUAL(5, relay_cli_send_command ("test"));
     RELAY_CHECK_RECV("test\n");
+}
+
+/*
+ * Tests functions:
+ *   relay_cli_check_pending
+ */
+
+TEST(SrcCli, CheckPending)
+{
+    LONGS_EQUAL(0, relay_cli_check_pending ());
 }
 
 /*
@@ -553,18 +582,18 @@ TEST(SrcCli, SendCommand)
 
 TEST(SrcCli, RecvMessage)
 {
-    relay_cli_session = &relay_session;
+    relay_cli_session = relay_session;
 
     /* failed: invalid socket */
-    relay_session.sock = -1;
+    relay_session->sock = -1;
     LONGS_EQUAL(-1, relay_cli_recv_message());
-    relay_session.sock = fd_pipe[1];
+    relay_session->sock = fd_pipe[1];
 
     /* success: "test\n" received */
     LONGS_EQUAL(5, relay_cli_send_command ("test"));
-    relay_session.sock = fd_pipe[0];
+    relay_session->sock = fd_pipe[0];
     LONGS_EQUAL(5, relay_cli_recv_message());
-    relay_session.sock = fd_pipe[1];
+    relay_session->sock = fd_pipe[1];
 }
 
 /*
@@ -576,19 +605,19 @@ TEST(SrcCli, LineHandler)
 {
     char *line;
 
-    relay_cli_session = &relay_session;
+    relay_cli_session = relay_session;
 
     /* "quit\n" is sent when line is NULL */
     relay_cli_line_handler (NULL);
-    relay_session.sock = fd_pipe[0];
+    relay_session->sock = fd_pipe[0];
     LONGS_EQUAL(5, relay_cli_recv_message());
-    relay_session.sock = fd_pipe[1];
+    relay_session->sock = fd_pipe[1];
 
     line = strdup ("abc");
     relay_cli_line_handler (line);
-    relay_session.sock = fd_pipe[0];
+    relay_session->sock = fd_pipe[0];
     LONGS_EQUAL(4, relay_cli_recv_message());
-    relay_session.sock = fd_pipe[1];
+    relay_session->sock = fd_pipe[1];
 }
 
 /*

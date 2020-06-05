@@ -32,6 +32,7 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <errno.h>
+
 #include <gnutls/gnutls.h>
 #include <zlib.h>
 
@@ -44,10 +45,10 @@
  * Returns pointer to new message, NULL if error.
  */
 
-struct t_weechat_relay_msg *
+struct t_weechat_relay_msg_buf *
 weechat_relay_msg_new (const char *id)
 {
-    struct t_weechat_relay_msg *new_msg;
+    struct t_weechat_relay_msg_buf *new_msg;
 
     new_msg = malloc (sizeof (*new_msg));
     if (!new_msg)
@@ -82,7 +83,7 @@ weechat_relay_msg_new (const char *id)
  */
 
 int
-weechat_relay_msg_add_bytes (struct t_weechat_relay_msg *msg,
+weechat_relay_msg_add_bytes (struct t_weechat_relay_msg_buf *msg,
                              const void *buffer, size_t size)
 {
     char *ptr;
@@ -126,7 +127,7 @@ weechat_relay_msg_add_bytes (struct t_weechat_relay_msg *msg,
  */
 
 int
-weechat_relay_msg_set_bytes (struct t_weechat_relay_msg *msg,
+weechat_relay_msg_set_bytes (struct t_weechat_relay_msg_buf *msg,
                              int position, const void *buffer, size_t size)
 {
     if (!msg || !msg->data || (position < 0) || !buffer || (size == 0)
@@ -149,7 +150,7 @@ weechat_relay_msg_set_bytes (struct t_weechat_relay_msg *msg,
  */
 
 int
-weechat_relay_msg_add_type (struct t_weechat_relay_msg *msg,
+weechat_relay_msg_add_type (struct t_weechat_relay_msg_buf *msg,
                             const char *string)
 {
     return weechat_relay_msg_add_bytes (msg,
@@ -166,7 +167,7 @@ weechat_relay_msg_add_type (struct t_weechat_relay_msg *msg,
  */
 
 int
-weechat_relay_msg_add_char (struct t_weechat_relay_msg *msg, char c)
+weechat_relay_msg_add_char (struct t_weechat_relay_msg_buf *msg, char c)
 {
     return weechat_relay_msg_add_bytes (msg, &c, 1);
 }
@@ -180,7 +181,7 @@ weechat_relay_msg_add_char (struct t_weechat_relay_msg *msg, char c)
  */
 
 int
-weechat_relay_msg_add_int (struct t_weechat_relay_msg *msg, int value)
+weechat_relay_msg_add_int (struct t_weechat_relay_msg_buf *msg, int value)
 {
     uint32_t value32;
 
@@ -198,7 +199,7 @@ weechat_relay_msg_add_int (struct t_weechat_relay_msg *msg, int value)
  */
 
 int
-weechat_relay_msg_add_long (struct t_weechat_relay_msg *msg, long value)
+weechat_relay_msg_add_long (struct t_weechat_relay_msg_buf *msg, long value)
 {
     char str_long[128];
     unsigned char length;
@@ -219,7 +220,7 @@ weechat_relay_msg_add_long (struct t_weechat_relay_msg *msg, long value)
  */
 
 int
-weechat_relay_msg_add_string (struct t_weechat_relay_msg *msg,
+weechat_relay_msg_add_string (struct t_weechat_relay_msg_buf *msg,
                               const char *string)
 {
     size_t length;
@@ -249,7 +250,7 @@ weechat_relay_msg_add_string (struct t_weechat_relay_msg *msg,
  */
 
 int
-weechat_relay_msg_add_buffer (struct t_weechat_relay_msg *msg,
+weechat_relay_msg_add_buffer (struct t_weechat_relay_msg_buf *msg,
                               const void *buffer, size_t length)
 {
     if (buffer)
@@ -276,7 +277,8 @@ weechat_relay_msg_add_buffer (struct t_weechat_relay_msg *msg,
  */
 
 int
-weechat_relay_msg_add_pointer (struct t_weechat_relay_msg *msg, void *pointer)
+weechat_relay_msg_add_pointer (struct t_weechat_relay_msg_buf *msg,
+                               void *pointer)
 {
     char str_pointer[128];
     unsigned char length;
@@ -298,7 +300,7 @@ weechat_relay_msg_add_pointer (struct t_weechat_relay_msg *msg, void *pointer)
  */
 
 int
-weechat_relay_msg_add_time (struct t_weechat_relay_msg *msg, time_t time)
+weechat_relay_msg_add_time (struct t_weechat_relay_msg_buf *msg, time_t time)
 {
     char str_time[128];
     unsigned char length;
@@ -319,7 +321,7 @@ weechat_relay_msg_add_time (struct t_weechat_relay_msg *msg, time_t time)
  */
 
 void *
-weechat_relay_msg_compress (struct t_weechat_relay_msg *msg,
+weechat_relay_msg_compress (struct t_weechat_relay_msg_buf *msg,
                             int compression_level,
                             size_t *size)
 {
@@ -365,7 +367,7 @@ weechat_relay_msg_compress (struct t_weechat_relay_msg *msg,
  */
 
 void
-weechat_relay_msg_free (struct t_weechat_relay_msg *msg)
+weechat_relay_msg_free (struct t_weechat_relay_msg_buf *msg)
 {
     if (!msg)
         return;

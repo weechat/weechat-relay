@@ -40,6 +40,7 @@
 #include "config-git.h"
 
 #include "cli.h"
+#include "message.h"
 #include "network.h"
 #include "util.h"
 
@@ -269,6 +270,20 @@ relay_cli_display_hex_dump (const void *buffer, size_t size)
 }
 
 /*
+ * Displays an incoming message.
+ */
+
+void
+relay_cli_display_message (const void *buffer, size_t size)
+{
+    printf ("\r--> %ld bytes received\n", size);
+    if (relay_cli_debug >= 2)
+        relay_cli_display_hex_dump (buffer, size);
+    relay_message_display (buffer, size);
+    rl_forced_update_display ();
+}
+
+/*
  * Sends a command to WeeChat.
  *
  * Returns number of bytes sent, -1 if error.
@@ -321,6 +336,21 @@ relay_cli_send_command (const char *command)
 }
 
 /*
+ * Checks if bytes are pending (ready to read on the socket).
+ */
+
+int
+relay_cli_check_pending ()
+{
+    if (!relay_cli_ssl)
+        return 0;
+
+    return (gnutls_record_check_pending (
+                *((gnutls_session_t *)relay_cli_session->gnutls_sess))) ?
+        1 : 0;
+}
+
+/*
  * Receives a message from WeeChat.
  *
  * Returns number of bytes received, -1 if error.
@@ -330,10 +360,12 @@ ssize_t
 relay_cli_recv_message ()
 {
     ssize_t num_recv;
-    char buffer[4096];
+    char buffer_recv[4096];
+    void *buffer;
+    size_t buffer_size;
 
     num_recv = weechat_relay_session_recv (relay_cli_session,
-                                           buffer, sizeof (buffer));
+                                           buffer_recv, sizeof (buffer_recv));
 
     if (num_recv < 0)
     {
@@ -351,10 +383,19 @@ relay_cli_recv_message ()
     }
     else
     {
-        printf ("\r--> %ld bytes received\n", num_recv);
-        if (relay_cli_debug >= 2)
-            relay_cli_display_hex_dump (buffer, num_recv);
-        rl_forced_update_display ();
+        /* add bytes to buffer */
+        weechat_relay_session_buffer_add_bytes (relay_cli_session,
+                                                buffer_recv, num_recv);
+        /* pop messages and display them */
+        while (1)
+        {
+            weechat_relay_session_buffer_pop (relay_cli_session,
+                                              &buffer, &buffer_size);
+            if (!buffer)
+                break;
+            relay_cli_display_message (buffer, buffer_size);
+            free (buffer);
+        }
     }
 
     return num_recv;
@@ -461,7 +502,13 @@ relay_cli_main_loop ()
 
             /* read socket: message from WeeChat */
             if (FD_ISSET(sock, &read_fds))
-                relay_cli_recv_message ();
+            {
+                do
+                {
+                    relay_cli_recv_message ();
+                }
+                while (relay_cli_check_pending ());
+            }
         }
     }
 
@@ -487,13 +534,9 @@ relay_cli_main (int argc, char *argv[])
 
     rc = relay_cli_parse_args (argc, argv);
     if (rc < 1)
-    {
         rc = (rc == 0) ? 1 : 0;
-    }
     else
-    {
         rc = relay_cli_main_loop ();
-    }
 
     relay_network_end ();
 

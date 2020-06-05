@@ -25,6 +25,8 @@
 
 #include <unistd.h>
 #include <stdlib.h>
+#include <string.h>
+#include <arpa/inet.h>
 
 #include <gnutls/gnutls.h>
 
@@ -49,13 +51,16 @@ weechat_relay_session_init (int sock, void *gnutls_sess)
 {
     struct t_weechat_relay_session *session;
 
-    session = malloc (sizeof (*session));
+    session = calloc (1, sizeof (*session));
     if (!session)
         return NULL;
 
     session->sock = sock;
     session->ssl = (gnutls_sess) ? 1 : 0;
     session->gnutls_sess = gnutls_sess;
+
+    session->buffer = NULL;
+    session->buffer_size = 0;
 
     return session;
 }
@@ -67,21 +72,21 @@ weechat_relay_session_init (int sock, void *gnutls_sess)
 
 ssize_t
 weechat_relay_session_send (struct t_weechat_relay_session *session,
-                            void *buffer, size_t length)
+                            void *buffer, size_t size)
 {
     ssize_t num_sent;
 
-    if (!session || (length == 0))
+    if (!session || (size == 0))
         return -1;
 
     if (session->ssl)
     {
         num_sent = gnutls_record_send (
-            *((gnutls_session_t *)session->gnutls_sess), buffer, length);
+            *((gnutls_session_t *)session->gnutls_sess), buffer, size);
     }
     else
     {
-        num_sent = write (session->sock, buffer, length);
+        num_sent = write (session->sock, buffer, size);
     }
 
     return (num_sent >= 0) ? num_sent : -1;
@@ -95,24 +100,129 @@ weechat_relay_session_send (struct t_weechat_relay_session *session,
 
 ssize_t
 weechat_relay_session_recv (struct t_weechat_relay_session *session,
-                            void *buffer, size_t length)
+                            void *buffer, size_t size)
 {
     ssize_t num_recv;
 
-    if (!session || (length <= 0))
+    if (!session || (size == 0))
         return -1;
 
     if (session->ssl)
     {
         num_recv = gnutls_record_recv (
-            *((gnutls_session_t *)session->gnutls_sess), buffer, length);
+            *((gnutls_session_t *)session->gnutls_sess), buffer, size);
     }
     else
     {
-        num_recv = read (session->sock, buffer, length);
+        num_recv = read (session->sock, buffer, size);
     }
 
     return (num_recv >= 0) ? num_recv : -1;
+}
+
+/*
+ * Adds bytes to the session buffer.
+ *
+ * Returns:
+ *   1: OK
+ *   0: error
+ */
+
+int
+weechat_relay_session_buffer_add_bytes (struct t_weechat_relay_session *session,
+                                        const void *buffer, size_t size)
+{
+    void *new_buffer;
+
+    if (!session || !buffer || (size == 0))
+        return 0;
+
+    if (session->buffer)
+    {
+        new_buffer = realloc (session->buffer, session->buffer_size + size);
+        if (!new_buffer)
+            return 0;
+        session->buffer = new_buffer;
+        memcpy (session->buffer + session->buffer_size, buffer, size);
+        session->buffer_size += size;
+    }
+    else
+    {
+        session->buffer = malloc (size);
+        if (!session->buffer)
+            return 0;
+        memcpy (session->buffer, buffer, size);
+        session->buffer_size = size;
+    }
+
+    return 1;
+}
+
+/*
+ * Pops the first message from the session buffer.
+ *
+ * If a complete message is not ready, *buffer is set to NULL and *size to 0.
+ *
+ * If a message is returned, it is removed from the session buffer.
+ *
+ * Note: *buffer returned must be freed after use.
+ */
+
+void
+weechat_relay_session_buffer_pop (struct t_weechat_relay_session *session,
+                                  void **buffer, size_t *size)
+{
+    uint32_t msg_size;
+    size_t new_size;
+    void *new_buffer;
+
+    if (!session || !buffer || !size)
+        return;
+
+    *buffer = NULL;
+    *size = 0;
+
+    if (!session->buffer || session->buffer_size < 5)
+        return;
+
+    memcpy (&msg_size, session->buffer, 4);
+    msg_size = ntohl (msg_size);
+    if (msg_size > session->buffer_size)
+    {
+        /* incomplete message, it will be processed later */
+        return;
+    }
+
+    *buffer = malloc (msg_size);
+    if (!*buffer)
+        return;
+    memcpy (*buffer, session->buffer, msg_size);
+    *size = msg_size;
+
+    if (msg_size == session->buffer_size)
+    {
+        free (session->buffer);
+        session->buffer = NULL;
+        session->buffer_size = 0;
+    }
+    else
+    {
+        new_size = session->buffer_size - msg_size;
+        new_buffer = malloc (new_size);
+        if (new_buffer)
+        {
+            memcpy (new_buffer, session->buffer + msg_size, new_size);
+            free (session->buffer);
+            session->buffer = new_buffer;
+            session->buffer_size = new_size;
+        }
+        else
+        {
+            free (session->buffer);
+            session->buffer = NULL;
+            session->buffer_size = 0;
+        }
+    }
 }
 
 /*
@@ -122,5 +232,8 @@ weechat_relay_session_recv (struct t_weechat_relay_session *session,
 void
 weechat_relay_session_free (struct t_weechat_relay_session *session)
 {
+    if (session->buffer)
+        free (session->buffer);
+
     free (session);
 }

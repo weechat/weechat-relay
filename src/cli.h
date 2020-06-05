@@ -40,6 +40,8 @@
 #define RELAY_CLI_MAX_COMMANDS     16
 #define RELAY_CLI_MAX_COMMANDS_STR "16"
 
+extern int relay_cli_debug;
+
 extern int relay_cli_main (int argc, char *argv[]);
 
 #endif /* RELAY_CLI_CLI_H */

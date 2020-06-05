@@ -31,6 +31,7 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <errno.h>
+
 #include <gnutls/gnutls.h>
 
 #include "weechat-relay.h"

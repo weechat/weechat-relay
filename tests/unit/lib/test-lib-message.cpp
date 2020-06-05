@@ -1,5 +1,5 @@
 /*
- * test-lib-message.cpp - test messages
+ * test-lib-message.cpp - test build of binary messages
  *
  * Copyright (C) 2019-2020 Sébastien Helleu <flashcode@flashtux.org>
  *
@@ -60,7 +60,7 @@ TEST_GROUP(LibMessage)
 
 TEST(LibMessage, InitFree)
 {
-    struct t_weechat_relay_msg *msg;
+    struct t_weechat_relay_msg_buf *msg;
 
     msg = weechat_relay_msg_new (NULL);
     CHECK(msg);
@@ -88,7 +88,7 @@ TEST(LibMessage, InitFree)
 
 TEST(LibMessage, AddBytes)
 {
-    struct t_weechat_relay_msg *msg;
+    struct t_weechat_relay_msg_buf *msg;
     const char *str = "abc";
     char buffer[WEECHAT_RELAY_MSG_INITIAL_ALLOC];
 
@@ -119,7 +119,7 @@ TEST(LibMessage, AddBytes)
 
 TEST(LibMessage, SetBytes)
 {
-    struct t_weechat_relay_msg *msg;
+    struct t_weechat_relay_msg_buf *msg;
     const char *str1 = "abc";
     const char *str2 = "def";
 
@@ -152,7 +152,7 @@ TEST(LibMessage, SetBytes)
 
 TEST(LibMessage, AddType)
 {
-    struct t_weechat_relay_msg *msg;
+    struct t_weechat_relay_msg_buf *msg;
     const char *type = "int";
 
     msg = weechat_relay_msg_new ("test");
@@ -176,7 +176,7 @@ TEST(LibMessage, AddType)
 
 TEST(LibMessage, AddChar)
 {
-    struct t_weechat_relay_msg *msg;
+    struct t_weechat_relay_msg_buf *msg;
     char ch = 123;
 
     msg = weechat_relay_msg_new ("test");
@@ -199,7 +199,7 @@ TEST(LibMessage, AddChar)
 
 TEST(LibMessage, AddInt)
 {
-    struct t_weechat_relay_msg *msg;
+    struct t_weechat_relay_msg_buf *msg;
     int number1 = 123456;
     uint32_t value32_number1;
     int number2 = -112233;
@@ -231,7 +231,7 @@ TEST(LibMessage, AddInt)
 
 TEST(LibMessage, AddLong)
 {
-    struct t_weechat_relay_msg *msg;
+    struct t_weechat_relay_msg_buf *msg;
     long number1 = 123456789012;
     const char *str_number1 = "123456789012";
     long number2 = -112233445566;
@@ -263,7 +263,7 @@ TEST(LibMessage, AddLong)
 
 TEST(LibMessage, AddString)
 {
-    struct t_weechat_relay_msg *msg;
+    struct t_weechat_relay_msg_buf *msg;
     const char *str = "abcdef";
     uint32_t value32;
 
@@ -303,7 +303,7 @@ TEST(LibMessage, AddString)
 
 TEST(LibMessage, AddBuffer)
 {
-    struct t_weechat_relay_msg *msg;
+    struct t_weechat_relay_msg_buf *msg;
     const void *str = "abcdef";
     uint32_t value32;
 
@@ -344,7 +344,7 @@ TEST(LibMessage, AddBuffer)
 
 TEST(LibMessage, AddPointer)
 {
-    struct t_weechat_relay_msg *msg;
+    struct t_weechat_relay_msg_buf *msg;
     void *pointer = (void *)0x123456789abc;
     const char *str_pointer = "123456789abc";
 
@@ -375,7 +375,7 @@ TEST(LibMessage, AddPointer)
 
 TEST(LibMessage, AddTime)
 {
-    struct t_weechat_relay_msg *msg;
+    struct t_weechat_relay_msg_buf *msg;
     time_t time = 123456789;
     const char *str_time = "123456789";
 
@@ -399,7 +399,7 @@ TEST(LibMessage, AddTime)
 
 TEST(LibMessage, Compress)
 {
-    struct t_weechat_relay_msg *msg;
+    struct t_weechat_relay_msg_buf *msg;
     void *buffer;
     size_t size;
 

@@ -26,15 +26,17 @@ include_directories(${CPPUTEST_INCLUDE_DIRS} ${PROJECT_BINARY_DIR} ${PROJECT_SOU
 set(LIB_WEECHAT_RELAY_UNIT_TESTS_LIB_SRC
   unit/lib/test-lib-command.cpp
   unit/lib/test-lib-message.cpp
+  unit/lib/test-lib-parse.cpp
   unit/lib/test-lib-session.cpp
   unit/src/test-src-cli.cpp
+  unit/src/test-src-message.cpp
   unit/src/test-src-network.cpp
   unit/src/test-src-util.cpp
 )
 add_library(weechat_relay_unit_tests_lib STATIC ${LIB_WEECHAT_RELAY_UNIT_TESTS_LIB_SRC})
 
 # binary to run tests
-set(WEECHAT_RELAY_TESTS_SRC tests.cpp)
+set(WEECHAT_RELAY_TESTS_SRC tests.cpp tests.h)
 add_executable(tests ${WEECHAT_RELAY_TESTS_SRC})
 target_link_libraries(tests
   weechat_relay_unit_tests_lib

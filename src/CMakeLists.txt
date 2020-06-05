@@ -28,6 +28,7 @@ if(BUILD_CLI)
 
   set(RELAY_LIB_CLI_SRC
     cli.c cli.h
+    message.c message.h
     network.c network.h
     util.c util.h
   )
