@@ -25,7 +25,7 @@ email to <security@weechat.org> instead.
 When reporting https://github.com/weechat/weechat-relay/issues[issues] on GitHub,
 please include:
 
-* The *library version* (with git head): output of `weechat-relay-cli -vv`
+* The *library version*: output of `weechat-relay-cli -v`
 * The *version of the remote WeeChat*: the output of `/v` in WeeChat,
   for example: _WeeChat 2.5-dev (git: v2.4-67-g413221bc9)_. +
 * Your *operating system*: its name and version (examples: Linux Debian Wheezy,
