@@ -104,7 +104,7 @@ relay_cli_display_usage ()
 {
     relay_cli_display_copyright ();
     printf ("\n");
-    printf ("Usage: %s [option...] hostname\n", ptr_argv0);
+    printf ("Usage: %s [option...] [hostname]\n", ptr_argv0);
     printf ("\n");
     printf (
         "  -4, --ipv4         force connection with IPv4 (default: auto)\n"
