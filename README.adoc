@@ -91,15 +91,26 @@ weechat-relay-cli --help
 Example:
 
 ----
-$ weechat-relay-cli -s -p 12345 localhost
+$ weechat-relay-cli -dd -s -p 12345 localhost
 Connected to 127.0.0.1 (SSL)
 weechat-relay> init password=my_secret_password
-<-- init password=my_secret_password
+<-- init password=my_secret_password (33 bytes)
+      69 6E 69 74 20 70 61 73 73 77 6F 72 64 3D 6D 79   i n i t   p a s s w o r d = m y
+      5F 73 65 63 72 65 74 5F 70 61 73 73 77 6F 72 64   _ s e c r e t _ p a s s w o r d
+      0A                                                .
 weechat-relay> info version
-<-- info version
+<-- info version (13 bytes)
+      69 6E 66 6F 20 76 65 72 73 69 6F 6E 0A            i n f o   v e r s i o n .
 --> 34 bytes received
+      00 00 00 22 00 FF FF FF FF 69 6E 66 00 00 00 07   . . . " . . . . . i n f . . . .
+      76 65 72 73 69 6F 6E 00 00 00 07 32 2E 39 2D 64   v e r s i o n . . . . 2 . 9 - d
+      65 76                                             e v
+    message (length: 34 bytes, data: 29 bytes, no compression):
+      id: NULL
+      info: "version" -> "2.9-dev"
 weechat-relay> quit
-<-- quit
+<-- quit (5 bytes)
+      71 75 69 74 0A                                    q u i t .
 ----
 
 == Copyright
