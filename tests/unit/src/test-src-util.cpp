@@ -88,3 +88,17 @@ TEST(SrcUtil, StringHexDump)
                  "EB 6C   . l ",
                  noel_iso, strlen (noel_iso), 2, NULL, NULL);
 }
+
+/*
+ * Tests functions:
+ *   display_hex_dump
+ */
+
+TEST(SrcUtil, DisplayHexDump)
+{
+    const char *string = "abcdefghijklmnopqrstuvwzyz";
+
+    display_hex_dump (NULL, 0);
+    display_hex_dump (string, 0);
+    display_hex_dump (string, strlen (string));
+}

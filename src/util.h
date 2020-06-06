@@ -23,5 +23,6 @@
 extern char *string_hex_dump (const char *data, size_t size,
                               int bytes_per_line,
                               const char *prefix, const char *suffix);
+extern void display_hex_dump (const void *buffer, size_t size);
 
 #endif /* RELAY_CLI_UTIL_H */

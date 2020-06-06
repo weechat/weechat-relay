@@ -250,26 +250,6 @@ relay_cli_parse_args (int argc, char *argv[])
 }
 
 /*
- * Displays hexadecimal dump of a message.
- */
-
-void
-relay_cli_display_hex_dump (const void *buffer, size_t size)
-{
-    char *str_dump;
-
-    if (!buffer || (size == 0))
-        return;
-
-    str_dump = string_hex_dump (buffer, size, 16, "      ", NULL);
-    if (str_dump)
-    {
-        printf ("%s\n", str_dump);
-        free (str_dump);
-    }
-}
-
-/*
  * Displays an incoming message.
  */
 
@@ -278,7 +258,7 @@ relay_cli_display_message (const void *buffer, size_t size)
 {
     printf ("\r--> %ld bytes received\n", size);
     if (relay_cli_debug >= 2)
-        relay_cli_display_hex_dump (buffer, size);
+        display_hex_dump (buffer, size);
     relay_message_display (buffer, size);
     rl_forced_update_display ();
 }
@@ -324,7 +304,7 @@ relay_cli_send_command (const char *command)
             printf(" (%ld bytes)", num_sent);
         printf ("\n");
         if (relay_cli_debug >= 2)
-            relay_cli_display_hex_dump (buffer, strlen (buffer));
+            display_hex_dump (buffer, strlen (buffer));
     }
 
     if (strcmp (command, "quit") == 0)

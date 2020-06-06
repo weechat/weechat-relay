@@ -133,3 +133,23 @@ end:
 
     return buf;
 }
+
+/*
+ * Displays hexadecimal dump of a message.
+ */
+
+void
+display_hex_dump (const void *buffer, size_t size)
+{
+    char *str_dump;
+
+    if (!buffer || (size == 0))
+        return;
+
+    str_dump = string_hex_dump (buffer, size, 16, "      ", NULL);
+    if (str_dump)
+    {
+        printf ("%s\n", str_dump);
+        free (str_dump);
+    }
+}
