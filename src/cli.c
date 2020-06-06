@@ -179,7 +179,8 @@ relay_cli_parse_args (int argc, char *argv[])
 
     long_index = 0;
 
-    while ((opt = getopt_long (argc, argv, "46c:dhlp:sv",
+    while ((rc == 1)
+           && (opt = getopt_long (argc, argv, "46c:dhlp:sv",
                                long_options, &long_index)) != -1)
     {
         switch (opt)
