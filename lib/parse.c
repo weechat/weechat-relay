@@ -70,6 +70,8 @@ weechat_relay_parse_search_type (const char *type)
 
 /*
  * Allocates an object structure.
+ *
+ * Returns the new object, NULL if error.
  */
 
 struct t_weechat_relay_obj *
@@ -444,6 +446,8 @@ weechat_relay_parse_read_pointer (struct t_weechat_relay_msg *msg,
 
 /*
  * Reads a char object in message (1 byte).
+ *
+ * Returns the char object, NULL if error.
  */
 
 struct t_weechat_relay_obj *
@@ -471,6 +475,8 @@ error:
 
 /*
  * Reads an integer object in message (4 bytes).
+ *
+ * Returns the integer object, NULL if error.
  */
 
 struct t_weechat_relay_obj *
@@ -498,6 +504,8 @@ error:
 
 /*
  * Reads a long integer object in message (1 byte + content).
+ *
+ * Returns the long integer object, NULL if error.
  */
 
 struct t_weechat_relay_obj *
@@ -540,6 +548,8 @@ error:
 
 /*
  * Reads a string object in message (4 bytes + content).
+ *
+ * Returns the string object, NULL if error.
  */
 
 struct t_weechat_relay_obj *
@@ -567,6 +577,8 @@ error:
 
 /*
  * Reads a buffer object in message (4 bytes + content).
+ *
+ * Returns the buffer object, NULL if error.
  */
 
 struct t_weechat_relay_obj *
@@ -598,6 +610,8 @@ error:
 
 /*
  * Reads a pointer object in message (1 byte + content).
+ *
+ * Returns the pointer object, NULL if error.
  */
 
 struct t_weechat_relay_obj *
@@ -625,6 +639,8 @@ error:
 
 /*
  * Reads a time object in message (1 byte + content).
+ *
+ * Returns the time object, NULL if error.
  */
 
 struct t_weechat_relay_obj *
@@ -667,6 +683,8 @@ error:
 
 /*
  * Reads a hashtable object in message (variable length).
+ *
+ * Returns the hashtable object, NULL if error.
  */
 
 struct t_weechat_relay_obj *
@@ -873,6 +891,8 @@ error:
 
 /*
  * Reads a hdata object in message (variable length).
+ *
+ * Returns the hdata object, NULL if error.
  */
 
 struct t_weechat_relay_obj *
@@ -961,6 +981,8 @@ error:
 
 /*
  * Reads an info object in message (2 strings).
+ *
+ * Returns the info object, NULL if error.
  */
 
 struct t_weechat_relay_obj *
@@ -990,6 +1012,8 @@ error:
 
 /*
  * Reads an infolist object in message (variable length).
+ *
+ * Returns the infolist object, NULL if error.
  */
 
 struct t_weechat_relay_obj *
@@ -1055,6 +1079,8 @@ error:
 
 /*
  * Reads an array object in message (variable length).
+ *
+ * Returns the array object, NULL if error.
  */
 
 struct t_weechat_relay_obj *
@@ -1102,6 +1128,8 @@ error:
 
 /*
  * Reads an object in a message.
+ *
+ * Returns the object, NULL if error.
  */
 
 struct t_weechat_relay_obj *
@@ -1264,6 +1292,8 @@ error:
 
 /*
  * Allocates a message structure.
+ *
+ * Returns the new message, NULL if error.
  */
 
 struct t_weechat_relay_msg *
