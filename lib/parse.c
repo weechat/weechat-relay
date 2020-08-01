@@ -1393,9 +1393,7 @@ weechat_relay_parse_msg_free (struct t_weechat_relay_msg *msg)
 /*
  * Parses a WeeChat binary message.
  *
- * Returns:
- *   1: OK
- *   0: error
+ * Returns the parsed message, NULL if error.
  */
 
 struct t_weechat_relay_msg *
