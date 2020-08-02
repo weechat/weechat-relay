@@ -28,7 +28,7 @@
 
 include(FindPkgConfig)
 
-pkg_check_modules(READLINE readline)
+pkg_check_modules(READLINE readline QUIET)
 
 if(READLINE_FOUND)
   set(READLINE_LIBRARIES ${READLINE_LDFLAGS})
