@@ -86,10 +86,14 @@ add_subdirectory(lib)
 add_subdirectory(src)
 add_subdirectory(doc)
 
-find_package(CppUTest)
-if(BUILD_TESTS AND CPPUTEST_FOUND)
-  enable_testing()
-  add_subdirectory(tests)
+if(BUILD_TESTS)
+  find_package(CppUTest)
+  if(CPPUTEST_FOUND)
+    enable_testing()
+    add_subdirectory(tests)
+  else()
+    message(SEND_ERROR "CppUTest not found")
+  endif()
 endif()
 
 # set the git version in "config-git.h"
