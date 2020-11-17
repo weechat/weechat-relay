@@ -135,7 +135,7 @@ fi
 
 # check git repository
 ROOT_DIR=$(git rev-parse --show-toplevel)
-if [ -z "${ROOT_DIR}" -o ! -d "${ROOT_DIR}/.git" -o ! -d "${ROOT_DIR}/debian-stable" ]; then
+if [ -z "${ROOT_DIR}" ] || [ ! -d "${ROOT_DIR}/.git" ] || [ ! -d "${ROOT_DIR}/debian-stable" ]; then
     error "this script must be run from WeeChat Relay git repository."
 fi
 cd "${ROOT_DIR}"
@@ -183,7 +183,7 @@ DISTRO_TYPE=$(expr "${DISTRO}" : '\([^/]*\)/') || true
 # extract distro name (sid, jessie, wily, ...)
 DISTRO_NAME=$(expr "${DISTRO}" : '[^/]*/\([a-z]*\)') || true
 
-if [ -z "${DISTRO_TYPE}" -o -z "${DISTRO_NAME}" ]; then
+if [ -z "${DISTRO_TYPE}" ] || [ -z "${DISTRO_NAME}" ]; then
     error_usage "missing distro type/name"
 fi
 
