@@ -1,6 +1,7 @@
 # ignored files for Git
 
-build*/*
+build/*
+builddir/*
 debian
 !tools/debian
 debian-devel/changelog
