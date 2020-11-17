@@ -89,7 +89,7 @@ Examples:
   $0 test-patches
 
 EOF
-    exit ${RC}
+    exit "${RC}"
 }
 
 error ()
@@ -109,7 +109,7 @@ test_patches ()
     set +e
     PATCHES_OK=0
     PATCHES_ERROR=0
-    for file in ${ROOT_DIR}/tools/debian/patches/*.patch; do
+    for file in "${ROOT_DIR}"/tools/debian/patches/*.patch; do
         echo "=== Testing patch ${file} ==="
         git apply --check "${file}"
         if [ $? -eq 0 ]; then
@@ -171,7 +171,7 @@ fi
 
 # convert version "stable" to its number
 if [ "${VERSION}" = "stable" ]; then
-    VERSION="$(${ROOT_DIR}/version.sh stable)"
+    VERSION="$("${ROOT_DIR}/version.sh" stable)"
 fi
 
 if [ -z "${VERSION}" ]; then
@@ -205,7 +205,7 @@ if [ "${VERSION}" = "devel" ]; then
     # devel packages: (lib)weechatrelay-devel(-xxx)_X.Y.Z-1~dev20190324_arch.deb
     DEB_DIR="debian-devel"
     DEB_NAME="weechatrelay-devel"
-    DEB_VERSION="$(${ROOT_DIR}/version.sh devel)-1~dev$(date '+%Y%m%d')"
+    DEB_VERSION="$("${ROOT_DIR}/version.sh" devel)-1~dev$(date '+%Y%m%d')"
     if [ "${DEB_REVISION}" != "1" ]; then
         DEB_VERSION="${DEB_VERSION}-${DEB_REVISION}"
     fi
@@ -248,7 +248,7 @@ echo " - Updating changelog: ${DEB_NAME} ${DEB_VERSION} (${DCH_DISTRO}, ${DCH_UR
 DEBFULLNAME="${PACKAGER_NAME}" DEBEMAIL="${PACKAGER_EMAIL}" dch "${DCH_CREATE}" --package "${DEB_NAME}" --newversion "${DEB_VERSION}" --distribution "${DCH_DISTRO}" --urgency "${DCH_URGENCY}" "${DCH_CHANGELOG}"
 
 # build packages (without debug symbols)
-DEB_BUILD_OPTIONS="noddebs" dpkg-buildpackage -us -uc -j${JOBS} --source-option="--tar-ignore=.git" --source-option="--tar-ignore=build*"
+DEB_BUILD_OPTIONS="noddebs" dpkg-buildpackage -us -uc "-j${JOBS}" --source-option="--tar-ignore=.git" --source-option="--tar-ignore=build*"
 
 # all OK!
 echo " - Build OK [${DEB_NAME}-${DEB_VERSION}]"
