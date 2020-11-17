@@ -33,8 +33,8 @@
 #include <sys/socket.h>
 
 #include <gnutls/gnutls.h>
-#include <readline.h>
-#include <history.h>
+#include <readline/readline.h>
+#include <readline/history.h>
 
 #include "lib/weechat-relay.h"
 #include "config-git.h"

@@ -26,7 +26,7 @@
 # READLINE_INCLUDE_DIRS = Readline include directory
 # READLINE_LIBRARIES    = Link options to compile with Readline
 
-include(FindPkgConfig)
+find_package(PkgConfig)
 
 pkg_check_modules(READLINE readline QUIET)
 
