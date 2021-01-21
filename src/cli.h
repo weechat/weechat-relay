@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019-2020 Sébastien Helleu <flashcode@flashtux.org>
+ * Copyright (C) 2019-2021 Sébastien Helleu <flashcode@flashtux.org>
  *
  * This file is part of WeeChat Relay.
  *
@@ -20,7 +20,7 @@
 #ifndef RELAY_CLI_CLI_H
 #define RELAY_CLI_CLI_H
 
-#define RELAY_CLI_COPYRIGHT_DATE   "(C) 2019-2020"
+#define RELAY_CLI_COPYRIGHT_DATE   "(C) 2019-2021"
 #define RELAY_CLI_WEB_SITE         "https://weechat.org/"
 #define RELAY_CLI_LICENSE_TEXT \
     "WeeChat Relay is free software; you can redistribute it and/or modify\n" \

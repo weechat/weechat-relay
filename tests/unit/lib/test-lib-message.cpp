@@ -1,7 +1,7 @@
 /*
  * test-lib-message.cpp - test build of binary messages
  *
- * Copyright (C) 2019-2020 Sébastien Helleu <flashcode@flashtux.org>
+ * Copyright (C) 2019-2021 Sébastien Helleu <flashcode@flashtux.org>
  *
  * This file is part of WeeChat Relay.
  *
