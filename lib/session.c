@@ -64,6 +64,7 @@ weechat_relay_session_init (int sock, void *gnutls_sess)
 
     return session;
 }
+
 /*
  * Sends bytes from WeeChat or client.
  *
