@@ -104,8 +104,11 @@ weechat_relay_cmd (struct t_weechat_relay_session *session,
     if (!session || !command)
         return -1;
 
-    length = 1 + strlen ((msg_id) ? msg_id : "") + 2 +
-        strlen ((command) ? command : "") + 1;
+    length = 1  /* "(" */
+        + strlen ((msg_id) ? msg_id : "")
+        + 2  /* ") " */
+        + strlen ((command) ? command : "")
+        + 1;  /* \0 */
 
     if (arguments)
     {
