@@ -173,8 +173,8 @@ weechat_relay_cmd_handshake (struct t_weechat_relay_session *session,
 
     ptr_compression = weechat_relay_compression_string[compression];
 
-    length = 128 + strlen ((password_hash_algo) ? password_hash_algo : "") +
-        strlen (ptr_compression) + 1;
+    length = 128 + strlen ((password_hash_algo) ? password_hash_algo : "")
+        + strlen (ptr_compression) + 1;
     options = malloc (length);
     if (!options)
         goto end;
@@ -228,8 +228,8 @@ weechat_relay_cmd_init (struct t_weechat_relay_session *session,
 
     ptr_compression = weechat_relay_compression_string[compression];
 
-    length = 128 + strlen ((password2) ? password2 : "") +
-        strlen (ptr_compression) + 1;
+    length = 128 + strlen ((password2) ? password2 : "")
+        + strlen (ptr_compression) + 1;
     options = malloc (length);
     if (!options)
         goto end;

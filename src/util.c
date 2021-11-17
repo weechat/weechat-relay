@@ -64,8 +64,8 @@ string_hex_dump (const char *data, size_t size, int bytes_per_line,
     length_prefix = (prefix) ? strlen (prefix) : 0;
     length_suffix = (suffix) ? strlen (suffix) : 0;
 
-    length_line = length_prefix + (bytes_per_line * 3) + 2 + length_ascii +
-        length_suffix;
+    length_line = length_prefix + (bytes_per_line * 3) + 2 + length_ascii
+        + length_suffix;
     str_line = malloc (length_line + 1);
     if (!str_line)
         goto end;
