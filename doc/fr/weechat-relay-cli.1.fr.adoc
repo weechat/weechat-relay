@@ -13,10 +13,10 @@ weechat-relay-cli - outil en ligne de commande pour tester la connexion à un re
 == SYNOPSIS
 
 [verse]
-*weechat-relay-cli* [-6|--ipv6] [-d|--debug] [-p|--port <port>] hôte
-*weechat-relay-cli* [-h|--help]
-*weechat-relay-cli* [-l|--license]
-*weechat-relay-cli* [-v|--version]
+*weechat-relay-cli* [--ipv4|--ipv6] [--command <command> [--command <command>...]] [--debug] [--port <port>] [--ssl] hôte
+*weechat-relay-cli* --help
+*weechat-relay-cli* --license
+*weechat-relay-cli* --version
 
 == DESCRIPTION
 
@@ -28,11 +28,19 @@ et afficher les messages binaires reçus de WeeChat.
 
 == OPTIONS
 
+*-4*, *--ipv4*::
+    Forcer la connexion en IPv4.
+
 *-6*, *--ipv6*::
-    Se connecter en utilisant l'IPv6.
+    Forcer la connexion en IPv6.
+
+*-c*, *--command*::
+    Envoyer une commande une fois connecté (cette option peut être donnée
+    jusqu'à 16 fois sur la ligne de commande).
 
 *-d*, *--debug*::
-    Activer les messages de debug.  Avec deux -d : afficher les messages bruts.
+    Activer les messages de debug.  Avec deux --debug : afficher les messages
+    bruts.
 
 *-h*, *--help*::
     Afficher l'aide et quitter.
@@ -43,12 +51,16 @@ et afficher les messages binaires reçus de WeeChat.
 *-p*, *--port*::
     Le port de connexion (par défaut  9000).
 
+*-s*, *--ssl*::
+    Utiliser SSL/TLS pour chiffrer les communications.
+
 *-v*, *--version*::
     Afficher la version et quitter.
 
 *hôte*::
-    Hôte sur lequel se connecter. Un WeeChat qui tourne avec un relai (de type
-    "weechat") doit être configuré sur cet hôte.
+    Hôte sur lequel se connecter. Un WeeChat qui tourne avec un relai de type
+    "weechat" doit être configuré sur cet hôte, avec SSL si l'option --ssl est
+    utilisée.
 
 == COPYRIGHT
 

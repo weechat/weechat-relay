@@ -13,10 +13,10 @@ weechat-relay-cli - command line tool to test WeeChat relay connection
 == SYNOPSIS
 
 [verse]
-*weechat-relay-cli* [-6|--ipv6] [-d|--debug] [-p|--port <port>] hostname
-*weechat-relay-cli* [-h|--help]
-*weechat-relay-cli* [-l|--license]
-*weechat-relay-cli* [-v|--version]
+*weechat-relay-cli* [--ipv4|--ipv6] [--command <command> [--command <command>...]] [--debug] [--port <port>] [--ssl] hostname
+*weechat-relay-cli* --help
+*weechat-relay-cli* --license
+*weechat-relay-cli* --version
 
 == DESCRIPTION
 
@@ -27,11 +27,18 @@ messages received from WeeChat.
 
 == OPTIONS
 
+*-4*, *--ipv4*::
+    Force connection using IPv4.
+
 *-6*, *--ipv6*::
-    Connect using IPv6.
+    Force connection using IPv6.
+
+*-c*, *--command*::
+    Send command once connected (this option can be given up to 16 times on
+    command line).
 
 *-d*, *--debug*::
-    Enable debug messages.  With two -d, display raw messages.
+    Enable debug messages.  With two --debug: display raw messages.
 
 *-h*, *--help*::
     Display help and exit.
@@ -42,12 +49,15 @@ messages received from WeeChat.
 *-p*, *--port*::
     The port to connect to (default: 9000).
 
+*-s*, *--ssl*::
+    Use SSL/TLS to secure communication.
+
 *-v*, *--version*::
     Display version and exit.
 
 *hostname*::
-    Hostname to connect to. A running WeeChat with a relay (type "weechat")
-    must be setup on this host.
+    Hostname to connect to. A running WeeChat with a relay of type "weechat"
+    must be setup on this host, with SSL if --ssl option is used.
 
 == COPYRIGHT
 
