@@ -41,7 +41,7 @@ please include:
 
 WeeChat Relay is under active development, so your idea may already have been
 implemented, or scheduled for a future version (you can check in
-https://github.com/weechat/weechat-relay/milestones[milestones] on GitHub.
+https://github.com/weechat/weechat-relay/milestones[milestones] on GitHub).
 
 Pull requests on GitHub are welcome for minor new features.
 
