@@ -166,7 +166,7 @@ TEST(LibParse, ReadBytes)
 
     for (i = 0; i < WEECHAT_RELAY_NUM_OBJ_TYPES; i++)
     {
-        snprintf (type, sizeof (type), weechat_relay_obj_types_str[i]);
+        snprintf (type, sizeof (type), "%s", weechat_relay_obj_types_str[i]);
         msg->buffer = type;
         msg->size = 3;
         msg->position = 0;
@@ -213,7 +213,8 @@ TEST(LibParse, ReadType)
     {
         type = (i == WEECHAT_RELAY_OBJ_TYPE_CHAR) ?
             WEECHAT_RELAY_OBJ_TYPE_STRING : WEECHAT_RELAY_OBJ_TYPE_CHAR;
-        snprintf (str_type, sizeof (str_type), weechat_relay_obj_types_str[i]);
+        snprintf (str_type, sizeof (str_type),
+                  "%s", weechat_relay_obj_types_str[i]);
         msg->buffer = str_type;
         msg->size = 3;
         msg->position = 0;
