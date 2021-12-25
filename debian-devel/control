@@ -51,7 +51,7 @@ Section: net
 Architecture: any
 Depends:
     ${misc:Depends},
-    libweechatrelay (= ${binary:Version})
+    libweechatrelay-devel (= ${binary:Version})
 Suggests: weechatrelay-devel-doc (= ${source:Version})
 Conflicts: weechatrelay-bin
 Description: WeeChat Relay is a C library to communicate between WeeChat and

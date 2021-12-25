@@ -24,6 +24,11 @@ if(BUILD_CLI)
 
   list(APPEND LINK_LIBS ${READLINE_LIBRARIES})
 
+  if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+    # link with resolv lib on macOS
+    list(APPEND LINK_LIBS "resolv")
+  endif()
+
   include_directories(${CMAKE_BINARY_DIR} ${PROJECT_SOURCE_DIR}/lib ${READLINE_INCLUDE_DIRS})
 
   set(RELAY_LIB_CLI_SRC
