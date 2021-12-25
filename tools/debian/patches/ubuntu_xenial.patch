@@ -1,1 +1,42 @@
-debian_jessie.patch
+diff --git a/debian-devel/compat b/debian-devel/compat
+index 48082f7..ec63514 100644
+--- a/debian-devel/compat
++++ b/debian-devel/compat
+@@ -1 +1 @@
+-12
++9
+diff --git a/debian-devel/control b/debian-devel/control
+index 3a1c80f..11f0144 100644
+--- a/debian-devel/control
++++ b/debian-devel/control
+@@ -3,8 +3,7 @@ Section: libs
+ Priority: optional
+ Maintainer: Sébastien Helleu <flashcode@flashtux.org>
+ Build-Depends:
+-    asciidoctor (>= 1.5.4),
+-    debhelper (>= 12),
++    debhelper (>= 9),
+     cmake, pkg-config,
+     libncursesw5-dev,
+     libgnutls28-dev,
+diff --git a/debian-stable/compat b/debian-stable/compat
+index 48082f7..ec63514 100644
+--- a/debian-stable/compat
++++ b/debian-stable/compat
+@@ -1 +1 @@
+-12
++9
+diff --git a/debian-stable/control b/debian-stable/control
+index 28d335e..fee97fe 100644
+--- a/debian-stable/control
++++ b/debian-stable/control
+@@ -3,8 +3,7 @@ Section: libs
+ Priority: optional
+ Maintainer: Sébastien Helleu <flashcode@flashtux.org>
+ Build-Depends:
+-    asciidoctor (>= 1.5.4),
+-    debhelper (>= 12),
++    debhelper (>= 9),
+     cmake, pkg-config,
+     libncursesw5-dev,
+     libgnutls28-dev,
