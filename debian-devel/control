@@ -8,6 +8,7 @@ Build-Depends:
     cmake, pkg-config,
     libncursesw5-dev,
     libgnutls28-dev,
+    libzstd-dev,
     zlib1g-dev
 Standards-Version: 4.3.0
 Homepage: https://weechat.org/

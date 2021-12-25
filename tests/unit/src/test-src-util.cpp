@@ -43,6 +43,29 @@ TEST_GROUP(SrcUtil)
 
 /*
  * Tests functions:
+ *    timeval_diff
+ */
+
+TEST(SrcUtil, TimevalDiff)
+{
+    struct timeval tv_zero = { 0, 0 };
+    struct timeval tv1 = { 123456, 12000 };
+    struct timeval tv2 = { 123456, 15000 };
+    struct timeval tv3 = { 123457, 15000 };
+    struct timeval tv4 = { 1640279046, 0 };  /* 2021-12-23 17:04:06 GMT */
+
+    LONGS_EQUAL(0, timeval_diff (NULL, NULL));
+    LONGS_EQUAL(0, timeval_diff (NULL, &tv1));
+    LONGS_EQUAL(0, timeval_diff (&tv1, NULL));
+    LONGS_EQUAL(3000, timeval_diff (&tv1, &tv2));
+    LONGS_EQUAL(-3000, timeval_diff (&tv2, &tv1));
+    LONGS_EQUAL(1003000, timeval_diff (&tv1, &tv3));
+    LONGS_EQUAL(-1003000, timeval_diff (&tv3, &tv1));
+    CHECK(1640279046 * 1000000LL == timeval_diff (&tv_zero, &tv4));
+}
+
+/*
+ * Tests functions:
  *    string_hex_dump
  */
 

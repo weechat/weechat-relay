@@ -20,6 +20,7 @@
 #ifndef RELAY_CLI_UTIL_H
 #define RELAY_CLI_UTIL_H
 
+extern long long timeval_diff (struct timeval *tv1, struct timeval *tv2);
 extern char *string_hex_dump (const char *data, size_t size,
                               int bytes_per_line,
                               const char *prefix, const char *suffix);

@@ -25,7 +25,7 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get update -qq
-          sudo apt-get --yes --no-install-recommends install cmake pkg-config asciidoctor libgnutls28-dev zlib1g-dev libreadline-dev libcpputest-dev lcov
+          sudo apt-get --yes --no-install-recommends install asciidoctor cmake libcpputest-dev libgnutls28-dev lcov libreadline-dev libzstd-dev pkg-config zlib1g-dev
 
       - name: Test patches
         run: ./tools/build-debian.sh test-patches

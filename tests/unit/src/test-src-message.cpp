@@ -129,21 +129,21 @@ TEST(SrcMessage, DisplayString)
 
 TEST(SrcMessage, DisplayBuffer)
 {
-    struct t_weechat_relay_msg *msg;
+    struct t_weechat_relay_parsed_msg *parsed_msg;
     unsigned char msg_buffer_null[] = { MESSAGE_BUFFER_NULL };
     unsigned char msg_buffer_abc[] = { MESSAGE_BUFFER };
 
-    msg = weechat_relay_parse_message (msg_buffer_null,
-                                       sizeof (msg_buffer_null));
-    CHECK(msg);
-    relay_message_display_buffer (&msg->objects[0]->value_buffer);
-    weechat_relay_parse_msg_free (msg);
+    parsed_msg = weechat_relay_parse_message (msg_buffer_null,
+                                        sizeof (msg_buffer_null));
+    CHECK(parsed_msg);
+    relay_message_display_buffer (&parsed_msg->objects[0]->value_buffer);
+    weechat_relay_parse_msg_free (parsed_msg);
 
-    msg = weechat_relay_parse_message (msg_buffer_abc,
-                                       sizeof (msg_buffer_abc));
-    CHECK(msg);
-    relay_message_display_buffer (&msg->objects[0]->value_buffer);
-    weechat_relay_parse_msg_free (msg);
+    parsed_msg = weechat_relay_parse_message (msg_buffer_abc,
+                                        sizeof (msg_buffer_abc));
+    CHECK(parsed_msg);
+    relay_message_display_buffer (&parsed_msg->objects[0]->value_buffer);
+    weechat_relay_parse_msg_free (parsed_msg);
 }
 
 /*
@@ -175,13 +175,13 @@ TEST(SrcMessage, DisplayTime)
 
 TEST(SrcMessage, DisplayHashtable)
 {
-    struct t_weechat_relay_msg *msg;
+    struct t_weechat_relay_parsed_msg *parsed_msg;
     unsigned char msg_hashtable[] = { MESSAGE_HASHTABLE };
 
-    msg = weechat_relay_parse_message (msg_hashtable, sizeof (msg_hashtable));
-    CHECK(msg);
-    relay_message_display_hashtable (&msg->objects[0]->value_hashtable);
-    weechat_relay_parse_msg_free (msg);
+    parsed_msg = weechat_relay_parse_message (msg_hashtable, sizeof (msg_hashtable));
+    CHECK(parsed_msg);
+    relay_message_display_hashtable (&parsed_msg->objects[0]->value_hashtable);
+    weechat_relay_parse_msg_free (parsed_msg);
 }
 
 /*
@@ -191,13 +191,13 @@ TEST(SrcMessage, DisplayHashtable)
 
 TEST(SrcMessage, DisplayHdata)
 {
-    struct t_weechat_relay_msg *msg;
+    struct t_weechat_relay_parsed_msg *parsed_msg;
     unsigned char msg_hdata[] = { MESSAGE_HDATA };
 
-    msg = weechat_relay_parse_message (msg_hdata, sizeof (msg_hdata));
-    CHECK(msg);
-    relay_message_display_hdata (&msg->objects[0]->value_hdata);
-    weechat_relay_parse_msg_free (msg);
+    parsed_msg = weechat_relay_parse_message (msg_hdata, sizeof (msg_hdata));
+    CHECK(parsed_msg);
+    relay_message_display_hdata (&parsed_msg->objects[0]->value_hdata);
+    weechat_relay_parse_msg_free (parsed_msg);
 }
 
 /*
@@ -207,13 +207,13 @@ TEST(SrcMessage, DisplayHdata)
 
 TEST(SrcMessage, DisplayInfo)
 {
-    struct t_weechat_relay_msg *msg;
+    struct t_weechat_relay_parsed_msg *parsed_msg;
     unsigned char msg_info[] = { MESSAGE_INFO };
 
-    msg = weechat_relay_parse_message (msg_info, sizeof (msg_info));
-    CHECK(msg);
-    relay_message_display_info (&msg->objects[0]->value_info);
-    weechat_relay_parse_msg_free (msg);
+    parsed_msg = weechat_relay_parse_message (msg_info, sizeof (msg_info));
+    CHECK(parsed_msg);
+    relay_message_display_info (&parsed_msg->objects[0]->value_info);
+    weechat_relay_parse_msg_free (parsed_msg);
 }
 
 /*
@@ -223,13 +223,13 @@ TEST(SrcMessage, DisplayInfo)
 
 TEST(SrcMessage, DisplayInfolist)
 {
-    struct t_weechat_relay_msg *msg;
+    struct t_weechat_relay_parsed_msg *parsed_msg;
     unsigned char msg_infolist[] = { MESSAGE_INFOLIST };
 
-    msg = weechat_relay_parse_message (msg_infolist, sizeof (msg_infolist));
-    CHECK(msg);
-    relay_message_display_infolist (&msg->objects[0]->value_infolist);
-    weechat_relay_parse_msg_free (msg);
+    parsed_msg = weechat_relay_parse_message (msg_infolist, sizeof (msg_infolist));
+    CHECK(parsed_msg);
+    relay_message_display_infolist (&parsed_msg->objects[0]->value_infolist);
+    weechat_relay_parse_msg_free (parsed_msg);
 }
 
 /*
@@ -239,13 +239,13 @@ TEST(SrcMessage, DisplayInfolist)
 
 TEST(SrcMessage, DisplayArray)
 {
-    struct t_weechat_relay_msg *msg;
+    struct t_weechat_relay_parsed_msg *parsed_msg;
     unsigned char msg_array[] = { MESSAGE_ARRAY };
 
-    msg = weechat_relay_parse_message (msg_array, sizeof (msg_array));
-    CHECK(msg);
-    relay_message_display_array (&msg->objects[0]->value_array);
-    weechat_relay_parse_msg_free (msg);
+    parsed_msg = weechat_relay_parse_message (msg_array, sizeof (msg_array));
+    CHECK(parsed_msg);
+    relay_message_display_array (&parsed_msg->objects[0]->value_array);
+    weechat_relay_parse_msg_free (parsed_msg);
 }
 
 /*
@@ -257,10 +257,7 @@ TEST(SrcMessage, DisplayObject)
 {
     unsigned char msg_invalid_size[] = { MESSAGE_INVALID_SIZE };
     unsigned char msg_invalid_id[] = { MESSAGE_INVALID_ID };
-    unsigned char msg_invalid_compressed_data[] = {
-        MESSAGE_INVALID_COMPRESSED_DATA };
-    unsigned char msg_not_compressed[] = { MESSAGE_NOT_COMPRESSED };
-    unsigned char msg_compressed_zlib[] = { MESSAGE_COMPRESSED_ZLIB };
+    unsigned char msg_invalid_compressed_data[] = { MESSAGE_INVALID_COMPRESSED_DATA };
     unsigned char msg_char[] = { MESSAGE_CHAR };
     unsigned char msg_integer[] = { MESSAGE_INTEGER };
     unsigned char msg_long[] = { MESSAGE_LONG };
@@ -273,6 +270,9 @@ TEST(SrcMessage, DisplayObject)
     unsigned char msg_info[] = { MESSAGE_INFO };
     unsigned char msg_infolist[] = { MESSAGE_INFOLIST };
     unsigned char msg_array[] = { MESSAGE_ARRAY };
+    struct t_weechat_relay_msg *msg;
+    void *ptr_compressed;
+    size_t size;
 
     relay_message_display_object (NULL);
 
@@ -280,9 +280,30 @@ TEST(SrcMessage, DisplayObject)
     relay_message_display (msg_invalid_id, sizeof (msg_invalid_id));
     relay_message_display (msg_invalid_compressed_data,
                            sizeof (msg_invalid_compressed_data));
-    relay_message_display (msg_not_compressed, sizeof (msg_not_compressed));
-    relay_message_display (msg_compressed_zlib, sizeof (msg_compressed_zlib));
 
+    /* no compression, empty message */
+    msg = weechat_relay_msg_new (NULL);
+    relay_message_display (msg->data, msg->data_size);
+    weechat_relay_msg_free (msg);
+
+    /* no compression */
+    MESSAGE_BUILD_FAKE(msg);
+    relay_message_display (msg->data, msg->data_size);
+    weechat_relay_msg_free (msg);
+
+    /* zlib compression */
+    MESSAGE_BUILD_FAKE(msg);
+    ptr_compressed = weechat_relay_msg_compress_zlib (msg, 5, &size);
+    CHECK(ptr_compressed);
+    relay_message_display (ptr_compressed, size);
+
+    /* zstd compression */
+    MESSAGE_BUILD_FAKE(msg);
+    ptr_compressed = weechat_relay_msg_compress_zstd (msg, 10, &size);
+    CHECK(ptr_compressed);
+    relay_message_display (ptr_compressed, size);
+
+    /* test with every type supported */
     relay_message_display (msg_char, sizeof (msg_char));
     relay_message_display (msg_integer, sizeof (msg_integer));
     relay_message_display (msg_long, sizeof (msg_long));

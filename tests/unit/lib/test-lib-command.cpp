@@ -153,6 +153,11 @@ TEST(LibCommand, CmdHandshake)
                                              WEECHAT_RELAY_COMPRESSION_ZLIB));
     RELAY_CHECK_RECV("(my_id) handshake compression=zlib\n");
 
+    LONGS_EQUAL(35,
+                weechat_relay_cmd_handshake (&relay_session, "my_id", NULL,
+                                             WEECHAT_RELAY_COMPRESSION_ZSTD));
+    RELAY_CHECK_RECV("(my_id) handshake compression=zstd\n");
+
     LONGS_EQUAL(81,
                 weechat_relay_cmd_handshake (
                     &relay_session,
@@ -161,6 +166,15 @@ TEST(LibCommand, CmdHandshake)
                     WEECHAT_RELAY_COMPRESSION_ZLIB));
     RELAY_CHECK_RECV("(my_id) handshake password_hash_algo=plain:sha256:"
                      "pbkdf2+sha256,compression=zlib\n");
+
+    LONGS_EQUAL(81,
+                weechat_relay_cmd_handshake (
+                    &relay_session,
+                    "my_id",
+                    "plain:sha256:pbkdf2+sha256",
+                    WEECHAT_RELAY_COMPRESSION_ZSTD));
+    RELAY_CHECK_RECV("(my_id) handshake password_hash_algo=plain:sha256:"
+                     "pbkdf2+sha256,compression=zstd\n");
 }
 
 /*
@@ -181,13 +195,25 @@ TEST(LibCommand, CmdInit)
                                             WEECHAT_RELAY_COMPRESSION_ZLIB));
     RELAY_CHECK_RECV("(my_id) init compression=zlib\n");
 
+    LONGS_EQUAL(30, weechat_relay_cmd_init (&relay_session, "my_id", NULL,
+                                            WEECHAT_RELAY_COMPRESSION_ZSTD));
+    RELAY_CHECK_RECV("(my_id) init compression=zstd\n");
+
     LONGS_EQUAL(46, weechat_relay_cmd_init (&relay_session, "my_id", "secret",
                                             WEECHAT_RELAY_COMPRESSION_ZLIB));
     RELAY_CHECK_RECV("(my_id) init password=secret,compression=zlib\n");
 
+    LONGS_EQUAL(46, weechat_relay_cmd_init (&relay_session, "my_id", "secret",
+                                            WEECHAT_RELAY_COMPRESSION_ZSTD));
+    RELAY_CHECK_RECV("(my_id) init password=secret,compression=zstd\n");
+
     LONGS_EQUAL(48, weechat_relay_cmd_init (&relay_session, "my_id", "sec,ret",
                                             WEECHAT_RELAY_COMPRESSION_ZLIB));
     RELAY_CHECK_RECV("(my_id) init password=sec\\,ret,compression=zlib\n");
+
+    LONGS_EQUAL(48, weechat_relay_cmd_init (&relay_session, "my_id", "sec,ret",
+                                            WEECHAT_RELAY_COMPRESSION_ZSTD));
+    RELAY_CHECK_RECV("(my_id) init password=sec\\,ret,compression=zstd\n");
 }
 
 /*

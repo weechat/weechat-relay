@@ -20,10 +20,11 @@
 set(WEECHAT_RELAY_SRC command.c message.c parse.c session.c)
 
 find_package(ZLIB REQUIRED)
+pkg_check_modules(LIBZSTD libzstd)
 
-list(APPEND LINK_LIBS ${ZLIB_LIBRARY})
+list(APPEND LINK_LIBS ${ZLIB_LIBRARY} ${LIBZSTD_LDFLAGS})
 
-include_directories(${CMAKE_BINARY_DIR} ${CMAKE_CURRENT_BINARY_DIR})
+include_directories(${CMAKE_BINARY_DIR} ${CMAKE_CURRENT_BINARY_DIR} ${LIBZSTD_INCLUDE_DIRS})
 
 add_library(weechatrelay_static STATIC ${WEECHAT_RELAY_SRC})
 add_library(weechatrelay_shared SHARED ${WEECHAT_RELAY_SRC})

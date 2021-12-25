@@ -38,7 +38,7 @@
 
 
 const char *weechat_relay_compression_string[WEECHAT_RELAY_NUM_COMPRESSIONS] =
-{ "off", "zlib" };
+{ "off", "zlib", "zstd" };
 
 
 /*

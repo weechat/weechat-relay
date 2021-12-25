@@ -30,18 +30,14 @@
 #include <arpa/inet.h>
 
 #include <zlib.h>
+#include <zstd.h>
 
 #include "weechat-relay.h"
 
 
-const char *weechat_relay_obj_types_str[WEECHAT_RELAY_NUM_OBJ_TYPES] = {
-    "chr", "int", "lon", "str", "buf", "ptr", "tim", "htb",
-    "hda", "inf", "inl", "arr",
-};
-
-
 struct t_weechat_relay_obj *weechat_relay_parse_read_object (
-    struct t_weechat_relay_msg *msg, enum t_weechat_relay_obj_type type);
+    struct t_weechat_relay_parsed_msg *parsed_msg,
+    enum t_weechat_relay_obj_type type);
 
 
 /*
@@ -246,22 +242,22 @@ weechat_relay_parse_obj_free (struct t_weechat_relay_obj *obj)
  */
 
 int
-weechat_relay_parse_read_bytes (struct t_weechat_relay_msg *msg,
+weechat_relay_parse_read_bytes (struct t_weechat_relay_parsed_msg *parsed_msg,
                                 void *output, size_t count)
 {
-    if (!msg || !output)
+    if (!parsed_msg || !output)
         return 0;
 
     if (count == 0)
         return 1;
 
-    if (msg->position + count > msg->size)
+    if (parsed_msg->position + count > parsed_msg->size)
         return 0;
 
     if (count > 0)
     {
-        memcpy (output, msg->buffer + msg->position, count);
-        msg->position += count;
+        memcpy (output, parsed_msg->buffer + parsed_msg->position, count);
+        parsed_msg->position += count;
     }
 
     return 1;
@@ -276,16 +272,16 @@ weechat_relay_parse_read_bytes (struct t_weechat_relay_msg *msg,
  */
 
 int
-weechat_relay_parse_read_type (struct t_weechat_relay_msg *msg,
+weechat_relay_parse_read_type (struct t_weechat_relay_parsed_msg *parsed_msg,
                                enum t_weechat_relay_obj_type *type)
 {
     char str_type[4];
     int type_found;
 
-    if (!msg || !type)
+    if (!parsed_msg || !type)
         return 0;
 
-    if (!weechat_relay_parse_read_bytes (msg, str_type, 3))
+    if (!weechat_relay_parse_read_bytes (parsed_msg, str_type, 3))
         return 0;
 
     str_type[3] = 0;
@@ -308,15 +304,15 @@ weechat_relay_parse_read_type (struct t_weechat_relay_msg *msg,
  */
 
 int
-weechat_relay_parse_read_integer (struct t_weechat_relay_msg *msg,
+weechat_relay_parse_read_integer (struct t_weechat_relay_parsed_msg *parsed_msg,
                                   int *value)
 {
     uint32_t value32;
 
-    if (!msg || !value)
+    if (!parsed_msg || !value)
         return 0;
 
-    if (!weechat_relay_parse_read_bytes (msg, &value32, 4))
+    if (!weechat_relay_parse_read_bytes (parsed_msg, &value32, 4))
         return 0;
 
     *value = (int) ntohl (value32);
@@ -333,17 +329,17 @@ weechat_relay_parse_read_integer (struct t_weechat_relay_msg *msg,
  */
 
 int
-weechat_relay_parse_read_string (struct t_weechat_relay_msg *msg,
+weechat_relay_parse_read_string (struct t_weechat_relay_parsed_msg *parsed_msg,
                                  char **string)
 {
     int length;
 
-    if (!msg || !string)
+    if (!parsed_msg || !string)
         return 0;
 
     *string = NULL;
 
-    if (!weechat_relay_parse_read_integer (msg, &length))
+    if (!weechat_relay_parse_read_integer (parsed_msg, &length))
         goto error;
     if (length < 0)
         return 1;
@@ -352,7 +348,7 @@ weechat_relay_parse_read_string (struct t_weechat_relay_msg *msg,
     if (!*string)
         goto error;
 
-    if (!weechat_relay_parse_read_bytes (msg, *string, length))
+    if (!weechat_relay_parse_read_bytes (parsed_msg, *string, length))
         goto error;
 
     (*string)[length] = '\0';
@@ -377,16 +373,16 @@ error:
  */
 
 int
-weechat_relay_parse_read_buffer (struct t_weechat_relay_msg *msg,
+weechat_relay_parse_read_buffer (struct t_weechat_relay_parsed_msg *parsed_msg,
                                  void **buffer, int *length)
 {
-    if (!msg || !buffer || !length)
+    if (!parsed_msg || !buffer || !length)
         return 0;
 
     *buffer = NULL;
     *length = 0;
 
-    if (!weechat_relay_parse_read_integer (msg, length))
+    if (!weechat_relay_parse_read_integer (parsed_msg, length))
         goto error;
     if (*length <= 0)
         return 1;
@@ -395,7 +391,7 @@ weechat_relay_parse_read_buffer (struct t_weechat_relay_msg *msg,
     if (!*buffer)
         goto error;
 
-    if (!weechat_relay_parse_read_bytes (msg, *buffer, *length))
+    if (!weechat_relay_parse_read_bytes (parsed_msg, *buffer, *length))
         goto error;
 
     return 1;
@@ -419,7 +415,7 @@ error:
  */
 
 int
-weechat_relay_parse_read_pointer (struct t_weechat_relay_msg *msg,
+weechat_relay_parse_read_pointer (struct t_weechat_relay_parsed_msg *parsed_msg,
                                   const void **pointer)
 {
     int rc;
@@ -427,10 +423,10 @@ weechat_relay_parse_read_pointer (struct t_weechat_relay_msg *msg,
     unsigned long value;
     char str_pointer[256];
 
-    if (!weechat_relay_parse_read_bytes (msg, &length, 1))
+    if (!weechat_relay_parse_read_bytes (parsed_msg, &length, 1))
         return 0;
 
-    if (!weechat_relay_parse_read_bytes (msg, str_pointer, length))
+    if (!weechat_relay_parse_read_bytes (parsed_msg, str_pointer, length))
         return 0;
     str_pointer[length] = '\0';
 
@@ -451,18 +447,18 @@ weechat_relay_parse_read_pointer (struct t_weechat_relay_msg *msg,
  */
 
 struct t_weechat_relay_obj *
-weechat_relay_parse_obj_char (struct t_weechat_relay_msg *msg)
+weechat_relay_parse_obj_char (struct t_weechat_relay_parsed_msg *parsed_msg)
 {
     struct t_weechat_relay_obj *obj;
 
-    if (!msg)
+    if (!parsed_msg)
         return NULL;
 
     obj = weechat_relay_parse_obj_alloc (WEECHAT_RELAY_OBJ_TYPE_CHAR);
     if (!obj)
         goto error;
 
-    if (!weechat_relay_parse_read_bytes (msg, &obj->value_char, 1))
+    if (!weechat_relay_parse_read_bytes (parsed_msg, &obj->value_char, 1))
         goto error;
 
     return obj;
@@ -480,18 +476,18 @@ error:
  */
 
 struct t_weechat_relay_obj *
-weechat_relay_parse_obj_integer (struct t_weechat_relay_msg *msg)
+weechat_relay_parse_obj_integer (struct t_weechat_relay_parsed_msg *parsed_msg)
 {
     struct t_weechat_relay_obj *obj;
 
-    if (!msg)
+    if (!parsed_msg)
         return NULL;
 
     obj = weechat_relay_parse_obj_alloc (WEECHAT_RELAY_OBJ_TYPE_INTEGER);
     if (!obj)
         goto error;
 
-    if (!weechat_relay_parse_read_integer (msg, &obj->value_integer))
+    if (!weechat_relay_parse_read_integer (parsed_msg, &obj->value_integer))
         goto error;
 
     return obj;
@@ -509,7 +505,7 @@ error:
  */
 
 struct t_weechat_relay_obj *
-weechat_relay_parse_obj_long (struct t_weechat_relay_msg *msg)
+weechat_relay_parse_obj_long (struct t_weechat_relay_parsed_msg *parsed_msg)
 {
     struct t_weechat_relay_obj *obj;
     unsigned char length;
@@ -517,17 +513,17 @@ weechat_relay_parse_obj_long (struct t_weechat_relay_msg *msg)
     long value;
     int rc;
 
-    if (!msg)
+    if (!parsed_msg)
         return NULL;
 
     obj = weechat_relay_parse_obj_alloc (WEECHAT_RELAY_OBJ_TYPE_LONG);
     if (!obj)
         goto error;
 
-    if (!weechat_relay_parse_read_bytes (msg, &length, 1))
+    if (!weechat_relay_parse_read_bytes (parsed_msg, &length, 1))
         goto error;
 
-    if (!weechat_relay_parse_read_bytes (msg, str_long, length))
+    if (!weechat_relay_parse_read_bytes (parsed_msg, str_long, length))
         goto error;
 
     str_long[length] = '\0';
@@ -553,18 +549,18 @@ error:
  */
 
 struct t_weechat_relay_obj *
-weechat_relay_parse_obj_string (struct t_weechat_relay_msg *msg)
+weechat_relay_parse_obj_string (struct t_weechat_relay_parsed_msg *parsed_msg)
 {
     struct t_weechat_relay_obj *obj;
 
-    if (!msg)
+    if (!parsed_msg)
         return NULL;
 
     obj = weechat_relay_parse_obj_alloc (WEECHAT_RELAY_OBJ_TYPE_STRING);
     if (!obj)
         goto error;
 
-    if (!weechat_relay_parse_read_string (msg, &obj->value_string))
+    if (!weechat_relay_parse_read_string (parsed_msg, &obj->value_string))
         goto error;
 
     return obj;
@@ -582,18 +578,18 @@ error:
  */
 
 struct t_weechat_relay_obj *
-weechat_relay_parse_obj_buffer (struct t_weechat_relay_msg *msg)
+weechat_relay_parse_obj_buffer (struct t_weechat_relay_parsed_msg *parsed_msg)
 {
     struct t_weechat_relay_obj *obj;
 
-    if (!msg)
+    if (!parsed_msg)
         return NULL;
 
     obj = weechat_relay_parse_obj_alloc (WEECHAT_RELAY_OBJ_TYPE_BUFFER);
     if (!obj)
         goto error;
 
-    if (!weechat_relay_parse_read_buffer (msg,
+    if (!weechat_relay_parse_read_buffer (parsed_msg,
                                           &obj->value_buffer.buffer,
                                           &obj->value_buffer.length))
     {
@@ -615,18 +611,18 @@ error:
  */
 
 struct t_weechat_relay_obj *
-weechat_relay_parse_obj_pointer (struct t_weechat_relay_msg *msg)
+weechat_relay_parse_obj_pointer (struct t_weechat_relay_parsed_msg *parsed_msg)
 {
     struct t_weechat_relay_obj *obj;
 
-    if (!msg)
+    if (!parsed_msg)
         return NULL;
 
     obj = weechat_relay_parse_obj_alloc (WEECHAT_RELAY_OBJ_TYPE_POINTER);
     if (!obj)
         goto error;
 
-    if (!weechat_relay_parse_read_pointer (msg, &obj->value_pointer))
+    if (!weechat_relay_parse_read_pointer (parsed_msg, &obj->value_pointer))
         goto error;
 
     return obj;
@@ -644,7 +640,7 @@ error:
  */
 
 struct t_weechat_relay_obj *
-weechat_relay_parse_obj_time (struct t_weechat_relay_msg *msg)
+weechat_relay_parse_obj_time (struct t_weechat_relay_parsed_msg *parsed_msg)
 {
     struct t_weechat_relay_obj *obj;
     unsigned char length;
@@ -652,17 +648,17 @@ weechat_relay_parse_obj_time (struct t_weechat_relay_msg *msg)
     unsigned long value;
     int rc;
 
-    if (!msg)
+    if (!parsed_msg)
         return NULL;
 
     obj = weechat_relay_parse_obj_alloc (WEECHAT_RELAY_OBJ_TYPE_TIME);
     if (!obj)
         goto error;
 
-    if (!weechat_relay_parse_read_bytes (msg, &length, 1))
+    if (!weechat_relay_parse_read_bytes (parsed_msg, &length, 1))
         goto error;
 
-    if (!weechat_relay_parse_read_bytes (msg, str_time, length))
+    if (!weechat_relay_parse_read_bytes (parsed_msg, str_time, length))
         goto error;
 
     str_time[length] = '\0';
@@ -688,25 +684,25 @@ error:
  */
 
 struct t_weechat_relay_obj *
-weechat_relay_parse_obj_hashtable (struct t_weechat_relay_msg *msg)
+weechat_relay_parse_obj_hashtable (struct t_weechat_relay_parsed_msg *parsed_msg)
 {
     struct t_weechat_relay_obj *obj;
     int i;
 
-    if (!msg)
+    if (!parsed_msg)
         return NULL;
 
     obj = weechat_relay_parse_obj_alloc (WEECHAT_RELAY_OBJ_TYPE_HASHTABLE);
     if (!obj)
         goto error;
 
-    if (!weechat_relay_parse_read_type (msg, &obj->value_hashtable.type_keys))
+    if (!weechat_relay_parse_read_type (parsed_msg, &obj->value_hashtable.type_keys))
         goto error;
 
-    if (!weechat_relay_parse_read_type (msg, &obj->value_hashtable.type_values))
+    if (!weechat_relay_parse_read_type (parsed_msg, &obj->value_hashtable.type_values))
         goto error;
 
-    if (!weechat_relay_parse_read_integer (msg, &obj->value_hashtable.count))
+    if (!weechat_relay_parse_read_integer (parsed_msg, &obj->value_hashtable.count))
         goto error;
     if (obj->value_hashtable.count < 0)
         goto error;
@@ -724,11 +720,11 @@ weechat_relay_parse_obj_hashtable (struct t_weechat_relay_msg *msg)
     for (i = 0; i < obj->value_hashtable.count; i++)
     {
         obj->value_hashtable.keys[i] = weechat_relay_parse_read_object (
-            msg, obj->value_hashtable.type_keys);
+            parsed_msg, obj->value_hashtable.type_keys);
         if (!obj->value_hashtable.keys[i])
             goto error;
         obj->value_hashtable.values[i] = weechat_relay_parse_read_object (
-            msg, obj->value_hashtable.type_values);
+            parsed_msg, obj->value_hashtable.type_values);
         if (!obj->value_hashtable.values[i])
             goto error;
     }
@@ -896,19 +892,19 @@ error:
  */
 
 struct t_weechat_relay_obj *
-weechat_relay_parse_obj_hdata (struct t_weechat_relay_msg *msg)
+weechat_relay_parse_obj_hdata (struct t_weechat_relay_parsed_msg *parsed_msg)
 {
     struct t_weechat_relay_obj *obj, *obj2;
     int i, j;
 
-    if (!msg)
+    if (!parsed_msg)
         return NULL;
 
     obj = weechat_relay_parse_obj_alloc (WEECHAT_RELAY_OBJ_TYPE_HDATA);
     if (!obj)
         goto error;
 
-    if (!weechat_relay_parse_read_string (msg, &obj->value_hdata.hpath))
+    if (!weechat_relay_parse_read_string (parsed_msg, &obj->value_hdata.hpath))
         goto error;
 
     if (!weechat_relay_parse_hdata_split_hpath (obj->value_hdata.hpath,
@@ -916,7 +912,7 @@ weechat_relay_parse_obj_hdata (struct t_weechat_relay_msg *msg)
                                                 &obj->value_hdata.num_hpaths))
         goto error;
 
-    if (!weechat_relay_parse_read_string (msg, &obj->value_hdata.keys))
+    if (!weechat_relay_parse_read_string (parsed_msg, &obj->value_hdata.keys))
         goto error;
 
     if (!weechat_relay_parse_hdata_split_keys (obj->value_hdata.keys,
@@ -925,7 +921,7 @@ weechat_relay_parse_obj_hdata (struct t_weechat_relay_msg *msg)
                                                &obj->value_hdata.num_keys))
         goto error;
 
-    if (!weechat_relay_parse_read_integer (msg, &obj->value_hdata.count))
+    if (!weechat_relay_parse_read_integer (parsed_msg, &obj->value_hdata.count))
         goto error;
     if (obj->value_hdata.count < 0)
         goto error;
@@ -949,7 +945,7 @@ weechat_relay_parse_obj_hdata (struct t_weechat_relay_msg *msg)
             goto error;
         for (j = 0; j < obj->value_hdata.num_hpaths; j++)
         {
-            obj2 = weechat_relay_parse_read_object (msg,
+            obj2 = weechat_relay_parse_read_object (parsed_msg,
                                                     WEECHAT_RELAY_OBJ_TYPE_POINTER);
             if (!obj2)
                 goto error;
@@ -963,7 +959,7 @@ weechat_relay_parse_obj_hdata (struct t_weechat_relay_msg *msg)
             goto error;
         for (j = 0; j < obj->value_hdata.num_keys; j++)
         {
-            obj2 = weechat_relay_parse_read_object (msg,
+            obj2 = weechat_relay_parse_read_object (parsed_msg,
                                                     obj->value_hdata.keys_types[j]);
             if (!obj2)
                 goto error;
@@ -986,20 +982,20 @@ error:
  */
 
 struct t_weechat_relay_obj *
-weechat_relay_parse_obj_info (struct t_weechat_relay_msg *msg)
+weechat_relay_parse_obj_info (struct t_weechat_relay_parsed_msg *parsed_msg)
 {
     struct t_weechat_relay_obj *obj;
 
-    if (!msg)
+    if (!parsed_msg)
         return NULL;
 
     obj = weechat_relay_parse_obj_alloc (WEECHAT_RELAY_OBJ_TYPE_INFO);
     if (!obj)
         goto error;
 
-    if (!weechat_relay_parse_read_string (msg, &obj->value_info.name))
+    if (!weechat_relay_parse_read_string (parsed_msg, &obj->value_info.name))
         goto error;
-    if (!weechat_relay_parse_read_string (msg, &obj->value_info.value))
+    if (!weechat_relay_parse_read_string (parsed_msg, &obj->value_info.value))
         goto error;
 
     return obj;
@@ -1017,22 +1013,22 @@ error:
  */
 
 struct t_weechat_relay_obj *
-weechat_relay_parse_obj_infolist (struct t_weechat_relay_msg *msg)
+weechat_relay_parse_obj_infolist (struct t_weechat_relay_parsed_msg *parsed_msg)
 {
     struct t_weechat_relay_obj *obj;
     enum t_weechat_relay_obj_type type;
     int i, j;
 
-    if (!msg)
+    if (!parsed_msg)
         return NULL;
 
     obj = weechat_relay_parse_obj_alloc (WEECHAT_RELAY_OBJ_TYPE_INFOLIST);
     if (!obj)
         goto error;
 
-    if (!weechat_relay_parse_read_string (msg, &obj->value_infolist.name))
+    if (!weechat_relay_parse_read_string (parsed_msg, &obj->value_infolist.name))
         goto error;
-    if (!weechat_relay_parse_read_integer (msg, &obj->value_infolist.count))
+    if (!weechat_relay_parse_read_integer (parsed_msg, &obj->value_infolist.count))
         goto error;
     if (obj->value_infolist.count < 0)
         goto error;
@@ -1047,7 +1043,7 @@ weechat_relay_parse_obj_infolist (struct t_weechat_relay_msg *msg)
         obj->value_infolist.items[i] = calloc (1, sizeof (*(obj->value_infolist.items[i])));
         if (!obj->value_infolist.items[i])
             goto error;
-        if (!weechat_relay_parse_read_integer (msg, &obj->value_infolist.items[i]->count))
+        if (!weechat_relay_parse_read_integer (parsed_msg, &obj->value_infolist.items[i]->count))
             goto error;
         if (obj->value_infolist.items[i]->count < 0)
             goto error;
@@ -1061,11 +1057,11 @@ weechat_relay_parse_obj_infolist (struct t_weechat_relay_msg *msg)
                 sizeof (*obj->value_infolist.items[i]->variables[j]));
             if (!obj->value_infolist.items[i]->variables[j])
                 goto error;
-            if (!weechat_relay_parse_read_string (msg, &obj->value_infolist.items[i]->variables[j]->name))
+            if (!weechat_relay_parse_read_string (parsed_msg, &obj->value_infolist.items[i]->variables[j]->name))
                 goto error;
-            if (!weechat_relay_parse_read_type (msg, &type))
+            if (!weechat_relay_parse_read_type (parsed_msg, &type))
                 goto error;
-            obj->value_infolist.items[i]->variables[j]->obj = weechat_relay_parse_read_object (msg, type);
+            obj->value_infolist.items[i]->variables[j]->obj = weechat_relay_parse_read_object (parsed_msg, type);
         }
     }
 
@@ -1084,23 +1080,23 @@ error:
  */
 
 struct t_weechat_relay_obj *
-weechat_relay_parse_obj_array (struct t_weechat_relay_msg *msg)
+weechat_relay_parse_obj_array (struct t_weechat_relay_parsed_msg *parsed_msg)
 {
     struct t_weechat_relay_obj *obj;
     enum t_weechat_relay_obj_type type;
     int i;
 
-    if (!msg)
+    if (!parsed_msg)
         return NULL;
 
     obj = weechat_relay_parse_obj_alloc (WEECHAT_RELAY_OBJ_TYPE_ARRAY);
     if (!obj)
         goto error;
 
-    if (!weechat_relay_parse_read_type (msg, &type))
+    if (!weechat_relay_parse_read_type (parsed_msg, &type))
         goto error;
 
-    if (!weechat_relay_parse_read_integer (msg, &obj->value_array.count))
+    if (!weechat_relay_parse_read_integer (parsed_msg, &obj->value_array.count))
         goto error;
     if (obj->value_array.count < 0)
         goto error;
@@ -1112,7 +1108,7 @@ weechat_relay_parse_obj_array (struct t_weechat_relay_msg *msg)
 
     for (i = 0; i < obj->value_array.count; i++)
     {
-        obj->value_array.values[i] = weechat_relay_parse_read_object (msg,
+        obj->value_array.values[i] = weechat_relay_parse_read_object (parsed_msg,
                                                                       type);
         if (!obj->value_array.values[i])
             goto error;
@@ -1133,12 +1129,12 @@ error:
  */
 
 struct t_weechat_relay_obj *
-weechat_relay_parse_read_object (struct t_weechat_relay_msg *msg,
+weechat_relay_parse_read_object (struct t_weechat_relay_parsed_msg *parsed_msg,
                                  enum t_weechat_relay_obj_type type)
 {
     struct t_weechat_relay_obj *obj;
 
-    if (!msg)
+    if (!parsed_msg)
         return NULL;
 
     obj = NULL;
@@ -1146,40 +1142,40 @@ weechat_relay_parse_read_object (struct t_weechat_relay_msg *msg,
     switch (type)
     {
         case WEECHAT_RELAY_OBJ_TYPE_CHAR:
-            obj = weechat_relay_parse_obj_char (msg);
+            obj = weechat_relay_parse_obj_char (parsed_msg);
             break;
         case WEECHAT_RELAY_OBJ_TYPE_INTEGER:
-            obj = weechat_relay_parse_obj_integer (msg);
+            obj = weechat_relay_parse_obj_integer (parsed_msg);
             break;
         case WEECHAT_RELAY_OBJ_TYPE_LONG:
-            obj = weechat_relay_parse_obj_long (msg);
+            obj = weechat_relay_parse_obj_long (parsed_msg);
             break;
         case WEECHAT_RELAY_OBJ_TYPE_STRING:
-            obj = weechat_relay_parse_obj_string (msg);
+            obj = weechat_relay_parse_obj_string (parsed_msg);
             break;
         case WEECHAT_RELAY_OBJ_TYPE_BUFFER:
-            obj = weechat_relay_parse_obj_buffer (msg);
+            obj = weechat_relay_parse_obj_buffer (parsed_msg);
             break;
         case WEECHAT_RELAY_OBJ_TYPE_POINTER:
-            obj = weechat_relay_parse_obj_pointer (msg);
+            obj = weechat_relay_parse_obj_pointer (parsed_msg);
             break;
         case WEECHAT_RELAY_OBJ_TYPE_TIME:
-            obj = weechat_relay_parse_obj_time (msg);
+            obj = weechat_relay_parse_obj_time (parsed_msg);
             break;
         case WEECHAT_RELAY_OBJ_TYPE_HASHTABLE:
-            obj = weechat_relay_parse_obj_hashtable (msg);
+            obj = weechat_relay_parse_obj_hashtable (parsed_msg);
             break;
         case WEECHAT_RELAY_OBJ_TYPE_HDATA:
-            obj = weechat_relay_parse_obj_hdata (msg);
+            obj = weechat_relay_parse_obj_hdata (parsed_msg);
             break;
         case WEECHAT_RELAY_OBJ_TYPE_INFO:
-            obj = weechat_relay_parse_obj_info (msg);
+            obj = weechat_relay_parse_obj_info (parsed_msg);
             break;
         case WEECHAT_RELAY_OBJ_TYPE_INFOLIST:
-            obj = weechat_relay_parse_obj_infolist (msg);
+            obj = weechat_relay_parse_obj_infolist (parsed_msg);
             break;
         case WEECHAT_RELAY_OBJ_TYPE_ARRAY:
-            obj = weechat_relay_parse_obj_array (msg);
+            obj = weechat_relay_parse_obj_array (parsed_msg);
             break;
         case WEECHAT_RELAY_NUM_OBJ_TYPES:
             break;
@@ -1189,7 +1185,7 @@ weechat_relay_parse_read_object (struct t_weechat_relay_msg *msg,
 }
 
 /*
- * Decompresses data.
+ * Decompresses data with zlib.
  *
  * The variable "size_decompressed" is set with the size of decompressed
  * buffer returned (in bytes).
@@ -1203,9 +1199,9 @@ weechat_relay_parse_read_object (struct t_weechat_relay_msg *msg,
  */
 
 void *
-weechat_relay_parse_decompress (const void *data, size_t size,
-                                size_t initial_output_size,
-                                size_t *size_decompressed)
+weechat_relay_parse_decompress_zlib (const void *data, size_t size,
+                                     size_t initial_output_size,
+                                     size_t *size_decompressed)
 {
     int rc;
     Bytef *dest, *dest2;
@@ -1291,22 +1287,127 @@ error:
 }
 
 /*
+ * Decompresses data with zstd.
+ *
+ * The variable "size_decompressed" is set with the size of decompressed
+ * buffer returned (in bytes).
+ *
+ * The initial output size must be set to an estimate output size, but the
+ * output buffer size ("size_decompressed") can be higher.
+ * A typical value here could be 10 * size if we estimate zstd can compress
+ * data with a 90% ratio (which is excellent).
+ *
+ * Returns a pointer to the decompressed message, NULL if error.
+ */
+
+void *
+weechat_relay_parse_decompress_zstd (const void *data, size_t size,
+                                     size_t initial_output_size,
+                                     size_t *size_decompressed)
+{
+    int rc;
+    void *dest, *dest2, *dest_buf;
+    size_t rc_decompress, dest_size_alloc, dest_pos, dest_buf_size;
+    ZSTD_DCtx* dctx;
+    ZSTD_inBuffer input_buf;
+    ZSTD_outBuffer output_buf;
+
+    if (!data || (size == 0) || (initial_output_size == 0)
+        || !size_decompressed)
+    {
+        return NULL;
+    }
+
+    dest = NULL;
+    dest_buf = NULL;
+    dctx = NULL;
+
+    *size_decompressed = 0;
+
+    /* estimate the decompressed size, by default 10 * size */
+    dest_size_alloc = initial_output_size;
+    dest_pos = 0;
+    dest = malloc (dest_size_alloc);
+    if (!dest)
+        goto error;
+
+    dest_buf_size = ZSTD_DStreamOutSize();
+    dest_buf = malloc (dest_buf_size);
+    if (!dest_buf)
+        goto error;
+
+    dctx = ZSTD_createDCtx();
+    if (!dctx)
+        goto error;
+
+    input_buf.src = data;
+    input_buf.size = size;
+    input_buf.pos = 0;
+
+    while (input_buf.pos < input_buf.size)
+    {
+        output_buf.dst = dest_buf;
+        output_buf.size = dest_buf_size;
+        output_buf.pos = 0;
+
+        rc_decompress = ZSTD_decompressStream (dctx, &output_buf, &input_buf);
+
+        if (ZSTD_isError(rc_decompress))
+            goto error;
+
+        if (output_buf.pos > 0)
+        {
+            if (dest_pos + output_buf.pos > dest_size_alloc)
+            {
+                dest_size_alloc = dest_pos + output_buf.pos;
+                dest2 = realloc (dest, dest_size_alloc);
+                if (!dest2)
+                    goto error;
+                dest = dest2;
+            }
+            memcpy (dest + dest_pos, dest_buf, output_buf.pos);
+            dest_pos += output_buf.pos;
+        }
+        rc = rc_decompress;
+    }
+
+    if (rc != 0)
+        goto error;
+
+    *size_decompressed = dest_pos;
+
+    free (dest_buf);
+    ZSTD_freeDCtx(dctx);
+
+    return dest;
+
+error:
+    if (dest)
+        free (dest);
+    if (dest_buf)
+        free (dest_buf);
+    if (dctx)
+        ZSTD_freeDCtx(dctx);
+    return NULL;
+}
+
+/*
  * Allocates a message structure.
  *
  * Returns the new message, NULL if error.
  */
 
-struct t_weechat_relay_msg *
+struct t_weechat_relay_parsed_msg *
 weechat_relay_parse_msg_alloc (const void *buffer, size_t size)
 {
-    struct t_weechat_relay_msg *msg;
+    struct t_weechat_relay_parsed_msg *parsed_msg;
     uint32_t msg_size;
 
     if (!buffer || (size < 6))
         return NULL;
 
-    msg = calloc (1, sizeof (*msg));
-    if (!msg)
+    parsed_msg = calloc (1, sizeof (*parsed_msg));
+    if (!parsed_msg)
         return NULL;
 
     memcpy (&msg_size, buffer, 4);
@@ -1315,48 +1416,59 @@ weechat_relay_parse_msg_alloc (const void *buffer, size_t size)
     if (msg_size != size)
         goto error;
 
-    msg->message = malloc (size);
-    if (!msg->message)
+    parsed_msg->message = malloc (size);
+    if (!parsed_msg->message)
         goto error;
 
-    memcpy (msg->message, buffer, size);
-    msg->length = size;
-    msg->length_data = size - 5;
+    memcpy (parsed_msg->message, buffer, size);
+    parsed_msg->length = size;
+    parsed_msg->length_data = size - 5;
 
-    msg->compression = ((const char *)buffer)[4];
+    parsed_msg->compression = ((const char *)buffer)[4];
 
-    msg->position = 0;
+    parsed_msg->position = 0;
 
-    switch (msg->compression)
+    switch (parsed_msg->compression)
     {
         case WEECHAT_RELAY_COMPRESSION_OFF:
-            msg->data_decompressed = NULL;
-            msg->length_data_decompressed = size - 5;
-            msg->buffer = buffer + 5;
-            msg->size = size - 5;
+            parsed_msg->data_decompressed = NULL;
+            parsed_msg->length_data_decompressed = size - 5;
+            parsed_msg->buffer = buffer + 5;
+            parsed_msg->size = size - 5;
             break;
         case WEECHAT_RELAY_COMPRESSION_ZLIB:
-            msg->data_decompressed = weechat_relay_parse_decompress (
+            parsed_msg->data_decompressed = weechat_relay_parse_decompress_zlib (
                 buffer + 5,
                 size - 5,
                 10 * (size - 5),
-                &msg->length_data_decompressed);
-            if (!msg->data_decompressed)
+                &parsed_msg->length_data_decompressed);
+            if (!parsed_msg->data_decompressed)
                 goto error;
-            msg->buffer = msg->data_decompressed;
-            msg->size = msg->length_data_decompressed;
+            parsed_msg->buffer = parsed_msg->data_decompressed;
+            parsed_msg->size = parsed_msg->length_data_decompressed;
+            break;
+        case WEECHAT_RELAY_COMPRESSION_ZSTD:
+            parsed_msg->data_decompressed = weechat_relay_parse_decompress_zstd (
+                buffer + 5,
+                size - 5,
+                10 * (size - 5),
+                &parsed_msg->length_data_decompressed);
+            if (!parsed_msg->data_decompressed)
+                goto error;
+            parsed_msg->buffer = parsed_msg->data_decompressed;
+            parsed_msg->size = parsed_msg->length_data_decompressed;
             break;
         case WEECHAT_RELAY_NUM_COMPRESSIONS:
             break;
     }
 
-    if (!weechat_relay_parse_read_string (msg, &msg->id))
+    if (!weechat_relay_parse_read_string (parsed_msg, &parsed_msg->id))
         goto error;
 
-    return msg;
+    return parsed_msg;
 
 error:
-    weechat_relay_parse_msg_free (msg);
+    weechat_relay_parse_msg_free (parsed_msg);
     return NULL;
 }
 
@@ -1365,29 +1477,29 @@ error:
  */
 
 void
-weechat_relay_parse_msg_free (struct t_weechat_relay_msg *msg)
+weechat_relay_parse_msg_free (struct t_weechat_relay_parsed_msg *parsed_msg)
 {
     int i;
 
-    if (!msg)
+    if (!parsed_msg)
         return;
 
-    if (msg->message)
-        free (msg->message);
-    if (msg->data_decompressed)
-        free (msg->data_decompressed);
+    if (parsed_msg->message)
+        free (parsed_msg->message);
+    if (parsed_msg->data_decompressed)
+        free (parsed_msg->data_decompressed);
 
-    if (msg->id)
-        free (msg->id);
+    if (parsed_msg->id)
+        free (parsed_msg->id);
 
-    for (i = 0; i < msg->num_objects; i++)
+    for (i = 0; i < parsed_msg->num_objects; i++)
     {
-        weechat_relay_parse_obj_free (msg->objects[i]);
+        weechat_relay_parse_obj_free (parsed_msg->objects[i]);
     }
-    if (msg->objects)
-        free (msg->objects);
+    if (parsed_msg->objects)
+        free (parsed_msg->objects);
 
-    free (msg);
+    free (parsed_msg);
 }
 
 /*
@@ -1396,44 +1508,44 @@ weechat_relay_parse_msg_free (struct t_weechat_relay_msg *msg)
  * Returns the parsed message, NULL if error.
  */
 
-struct t_weechat_relay_msg *
+struct t_weechat_relay_parsed_msg *
 weechat_relay_parse_message (const void *buffer, size_t size)
 {
-    struct t_weechat_relay_msg *msg;
+    struct t_weechat_relay_parsed_msg *parsed_msg;
     struct t_weechat_relay_obj *obj, **objects;
     enum t_weechat_relay_obj_type type;
 
-    msg = weechat_relay_parse_msg_alloc (buffer, size);
-    if (!msg)
+    parsed_msg = weechat_relay_parse_msg_alloc (buffer, size);
+    if (!parsed_msg)
         return NULL;
 
-    while (msg->position < msg->size)
+    while (parsed_msg->position < parsed_msg->size)
     {
-        if (!weechat_relay_parse_read_type (msg, &type))
+        if (!weechat_relay_parse_read_type (parsed_msg, &type))
             break;
 
-        obj = weechat_relay_parse_read_object (msg, type);
+        obj = weechat_relay_parse_read_object (parsed_msg, type);
         if (!obj)
             break;
 
         /* add object to the list of objects in parsed message */
-        msg->num_objects++;
-        if (msg->objects)
+        parsed_msg->num_objects++;
+        if (parsed_msg->objects)
         {
-            objects = realloc (msg->objects,
-                               sizeof (*msg->objects) * msg->num_objects);
+            objects = realloc (parsed_msg->objects,
+                               sizeof (*parsed_msg->objects) * parsed_msg->num_objects);
             if (!objects)
                 break;
-            msg->objects = objects;
+            parsed_msg->objects = objects;
         }
         else
         {
-            msg->objects = malloc (sizeof (*msg->objects) * msg->num_objects);
-            if (!msg->objects)
+            parsed_msg->objects = malloc (sizeof (*parsed_msg->objects) * parsed_msg->num_objects);
+            if (!parsed_msg->objects)
                 break;
         }
-        msg->objects[msg->num_objects - 1] = obj;
+        parsed_msg->objects[parsed_msg->num_objects - 1] = obj;
     }
 
-    return msg;
+    return parsed_msg;
 }

@@ -29,24 +29,9 @@ extern "C"
 #include <unistd.h>
 #include <string.h>
 #include <arpa/inet.h>
+#include "tests/tests.h"
 #include "lib/weechat-relay.h"
 }
-
-#define LOREM_IPSUM_1024 "Lorem ipsum dolor sit amet, consectetur adipiscing" \
-    " elit. Fusce auctor ac leo ut maximus. Curabitur vestibulum facilisis n" \
-    "eque, vitae sodales elit pulvinar ac. Mauris suscipit pharetra metus eu" \
-    " hendrerit. Proin viverra ligula ut nibh malesuada, vel vehicula leo pu" \
-    "lvinar. Nullam tellus dolor, posuere sed orci in, pretium fermentum ant" \
-    "e. Donec a quam vulputate, fermentum nisi nec, convallis sapien. Vestib" \
-    "ulum malesuada dui eget iaculis sagittis. Praesent egestas non ex quis " \
-    "blandit. Maecenas quis leo nunc. Integer eget tincidunt sapien, id lobo" \
-    "rtis libero. Aliquam posuere turpis in libero luctus pharetra. Vestibul" \
-    "um dui augue, volutpat ultricies laoreet in, varius sodales ante. Ut ne" \
-    "c urna non lacus bibendum scelerisque. Nullam convallis aliquet lectus " \
-    "interdum volutpat. Phasellus lacus tortor, elementum hendrerit lobortis" \
-    " ac, commodo id augue. Morbi imperdiet interdum consequat. Mauris purus" \
-    " lectus, ultrices sed velit et, pretium rhoncus erat. Pellentesque pell" \
-    "entesque efficitur nisl quis sodales. Nam hendreri."
 
 TEST_GROUP(LibMessage)
 {
@@ -60,7 +45,7 @@ TEST_GROUP(LibMessage)
 
 TEST(LibMessage, InitFree)
 {
-    struct t_weechat_relay_msg_buf *msg;
+    struct t_weechat_relay_msg *msg;
 
     msg = weechat_relay_msg_new (NULL);
     CHECK(msg);
@@ -88,7 +73,7 @@ TEST(LibMessage, InitFree)
 
 TEST(LibMessage, AddBytes)
 {
-    struct t_weechat_relay_msg_buf *msg;
+    struct t_weechat_relay_msg *msg;
     const char *str = "abc";
     char buffer[WEECHAT_RELAY_MSG_INITIAL_ALLOC];
 
@@ -119,7 +104,7 @@ TEST(LibMessage, AddBytes)
 
 TEST(LibMessage, SetBytes)
 {
-    struct t_weechat_relay_msg_buf *msg;
+    struct t_weechat_relay_msg *msg;
     const char *str1 = "abc";
     const char *str2 = "def";
 
@@ -152,19 +137,20 @@ TEST(LibMessage, SetBytes)
 
 TEST(LibMessage, AddType)
 {
-    struct t_weechat_relay_msg_buf *msg;
-    const char *type = "int";
+    struct t_weechat_relay_msg *msg;
+    int i, pos;
+    const char *ptr_type;
 
     msg = weechat_relay_msg_new ("test");
 
-    LONGS_EQUAL(0, weechat_relay_msg_add_type (NULL, NULL));
-    LONGS_EQUAL(0, weechat_relay_msg_add_type (msg, NULL));
-    LONGS_EQUAL(0, weechat_relay_msg_add_type (msg, ""));
-
-    LONGS_EQUAL(1, weechat_relay_msg_add_type (msg, type));
-    LONGS_EQUAL(WEECHAT_RELAY_MSG_INITIAL_ALLOC, msg->data_alloc);
-    LONGS_EQUAL(16, msg->data_size);
-    MEMCMP_EQUAL(msg->data + 13, type, strlen (type));
+    for (i = 0; i < WEECHAT_RELAY_NUM_OBJ_TYPES; i++)
+    {
+        pos = msg->data_size;
+        ptr_type = weechat_relay_obj_types_str[i];
+        LONGS_EQUAL(1, weechat_relay_msg_add_type (msg, (enum t_weechat_relay_obj_type)i));
+        LONGS_EQUAL(pos + strlen (ptr_type), msg->data_size);
+        MEMCMP_EQUAL(msg->data + pos, ptr_type, strlen (ptr_type));
+    }
 
     weechat_relay_msg_free (msg);
 }
@@ -176,7 +162,7 @@ TEST(LibMessage, AddType)
 
 TEST(LibMessage, AddChar)
 {
-    struct t_weechat_relay_msg_buf *msg;
+    struct t_weechat_relay_msg *msg;
     char ch = 123;
 
     msg = weechat_relay_msg_new ("test");
@@ -199,7 +185,7 @@ TEST(LibMessage, AddChar)
 
 TEST(LibMessage, AddInt)
 {
-    struct t_weechat_relay_msg_buf *msg;
+    struct t_weechat_relay_msg *msg;
     int number1 = 123456;
     uint32_t value32_number1;
     int number2 = -112233;
@@ -231,7 +217,7 @@ TEST(LibMessage, AddInt)
 
 TEST(LibMessage, AddLong)
 {
-    struct t_weechat_relay_msg_buf *msg;
+    struct t_weechat_relay_msg *msg;
     long number1 = 123456789012;
     const char *str_number1 = "123456789012";
     long number2 = -112233445566;
@@ -263,7 +249,7 @@ TEST(LibMessage, AddLong)
 
 TEST(LibMessage, AddString)
 {
-    struct t_weechat_relay_msg_buf *msg;
+    struct t_weechat_relay_msg *msg;
     const char *str = "abcdef";
     uint32_t value32;
 
@@ -303,7 +289,7 @@ TEST(LibMessage, AddString)
 
 TEST(LibMessage, AddBuffer)
 {
-    struct t_weechat_relay_msg_buf *msg;
+    struct t_weechat_relay_msg *msg;
     const void *str = "abcdef";
     uint32_t value32;
 
@@ -344,7 +330,7 @@ TEST(LibMessage, AddBuffer)
 
 TEST(LibMessage, AddPointer)
 {
-    struct t_weechat_relay_msg_buf *msg;
+    struct t_weechat_relay_msg *msg;
     void *pointer = (void *)0x123456789abc;
     const char *str_pointer = "123456789abc";
 
@@ -375,7 +361,7 @@ TEST(LibMessage, AddPointer)
 
 TEST(LibMessage, AddTime)
 {
-    struct t_weechat_relay_msg_buf *msg;
+    struct t_weechat_relay_msg *msg;
     time_t time = 123456789;
     const char *str_time = "123456789";
 
@@ -394,40 +380,68 @@ TEST(LibMessage, AddTime)
 
 /*
  * Tests functions:
- *   weechat_relay_msg_compress
+ *   weechat_relay_msg_compress_zlib
  */
 
-TEST(LibMessage, Compress)
+TEST(LibMessage, CompressZlib)
 {
-    struct t_weechat_relay_msg_buf *msg;
+    struct t_weechat_relay_msg *msg;
     void *buffer;
     size_t size;
 
-    POINTERS_EQUAL(NULL, weechat_relay_msg_compress (NULL, 0, NULL));
-    POINTERS_EQUAL(NULL, weechat_relay_msg_compress (NULL, 0, &size));
+    POINTERS_EQUAL(NULL, weechat_relay_msg_compress_zlib (NULL, 0, NULL));
+    POINTERS_EQUAL(NULL, weechat_relay_msg_compress_zlib (NULL, 0, &size));
 
-    msg = weechat_relay_msg_new ("test");
-
-    weechat_relay_msg_add_int (msg, 123456);
-    weechat_relay_msg_add_long (msg, 1234567890L);
-    weechat_relay_msg_add_string (msg, LOREM_IPSUM_1024);
+    MESSAGE_BUILD_FAKE(msg);
 
     /* initial message size */
-    LONGS_EQUAL(1056, msg->data_size);
+    LONGS_EQUAL(4186, msg->data_size);
 
     /* compression level 0 (no compression) */
-    buffer = weechat_relay_msg_compress (msg, 0, &size);
-    CHECK(size >= 1056);
+    buffer = weechat_relay_msg_compress_zlib (msg, 0, &size);
+    LONGS_EQUAL(4197, size);
     free (buffer);
 
     /* compression level 1 (highest speed) */
-    buffer = weechat_relay_msg_compress (msg, 1, &size);
-    CHECK(size < 1056);
+    buffer = weechat_relay_msg_compress_zlib (msg, 1, &size);
+    LONGS_EQUAL(1798, size);
     free (buffer);
 
     /* compression level 9 (highest compression) */
-    buffer = weechat_relay_msg_compress (msg, 9, &size);
-    CHECK(size < 1056);
+    buffer = weechat_relay_msg_compress_zlib (msg, 9, &size);
+    LONGS_EQUAL(1701, size);
+    free (buffer);
+
+    weechat_relay_msg_free (msg);
+}
+
+/*
+ * Tests functions:
+ *   weechat_relay_msg_compress_zstd
+ */
+
+TEST(LibMessage, CompressZstd)
+{
+    struct t_weechat_relay_msg *msg;
+    void *buffer;
+    size_t size;
+
+    POINTERS_EQUAL(NULL, weechat_relay_msg_compress_zstd (NULL, 0, NULL));
+    POINTERS_EQUAL(NULL, weechat_relay_msg_compress_zstd (NULL, 0, &size));
+
+    MESSAGE_BUILD_FAKE(msg);
+
+    /* initial message size */
+    LONGS_EQUAL(4186, msg->data_size);
+
+    /* compression level 1 (highest speed) */
+    buffer = weechat_relay_msg_compress_zstd (msg, 1, &size);
+    LONGS_EQUAL(1724, size);
+    free (buffer);
+
+    /* compression level 9 (highest compression) */
+    buffer = weechat_relay_msg_compress_zstd (msg, 19, &size);
+    LONGS_EQUAL(1665, size);
     free (buffer);
 
     weechat_relay_msg_free (msg);

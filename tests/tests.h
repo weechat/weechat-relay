@@ -35,45 +35,86 @@
     0x01,                                                               \
     0x01, 0x02, 0x03
 
-#define MESSAGE_NOT_COMPRESSED                                          \
-    0x00, 0x00, 0x00, 0xB5,                                             \
-    0x00,                                                               \
-    0xFF, 0xFF, 0xFF, 0xFF, 0x63, 0x68, 0x72, 0x41, 0x69, 0x6E,         \
-    0x74, 0x00, 0x01, 0xE2, 0x40, 0x69, 0x6E, 0x74, 0xFF, 0xFE,         \
-    0x1D, 0xC0, 0x6C, 0x6F, 0x6E, 0x0A, 0x31, 0x32, 0x33, 0x34,         \
-    0x35, 0x36, 0x37, 0x38, 0x39, 0x30, 0x6C, 0x6F, 0x6E, 0x0B,         \
-    0x2D, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39,         \
-    0x30, 0x73, 0x74, 0x72, 0x00, 0x00, 0x00, 0x08, 0x61, 0x20,         \
-    0x73, 0x74, 0x72, 0x69, 0x6E, 0x67, 0x73, 0x74, 0x72, 0x00,         \
-    0x00, 0x00, 0x00, 0x73, 0x74, 0x72, 0xFF, 0xFF, 0xFF, 0xFF,         \
-    0x62, 0x75, 0x66, 0x00, 0x00, 0x00, 0x06, 0x62, 0x75, 0x66,         \
-    0x66, 0x65, 0x72, 0x62, 0x75, 0x66, 0xFF, 0xFF, 0xFF, 0xFF,         \
-    0x70, 0x74, 0x72, 0x08, 0x31, 0x32, 0x33, 0x34, 0x61, 0x62,         \
-    0x63, 0x64, 0x70, 0x74, 0x72, 0x01, 0x30, 0x74, 0x69, 0x6D,         \
-    0x0A, 0x31, 0x33, 0x32, 0x31, 0x39, 0x39, 0x33, 0x34, 0x35,         \
-    0x36, 0x61, 0x72, 0x72, 0x73, 0x74, 0x72, 0x00, 0x00, 0x00,         \
-    0x02, 0x00, 0x00, 0x00, 0x03, 0x61, 0x62, 0x63, 0x00, 0x00,         \
-    0x00, 0x02, 0x64, 0x65, 0x61, 0x72, 0x72, 0x69, 0x6E, 0x74,         \
-    0x00, 0x00, 0x00, 0x03, 0x00, 0x00, 0x00, 0x7B, 0x00, 0x00,         \
-    0x01, 0xC8, 0x00, 0x00, 0x03, 0x15
+#define LOREM_IPSUM_4096                                                      \
+    "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aliquam dictum" \
+    "dolor non egestas mollis. Duis condimentum ipsum eu metus aliquet, id f" \
+    "ringilla sem lobortis. Integer tellus nisi, pretium ut orci eu, pulvina" \
+    "r dapibus leo. Quisque dapibus urna rutrum, sagittis lorem eget, dapibu" \
+    "s odio. Ut ultrices, orci maximus dapibus pharetra, tortor libero volut" \
+    "pat dui, nec bibendum lectus dolor vitae erat. In hac habitasse platea " \
+    "dictumst. Aliquam elementum sem ac augue bibendum, ac scelerisque liber" \
+    "o consequat. Aliquam ultrices mauris vel ipsum finibus elementum. In co" \
+    "nvallis sit amet nunc in blandit. Maecenas fringilla elit sed elit cons" \
+    "ectetur, in ultrices lacus vulputate. Pellentesque eget auctor lectus. " \
+    "Ut vitae lacus facilisis, lacinia velit id, interdum nisl. Morbi vitae " \
+    "finibus justo, sit amet dictum diam. Curabitur commodo mauris quis sapi" \
+    "en eleifend rutrum. Morbi accumsan ut tellus ut placerat. Integer ante " \
+    "sapien, maximus eget ex sed, rutrum dignissim mauris. Maecenas ut posue" \
+    "re tortor. Nunc ut elit neque. Fusce vulputate leo justo, et tempus eni" \
+    "m tincidunt eu. Sed vel maximus nisi, sit amet gravida turpis. Suspendi" \
+    "sse potenti. Cras arcu magna, egestas quis pellentesque ac, tincidunt u" \
+    "t felis. Sed non nibh vitae enim ornare dignissim sed ac sem. In in mat" \
+    "tis est. Integer sem tellus, auctor eu varius non, facilisis eget quam." \
+    "Cras ac purus non odio sollicitudin tincidunt vitae ultrices nunc. Phas" \
+    "ellus aliquam leo vitae egestas vulputate. Nulla facilisi. Fusce enim o" \
+    "rci, dapibus eu purus vel, commodo porttitor turpis. Nunc sodales, ligu" \
+    "la tincidunt malesuada euismod, felis ligula imperdiet dui, at cursus i" \
+    "psum lacus sed sapien. Vestibulum vehicula risus eu mi cursus imperdiet" \
+    "quis vel odio. Nulla facilisi. Integer vitae eros turpis. Nulla a augue" \
+    "lacus. Quisque nec egestas orci. Suspendisse aliquet ipsum non nisl eui" \
+    "smod, eget auctor odio lobortis. Morbi et mattis augue. Maecenas alique" \
+    "t ornare lorem, sit amet molestie neque suscipit in. Praesent vel dui o" \
+    "rci. Nunc felis risus, interdum ac placerat sed, rhoncus in ipsum. Pell" \
+    "entesque in diam ut nisi scelerisque ullamcorper. Nunc lacinia accumsan" \
+    "urna, vitae aliquam nunc eleifend et. Aliquam et fermentum neque, et tr" \
+    "istique justo. Integer massa orci, consequat vel libero ut, dictum mole" \
+    "stie sem. Vestibulum eget metus id mi lobortis aliquam. Orci varius nat" \
+    "oque penatibus et magnis dis parturient montes, nascetur ridiculus mus." \
+    "Phasellus maximus dignissim suscipit. Aenean nec sollicitudin ex. Donec" \
+    "auctor sapien condimentum diam egestas scelerisque. Fusce accumsan elem" \
+    "entum felis id rutrum. Vestibulum orci nunc, interdum non purus vestibu" \
+    "lum, sodales varius enim. Mauris nec pellentesque lacus, pulvinar molli" \
+    "s lacus. Nullam at luctus mauris, sit amet finibus nibh. Mauris at lobo" \
+    "rtis erat, sit amet euismod neque. Integer hendrerit est nec est commod" \
+    "o, ac pellentesque metus aliquam. Nam quam nunc, posuere ut neque vel, " \
+    "egestas commodo mauris. Curabitur aliquam fringilla nisl, sed viverra n" \
+    "unc tristique eu. Fusce non eleifend leo. Pellentesque malesuada lorem " \
+    "finibus felis vulputate convallis. Nunc semper justo non ipsum consequa" \
+    "t pulvinar. Proin mi urna, congue eget nunc in, condimentum feugiat nib" \
+    "h. Vivamus rhoncus varius bibendum. Aliquam sit amet neque accumsan, fr" \
+    "ingilla est eu, fermentum magna. Nulla sit amet nunc in nisl sodales ph" \
+    "aretra. Donec condimentum lacinia metus sit amet iaculis. Vivamus quis " \
+    "odio lacus. Nunc eleifend enim et velit pretium porta. Pellentesque pel" \
+    "lentesque lacus mi, venenatis hendrerit sem egestas vel. Cras vehicula " \
+    "facilisis lacus ac faucibus. Aenean efficitur velit felis, ac faucibus " \
+    "augue tempor sit amet. Maecenas varius mattis condimentum. Quisque nec " \
+    "ornare lectus. Donec id tristique sapien. Duis eget ante consectetur, d" \
+    "ictum libero sed, iaculis sapien. Donec nec tempus magna. Sed lacinia m" \
+    "agna sed arcu maximus, quis auctor ante aliquet. Nam vitae hendrerit le" \
+    "ctus, blandit condimentum odio. Nullam euismod lacus a erat semper, ut " \
+    "molestie risus consectetur. Nam mattis dui risus, nec tincidunt sem sem" \
+    "per ut. Quisque hendrerit mattis urna ida."
 
-#define MESSAGE_COMPRESSED_ZLIB                                         \
-    0x00, 0x00, 0x00, 0x91,                                             \
-    0x01,                                                               \
-    0x78, 0x9C, 0xFB, 0xFF, 0xFF, 0xFF, 0xFF, 0xE4, 0x8C, 0x22,         \
-    0xC7, 0xCC, 0xBC, 0x12, 0x06, 0xC6, 0x47, 0x0E, 0x40, 0xEA,         \
-    0xFF, 0x3F, 0xD9, 0x03, 0x39, 0xF9, 0x79, 0x5C, 0x86, 0x46,         \
-    0xC6, 0x26, 0xA6, 0x66, 0xE6, 0x16, 0x96, 0x06, 0x40, 0x1E,         \
-    0xB7, 0x2E, 0x82, 0x5B, 0x5C, 0x52, 0xC4, 0xC0, 0xC0, 0xC0,         \
-    0x91, 0xA8, 0x00, 0x64, 0x64, 0xE6, 0xA5, 0x43, 0xB8, 0x0C,         \
-    0x40, 0x0A, 0x68, 0xD4, 0xFF, 0xA4, 0xD2, 0x34, 0x20, 0x87,         \
-    0x0D, 0x48, 0xA5, 0xA5, 0x16, 0x01, 0x49, 0x90, 0x58, 0x41,         \
-    0x49, 0x11, 0x07, 0x48, 0x7B, 0x62, 0x52, 0x72, 0x0A, 0x90,         \
-    0xCD, 0x68, 0x50, 0x92, 0x99, 0xCB, 0x65, 0x68, 0x6C, 0x64,         \
-    0x68, 0x69, 0x09, 0x32, 0x33, 0xB1, 0xA8, 0x08, 0x62, 0x06,         \
-    0x13, 0x10, 0x33, 0x03, 0x15, 0x81, 0x98, 0x29, 0xA9, 0x40,         \
-    0x61, 0x90, 0xA3, 0x80, 0x42, 0x40, 0x5C, 0xCD, 0xC0, 0xC0,         \
-    0x78, 0x02, 0xC8, 0x14, 0x05, 0x00, 0x3B, 0xD4, 0x38, 0x34
+#define MESSAGE_BUILD_FAKE(msg)                                         \
+    msg = weechat_relay_msg_new ("test");                               \
+    weechat_relay_msg_add_type (msg, WEECHAT_RELAY_OBJ_TYPE_CHAR);      \
+    weechat_relay_msg_add_char (msg, 'A');                              \
+    weechat_relay_msg_add_type (msg, WEECHAT_RELAY_OBJ_TYPE_CHAR);      \
+    weechat_relay_msg_add_char (msg, 'Z');                              \
+    weechat_relay_msg_add_type (msg, WEECHAT_RELAY_OBJ_TYPE_INTEGER);   \
+    weechat_relay_msg_add_int (msg, 123456);                            \
+    weechat_relay_msg_add_type (msg, WEECHAT_RELAY_OBJ_TYPE_INTEGER);   \
+    weechat_relay_msg_add_int (msg, -987654);                           \
+    weechat_relay_msg_add_type (msg, WEECHAT_RELAY_OBJ_TYPE_LONG);      \
+    weechat_relay_msg_add_long (msg, 1234567890L);                      \
+    weechat_relay_msg_add_type (msg, WEECHAT_RELAY_OBJ_TYPE_LONG);      \
+    weechat_relay_msg_add_long (msg, -9876543210L);                     \
+    weechat_relay_msg_add_type (msg, WEECHAT_RELAY_OBJ_TYPE_STRING);    \
+    weechat_relay_msg_add_string (msg, LOREM_IPSUM_4096);               \
+    weechat_relay_msg_add_type (msg, WEECHAT_RELAY_OBJ_TYPE_POINTER);   \
+    weechat_relay_msg_add_pointer (msg, (void *)0x1234abcd);            \
+    weechat_relay_msg_add_type (msg, WEECHAT_RELAY_OBJ_TYPE_TIME);      \
+    weechat_relay_msg_add_time (msg, 1640091762);
 
 #define OBJ_CHAR 'a'
 #define MESSAGE_CHAR                                                    \

@@ -35,8 +35,15 @@
 
 #include <gnutls/gnutls.h>
 #include <zlib.h>
+#include <zstd.h>
 
 #include "weechat-relay.h"
+
+
+const char *weechat_relay_obj_types_str[WEECHAT_RELAY_NUM_OBJ_TYPES] = {
+    "chr", "int", "lon", "str", "buf", "ptr", "tim", "htb",
+    "hda", "inf", "inl", "arr",
+};
 
 
 /*
@@ -45,10 +52,10 @@
  * Returns pointer to new message, NULL if error.
  */
 
-struct t_weechat_relay_msg_buf *
+struct t_weechat_relay_msg *
 weechat_relay_msg_new (const char *id)
 {
-    struct t_weechat_relay_msg_buf *new_msg;
+    struct t_weechat_relay_msg *new_msg;
 
     new_msg = malloc (sizeof (*new_msg));
     if (!new_msg)
@@ -75,6 +82,29 @@ weechat_relay_msg_new (const char *id)
 }
 
 /*
+ * Sets some bytes in a message.
+ *
+ * Returns:
+ *   1: OK
+ *   0: error
+ */
+
+int
+weechat_relay_msg_set_bytes (struct t_weechat_relay_msg *msg,
+                             int position, const void *buffer, size_t size)
+{
+    if (!msg || !msg->data || (position < 0) || !buffer || (size == 0)
+        || (position + size) > msg->data_size)
+    {
+        return 0;
+    }
+
+    memcpy (msg->data + position, buffer, size);
+
+    return 1;
+}
+
+/*
  * Adds some bytes to a message.
  *
  * Returns:
@@ -83,11 +113,12 @@ weechat_relay_msg_new (const char *id)
  */
 
 int
-weechat_relay_msg_add_bytes (struct t_weechat_relay_msg_buf *msg,
+weechat_relay_msg_add_bytes (struct t_weechat_relay_msg *msg,
                              const void *buffer, size_t size)
 {
     char *ptr;
     size_t old_data_alloc;
+    uint32_t size32;
 
     if (!msg || !msg->data || !buffer || (size == 0))
         return 0;
@@ -115,28 +146,8 @@ weechat_relay_msg_add_bytes (struct t_weechat_relay_msg_buf *msg,
     memcpy (msg->data + msg->data_size, buffer, size);
     msg->data_size += size;
 
-    return 1;
-}
-
-/*
- * Sets some bytes in a message.
- *
- * Returns:
- *   1: OK
- *   0: error
- */
-
-int
-weechat_relay_msg_set_bytes (struct t_weechat_relay_msg_buf *msg,
-                             int position, const void *buffer, size_t size)
-{
-    if (!msg || !msg->data || (position < 0) || !buffer || (size == 0)
-        || (position + size) > msg->data_size)
-    {
-        return 0;
-    }
-
-    memcpy (msg->data + position, buffer, size);
+    size32 = htonl ((uint32_t)msg->data_size);
+    weechat_relay_msg_set_bytes (msg, 0, &size32, 4);
 
     return 1;
 }
@@ -150,12 +161,13 @@ weechat_relay_msg_set_bytes (struct t_weechat_relay_msg_buf *msg,
  */
 
 int
-weechat_relay_msg_add_type (struct t_weechat_relay_msg_buf *msg,
-                            const char *string)
+weechat_relay_msg_add_type (struct t_weechat_relay_msg *msg,
+                            enum t_weechat_relay_obj_type obj_type)
 {
-    return weechat_relay_msg_add_bytes (msg,
-                                        string,
-                                        (string) ? strlen (string) : 0);
+    return weechat_relay_msg_add_bytes (
+        msg,
+        weechat_relay_obj_types_str[obj_type],
+        strlen (weechat_relay_obj_types_str[obj_type]));
 }
 
 /*
@@ -167,7 +179,7 @@ weechat_relay_msg_add_type (struct t_weechat_relay_msg_buf *msg,
  */
 
 int
-weechat_relay_msg_add_char (struct t_weechat_relay_msg_buf *msg, char c)
+weechat_relay_msg_add_char (struct t_weechat_relay_msg *msg, char c)
 {
     return weechat_relay_msg_add_bytes (msg, &c, 1);
 }
@@ -181,7 +193,7 @@ weechat_relay_msg_add_char (struct t_weechat_relay_msg_buf *msg, char c)
  */
 
 int
-weechat_relay_msg_add_int (struct t_weechat_relay_msg_buf *msg, int value)
+weechat_relay_msg_add_int (struct t_weechat_relay_msg *msg, int value)
 {
     uint32_t value32;
 
@@ -199,7 +211,7 @@ weechat_relay_msg_add_int (struct t_weechat_relay_msg_buf *msg, int value)
  */
 
 int
-weechat_relay_msg_add_long (struct t_weechat_relay_msg_buf *msg, long value)
+weechat_relay_msg_add_long (struct t_weechat_relay_msg *msg, long value)
 {
     char str_long[128];
     unsigned char length;
@@ -220,7 +232,7 @@ weechat_relay_msg_add_long (struct t_weechat_relay_msg_buf *msg, long value)
  */
 
 int
-weechat_relay_msg_add_string (struct t_weechat_relay_msg_buf *msg,
+weechat_relay_msg_add_string (struct t_weechat_relay_msg *msg,
                               const char *string)
 {
     size_t length;
@@ -250,7 +262,7 @@ weechat_relay_msg_add_string (struct t_weechat_relay_msg_buf *msg,
  */
 
 int
-weechat_relay_msg_add_buffer (struct t_weechat_relay_msg_buf *msg,
+weechat_relay_msg_add_buffer (struct t_weechat_relay_msg *msg,
                               const void *buffer, size_t length)
 {
     if (buffer)
@@ -277,7 +289,7 @@ weechat_relay_msg_add_buffer (struct t_weechat_relay_msg_buf *msg,
  */
 
 int
-weechat_relay_msg_add_pointer (struct t_weechat_relay_msg_buf *msg,
+weechat_relay_msg_add_pointer (struct t_weechat_relay_msg *msg,
                                void *pointer)
 {
     char str_pointer[128];
@@ -300,7 +312,7 @@ weechat_relay_msg_add_pointer (struct t_weechat_relay_msg_buf *msg,
  */
 
 int
-weechat_relay_msg_add_time (struct t_weechat_relay_msg_buf *msg, time_t time)
+weechat_relay_msg_add_time (struct t_weechat_relay_msg *msg, time_t time)
 {
     char str_time[128];
     unsigned char length;
@@ -313,7 +325,7 @@ weechat_relay_msg_add_time (struct t_weechat_relay_msg_buf *msg, time_t time)
 }
 
 /*
- * Compresses a message.
+ * Compresses a message with zlib.
  *
  * The variable "size" is set with the size of buffer returned (in bytes).
  *
@@ -321,9 +333,9 @@ weechat_relay_msg_add_time (struct t_weechat_relay_msg_buf *msg, time_t time)
  */
 
 void *
-weechat_relay_msg_compress (struct t_weechat_relay_msg_buf *msg,
-                            int compression_level,
-                            size_t *size)
+weechat_relay_msg_compress_zlib (struct t_weechat_relay_msg *msg,
+                                 int compression_level,
+                                 size_t *size)
 {
     int rc;
     Bytef *dest;
@@ -363,11 +375,61 @@ weechat_relay_msg_compress (struct t_weechat_relay_msg_buf *msg,
 }
 
 /*
+ * Compresses a message with zstd.
+ *
+ * The variable "size" is set with the size of buffer returned (in bytes).
+ *
+ * Returns a pointer to the compressed message, NULL if error.
+ */
+
+void *
+weechat_relay_msg_compress_zstd (struct t_weechat_relay_msg *msg,
+                                 int compression_level,
+                                 size_t *size)
+{
+    Bytef *dest;
+    size_t dest_size, comp_size;
+    uint32_t size32;
+
+    if (!msg || !size)
+        return NULL;
+
+    *size = 0;
+
+    dest_size = ZSTD_compressBound (msg->data_size - 5);
+    dest = malloc (dest_size + 5);
+    if (!dest)
+        return NULL;
+
+    comp_size = ZSTD_compress(
+        dest + 5,
+        dest_size,
+        (void *)(msg->data + 5),
+        msg->data_size - 5,
+        compression_level);
+
+    if (comp_size == 0)
+    {
+        free (dest);
+        return NULL;
+    }
+
+    *size = comp_size + 5;
+
+    /* set size and compression flag */
+    size32 = htonl ((uint32_t)(*size));
+    memcpy (dest, &size32, 4);
+    dest[4] = WEECHAT_RELAY_COMPRESSION_ZSTD;
+
+    return dest;
+}
+
+/*
  * Frees a message.
  */
 
 void
-weechat_relay_msg_free (struct t_weechat_relay_msg_buf *msg)
+weechat_relay_msg_free (struct t_weechat_relay_msg *msg)
 {
     if (!msg)
         return;

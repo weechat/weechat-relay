@@ -26,7 +26,35 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <time.h>
+#include <sys/time.h>
 
+
+/*
+ * Calculates difference between two timeval structures.
+ *
+ * Returns difference in microseconds.
+ */
+
+long long
+timeval_diff (struct timeval *tv1, struct timeval *tv2)
+{
+    long long diff_sec, diff_usec;
+
+    if (!tv1 || !tv2)
+        return 0;
+
+    diff_sec = tv2->tv_sec - tv1->tv_sec;
+    diff_usec = tv2->tv_usec - tv1->tv_usec;
+
+    if (diff_usec < 0)
+    {
+        diff_usec += 1000000;
+        diff_sec--;
+    }
+
+    return (diff_sec * 1000000) + diff_usec;
+}
 
 /*
  * Dumps a data buffer as hexadecimal + ascii.

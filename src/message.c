@@ -28,6 +28,7 @@
 #include <stdarg.h>
 #include <string.h>
 #include <time.h>
+#include <sys/time.h>
 
 #include "lib/weechat-relay.h"
 
@@ -348,30 +349,40 @@ relay_message_display_object (struct t_weechat_relay_obj *obj)
 void
 relay_message_display (const void *buffer, size_t size)
 {
-    struct t_weechat_relay_msg *msg;
+    struct t_weechat_relay_parsed_msg *parsed_msg;
     char *str_dump, str_format[32], str_spaces[1024];
+    struct timeval tv1, tv2;
+    long long time_diff;
     int i, ratio;
 
     parse_indent = 4;
 
-    msg = weechat_relay_parse_message (buffer, size);
-    if (!msg)
+    gettimeofday (&tv1, NULL);
+
+    parsed_msg = weechat_relay_parse_message (buffer, size);
+    if (!parsed_msg)
     {
         relay_message_printf ("ERROR: parse of message failed\n");
         return;
     }
 
+    gettimeofday (&tv2, NULL);
+    time_diff = timeval_diff (&tv1, &tv2);
+
     /* message info */
-    if (msg->compression)
+    if (parsed_msg->compression)
     {
-        ratio = 100 - (int)((msg->length_data * 100)
-                            / msg->length_data_decompressed);
-        relay_message_printf ("message (length: %d bytes, data: %d bytes, "
-                              "decompressed: %d bytes, ratio: %d%%):\n",
-                              msg->length,
-                              msg->length_data,
-                              msg->length_data_decompressed,
-                              ratio);
+        ratio = 100 - (int)((parsed_msg->length_data * 100)
+                            / parsed_msg->length_data_decompressed);
+        relay_message_printf (
+            "message (length: %d bytes, data: %d bytes, "
+            "decompressed (%s): %d bytes, ratio: %d%%, parsed in %.2fms):\n",
+            parsed_msg->length,
+            parsed_msg->length_data,
+            weechat_relay_compression_string[parsed_msg->compression],
+            parsed_msg->length_data_decompressed,
+            ratio,
+            ((float)time_diff) / 1000);
 
         if (relay_cli_debug >= 2)
         {
@@ -379,13 +390,13 @@ relay_message_display (const void *buffer, size_t size)
             snprintf (str_format, sizeof (str_format),
                       "%%-%ds", parse_indent + 2);
             snprintf (str_spaces, sizeof (str_spaces), str_format, " ");
-            str_dump = string_hex_dump (msg->data_decompressed,
-                                        msg->length_data_decompressed,
+            str_dump = string_hex_dump (parsed_msg->data_decompressed,
+                                        parsed_msg->length_data_decompressed,
                                         16, str_spaces, NULL);
             if (str_dump)
             {
                 relay_message_printf ("decompressed data (%d bytes):\n",
-                                      msg->length_data_decompressed);
+                                      parsed_msg->length_data_decompressed);
                 printf ("%s\n", str_dump);
                 free (str_dump);
             }
@@ -395,23 +406,27 @@ relay_message_display (const void *buffer, size_t size)
     else
     {
         relay_message_printf ("message (length: %d bytes, data: %d bytes, "
-                              "no compression):\n",
-                              msg->length,
-                              msg->length_data);
+                              "no compression, parsed in %.2fms):\n",
+                              parsed_msg->length,
+                              parsed_msg->length_data,
+                              ((float)time_diff) / 1000);
     }
 
     parse_indent += 2;
 
-    if (msg->id)
-        relay_message_printf ("id: \"%s\"\n", msg->id);
+    if (parsed_msg->id)
+        relay_message_printf ("id: \"%s\"\n", parsed_msg->id);
     else
         relay_message_printf ("id: NULL\n");
 
     /* message objects */
-    for (i = 0; i < msg->num_objects; i++)
+    if (!parsed_msg->id || (strcmp (parsed_msg->id, "quiet") != 0))
     {
-        relay_message_display_object (msg->objects[i]);
+        for (i = 0; i < parsed_msg->num_objects; i++)
+        {
+            relay_message_display_object (parsed_msg->objects[i]);
+        }
     }
 
-    weechat_relay_parse_msg_free (msg);
+    weechat_relay_parse_msg_free (parsed_msg);
 }
