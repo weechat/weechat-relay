@@ -436,12 +436,16 @@ TEST(LibMessage, CompressZstd)
 
     /* compression level 1 (highest speed) */
     buffer = weechat_relay_msg_compress_zstd (msg, 1, &size);
-    LONGS_EQUAL(1724, size);
+    CHECK(buffer);
+    CHECK(size > 0);
+    CHECK(size < 4186);
     free (buffer);
 
     /* compression level 9 (highest compression) */
     buffer = weechat_relay_msg_compress_zstd (msg, 19, &size);
-    LONGS_EQUAL(1665, size);
+    CHECK(buffer);
+    CHECK(size > 0);
+    CHECK(size < 4186);
     free (buffer);
 
     weechat_relay_msg_free (msg);
