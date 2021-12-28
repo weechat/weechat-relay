@@ -23,9 +23,6 @@
 
 extern "C"
 {
-#ifndef HAVE_CONFIG_H
-#define HAVE_CONFIG_H
-#endif
 #include <string.h>
 #include "src/util.h"
 }

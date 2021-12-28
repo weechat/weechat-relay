@@ -77,8 +77,7 @@ find_package(GnuTLS REQUIRED)
 include_directories(${GNUTLS_INCLUDE_DIR})
 list(APPEND LINK_LIBS ${GNUTLS_LIBRARY})
 
-configure_file(config.h.cmake config.h @ONLY)
-add_definitions(-DHAVE_CONFIG_H)
+add_definitions(-DPACKAGE_NAME="${PROJECT_NAME}")
 
 configure_file(lib/weechat-relay.h.cmake lib/weechat-relay.h @ONLY)
 

@@ -23,13 +23,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-extern "C"
-{
-#ifndef HAVE_CONFIG_H
-#define HAVE_CONFIG_H
-#endif
-}
-
 #include "CppUTest/CommandLineTestRunner.h"
 
 /* import tests from libs */
