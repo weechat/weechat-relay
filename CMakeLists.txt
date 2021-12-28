@@ -36,55 +36,58 @@ execute_process(COMMAND ${CMAKE_SOURCE_DIR}/version.sh devel-minor OUTPUT_VARIAB
 execute_process(COMMAND ${CMAKE_SOURCE_DIR}/version.sh devel-patch OUTPUT_VARIABLE VERSION_PATCH OUTPUT_STRIP_TRAILING_WHITESPACE)
 execute_process(COMMAND ${CMAKE_SOURCE_DIR}/version.sh devel-number OUTPUT_VARIABLE VERSION_NUMBER OUTPUT_STRIP_TRAILING_WHITESPACE)
 
+# directories
 if(NOT DEFINED LIBDIR)
   set(LIBDIR ${CMAKE_INSTALL_PREFIX}/lib)
 endif()
-
 if(NOT DEFINED SHAREDIR)
   set(SHAREDIR ${CMAKE_INSTALL_PREFIX}/share)
 endif()
-
 if(NOT DEFINED MANDIR)
   set(MANDIR ${SHAREDIR}/man)
 endif()
-
 if(NOT DEFINED LOCALEDIR)
   set(LOCALEDIR ${SHAREDIR}/locale)
 endif()
-
 if(DEFINED INCLUDEDIR)
   set(INCLUDEDIR ${INCLUDEDIR}/${PROJECT_NAME})
 else()
   set(INCLUDEDIR ${CMAKE_INSTALL_PREFIX}/include/${PROJECT_NAME})
 endif()
 
+# build options
 option(BUILD_CLI     "Build the testing CLI program" ON)
 option(BUILD_DOC     "Enable build of documentation" ON)
 option(BUILD_MAN     "Enable build of man pages"     ON)
 option(BUILD_TESTS   "Build tests"                   OFF)
 option(CODE_COVERAGE "Enable code coverage"          OFF)
 
-add_library(coverage_config INTERFACE)
+# definitions
+add_definitions(-DPACKAGE_NAME="${PROJECT_NAME}")
 
 set(LINK_LIBS)
 
+# code coverage
+add_library(coverage_config INTERFACE)
 if(CODE_COVERAGE)
   target_compile_options(coverage_config INTERFACE -O0 -g --coverage)
   target_link_libraries(coverage_config INTERFACE --coverage)
 endif()
 
+# required libs
 find_package(GnuTLS REQUIRED)
 include_directories(${GNUTLS_INCLUDE_DIR})
 list(APPEND LINK_LIBS ${GNUTLS_LIBRARY})
 
-add_definitions(-DPACKAGE_NAME="${PROJECT_NAME}")
-
+# build weechat-relay.h
 configure_file(lib/weechat-relay.h.cmake lib/weechat-relay.h @ONLY)
 
+# sub-directories
 add_subdirectory(lib)
 add_subdirectory(src)
 add_subdirectory(doc)
 
+# tests
 if(BUILD_TESTS)
   find_package(CppUTest)
   if(CPPUTEST_FOUND)
@@ -100,6 +103,7 @@ add_custom_target(version_git ALL
   COMMAND "${CMAKE_CURRENT_SOURCE_DIR}/tools/git-version.sh" "${CMAKE_CURRENT_SOURCE_DIR}" "${VERSION}" "config-git.h"
   WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}")
 
+# add target "dist"
 add_custom_target(dist
   "${CMAKE_CURRENT_SOURCE_DIR}/tools/makedist.sh" "${VERSION}" "HEAD" "${CMAKE_CURRENT_BINARY_DIR}"
   WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
