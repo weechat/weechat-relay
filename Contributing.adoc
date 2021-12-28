@@ -28,8 +28,8 @@ please include:
 * The *library version*: output of `weechat-relay-cli -v`
 * The *version of the remote WeeChat*: the output of `/v` in WeeChat,
   for example: _WeeChat 2.5-dev (git: v2.4-67-g413221bc9)_. +
-* Your *operating system*: its name and version (examples: Linux Debian Wheezy,
-  FreeBSD 10.0, Windows/Cygwin 64-bit, Windows/Ubuntu 64-bit...).
+* Your *operating system*: its name and version (examples: Linux Debian Bullseye,
+  FreeBSD 13.0, Windows/Cygwin 64-bit, Windows/Ubuntu 64-bit...).
 * The *steps to reproduce*: if possible, please include a reproducible example:
   explain the steps which led you to the problem.
 * The *gdb's backtrace* (only for a crash): if you can reproduce the crash
