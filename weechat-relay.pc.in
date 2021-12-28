@@ -8,3 +8,4 @@ Description: WeeChat Relay library
 URL: https://weechat.org/
 Version: @VERSION@
 Cflags: -I${includedir}/@PROJECT_NAME@
+Libs: -L${libdir} -lweechatrelay
