@@ -22,10 +22,8 @@ Depends:
     ${shlibs:Depends}
 Suggests: weechatrelay-devel-bin (= ${source:Version})
 Conflicts: libweechatrelay
-Description: WeeChat Relay is a C library to communicate between WeeChat and
- a client using the "weechat" relay protocol.
- .
- This package provides the library to communicate between WeeChat and a client
+Description: C library for communication between WeeChat/relay and clients
+ This package provides the library to communicate between WeeChat and clients
  using the "weechat" relay protocol:
  - build and send commands from a client to WeeChat
  - build and send binary messages from WeeChat to a client
@@ -41,9 +39,7 @@ Suggests:
     weechatrelay-devel-bin (= ${source:Version}),
     weechatrelay-devel-doc (= ${source:Version})
 Conflicts: libweechatrelay-dev
-Description: WeeChat Relay is a C library to communicate between WeeChat and
- a client using the "weechat" relay protocol.
- .
+Description: C library for communication between WeeChat/relay and clients
  This package provides the WeeChat Relay development files.
 
 Package: weechatrelay-devel-bin
@@ -54,9 +50,7 @@ Depends:
     libweechatrelay-devel (= ${binary:Version})
 Suggests: weechatrelay-devel-doc (= ${source:Version})
 Conflicts: weechatrelay-bin
-Description: WeeChat Relay is a C library to communicate between WeeChat and
- a client using the "weechat" relay protocol.
- .
+Description: C library for communication between WeeChat/relay and clients
  This package contains a command-line interface to the WeeChat Relay library,
  which can be used for tests, debug or in shell scripts.
 
@@ -65,7 +59,5 @@ Section: doc
 Architecture: all
 Depends: ${misc:Depends}
 Conflicts: weechatrelay-doc
-Description: WeeChat Relay is a C library to communicate between WeeChat and
- a client using the "weechat" relay protocol.
- .
+Description: C library for communication between WeeChat/relay and clients
  This package contains the html documentation for WeeChat Relay.
