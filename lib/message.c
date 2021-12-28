@@ -87,9 +87,9 @@ weechat_relay_msg_new (const char *id)
 
 int
 weechat_relay_msg_set_bytes (struct t_weechat_relay_msg *msg,
-                             int position, const void *buffer, size_t size)
+                             size_t position, const void *buffer, size_t size)
 {
-    if (!msg || !msg->data || (position < 0) || !buffer || (size == 0)
+    if (!msg || !msg->data || !buffer || (size == 0)
         || (position + size) > msg->data_size)
     {
         return 0;

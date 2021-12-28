@@ -268,7 +268,7 @@ extern struct t_weechat_relay_msg *weechat_relay_msg_new (const char *id);
 extern int weechat_relay_msg_add_bytes (struct t_weechat_relay_msg *msg,
                                         const void *buffer, size_t size);
 extern int weechat_relay_msg_set_bytes (struct t_weechat_relay_msg *msg,
-                                        int position, const void *buffer,
+                                        size_t position, const void *buffer,
                                         size_t size);
 extern int weechat_relay_msg_add_type (struct t_weechat_relay_msg *msg,
                                        enum t_weechat_relay_obj_type obj_type);

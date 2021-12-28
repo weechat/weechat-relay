@@ -110,7 +110,6 @@ TEST(LibMessage, SetBytes)
     LONGS_EQUAL(0, weechat_relay_msg_set_bytes (NULL, 0, NULL, 0));
     LONGS_EQUAL(0, weechat_relay_msg_set_bytes (msg, 0, NULL, 0));
     LONGS_EQUAL(0, weechat_relay_msg_set_bytes (msg, 0, str1, 0));
-    LONGS_EQUAL(0, weechat_relay_msg_set_bytes (msg, -1, str1, 1));
     LONGS_EQUAL(0, weechat_relay_msg_set_bytes (msg, 0, str1,
                                                 WEECHAT_RELAY_MSG_INITIAL_ALLOC + 1));
 
