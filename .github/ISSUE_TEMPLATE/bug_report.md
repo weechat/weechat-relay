@@ -36,3 +36,5 @@ labels: bug
 <!-- MANDATORY INFO: -->
 
 - weechat-relay version (output of `weechat-relay-cli --version`): 
+- WeeChat version (output of `/v` in WeeChat): 
+- OS, distribution and version: 
