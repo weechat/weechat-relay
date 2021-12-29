@@ -21,6 +21,7 @@
 #define WEECHAT_RELAY_H
 
 #include <stdint.h>
+#include <time.h>
 
 /* WeeChat Relay version */
 
