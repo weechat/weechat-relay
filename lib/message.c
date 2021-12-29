@@ -36,12 +36,6 @@
 #include "weechat-relay.h"
 
 
-const char *weechat_relay_obj_types_str[WEECHAT_RELAY_NUM_OBJ_TYPES] = {
-    "chr", "int", "lon", "str", "buf", "ptr", "tim", "htb",
-    "hda", "inf", "inl", "arr",
-};
-
-
 /*
  * Builds a new message (for sending to client).
  *

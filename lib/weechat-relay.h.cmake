@@ -193,8 +193,12 @@ struct t_weechat_relay_session
     size_t buffer_size;                /* size of buffer                    */
 };
 
-extern const char *weechat_relay_compression_string[];
+/* arrays */
+
+extern const char *weechat_relay_compression_string[WEECHAT_RELAY_NUM_COMPRESSIONS];
 extern const char *weechat_relay_obj_types_str[WEECHAT_RELAY_NUM_OBJ_TYPES];
+
+/* Relay session */
 
 extern struct t_weechat_relay_session *weechat_relay_session_init (int sock,
                                                                    void *gnutls_session);
@@ -210,10 +214,10 @@ extern void weechat_relay_session_free (struct t_weechat_relay_session *session)
 
 /* Relay commands (client -> WeeChat) */
 
-extern ssize_t weechat_relay_cmd (struct t_weechat_relay_session *session,
-                                  const char *msg_id,
-                                  const char *command,
-                                  const char *arguments[]);
+extern ssize_t weechat_relay_cmd_send (struct t_weechat_relay_session *session,
+                                       const char *msg_id,
+                                       const char *command,
+                                       const char *arguments[]);
 extern ssize_t weechat_relay_cmd_handshake (struct t_weechat_relay_session *session,
                                             const char *msg_id,
                                             const char *password_hash_algo,
@@ -294,7 +298,7 @@ extern void *weechat_relay_msg_compress_zstd (struct t_weechat_relay_msg *msg,
                                               size_t *size);
 extern void weechat_relay_msg_free (struct t_weechat_relay_msg *msg);
 
-/* Functions to parse messages */
+/* Functions to parse binary messages sent by WeeChat (client side) */
 
 extern struct t_weechat_relay_parsed_msg *weechat_relay_parse_message (const void *buffer,
                                                                        size_t size);

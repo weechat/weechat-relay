@@ -17,7 +17,13 @@
 # along with WeeChat Relay.  If not, see <https://www.gnu.org/licenses/>.
 #
 
-set(WEECHAT_RELAY_SRC command.c message.c parse.c session.c)
+set(WEECHAT_RELAY_SRC
+  command.c command.h
+  message.c
+  object.c object.h
+  parse.c parse.h
+  session.c
+)
 
 find_package(ZLIB REQUIRED)
 pkg_check_modules(LIBZSTD libzstd)

@@ -65,37 +65,6 @@ TEST(LibMessage, InitFree)
 
 /*
  * Tests functions:
- *   weechat_relay_msg_add_bytes
- */
-
-TEST(LibMessage, AddBytes)
-{
-    struct t_weechat_relay_msg *msg;
-    const char *str = "abc";
-    char buffer[WEECHAT_RELAY_MSG_INITIAL_ALLOC];
-
-    msg = weechat_relay_msg_new ("test");
-
-    LONGS_EQUAL(0, weechat_relay_msg_add_bytes (NULL, NULL, 0));
-    LONGS_EQUAL(0, weechat_relay_msg_add_bytes (msg, NULL, 0));
-    LONGS_EQUAL(0, weechat_relay_msg_add_bytes (msg, str, 0));
-
-    LONGS_EQUAL(1, weechat_relay_msg_add_bytes (msg, str, strlen (str)));
-    LONGS_EQUAL(WEECHAT_RELAY_MSG_INITIAL_ALLOC, msg->data_alloc);
-    LONGS_EQUAL(16, msg->data_size);
-    MEMCMP_EQUAL(msg->data + 13, str, strlen (str));
-
-    memset (buffer, 123, sizeof (buffer));
-    LONGS_EQUAL(1, weechat_relay_msg_add_bytes (msg, buffer, sizeof (buffer)));
-    LONGS_EQUAL(WEECHAT_RELAY_MSG_INITIAL_ALLOC * 2, msg->data_alloc);
-    LONGS_EQUAL(16 + sizeof (buffer), msg->data_size);
-    MEMCMP_EQUAL(msg->data + 16, buffer, sizeof (buffer));
-
-    weechat_relay_msg_free (msg);
-}
-
-/*
- * Tests functions:
  *   weechat_relay_msg_set_bytes
  */
 
@@ -122,6 +91,37 @@ TEST(LibMessage, SetBytes)
     LONGS_EQUAL(WEECHAT_RELAY_MSG_INITIAL_ALLOC, msg->data_alloc);
     LONGS_EQUAL(16, msg->data_size);
     MEMCMP_EQUAL(msg->data + 13, str2, strlen (str2));
+
+    weechat_relay_msg_free (msg);
+}
+
+/*
+ * Tests functions:
+ *   weechat_relay_msg_add_bytes
+ */
+
+TEST(LibMessage, AddBytes)
+{
+    struct t_weechat_relay_msg *msg;
+    const char *str = "abc";
+    char buffer[WEECHAT_RELAY_MSG_INITIAL_ALLOC];
+
+    msg = weechat_relay_msg_new ("test");
+
+    LONGS_EQUAL(0, weechat_relay_msg_add_bytes (NULL, NULL, 0));
+    LONGS_EQUAL(0, weechat_relay_msg_add_bytes (msg, NULL, 0));
+    LONGS_EQUAL(0, weechat_relay_msg_add_bytes (msg, str, 0));
+
+    LONGS_EQUAL(1, weechat_relay_msg_add_bytes (msg, str, strlen (str)));
+    LONGS_EQUAL(WEECHAT_RELAY_MSG_INITIAL_ALLOC, msg->data_alloc);
+    LONGS_EQUAL(16, msg->data_size);
+    MEMCMP_EQUAL(msg->data + 13, str, strlen (str));
+
+    memset (buffer, 123, sizeof (buffer));
+    LONGS_EQUAL(1, weechat_relay_msg_add_bytes (msg, buffer, sizeof (buffer)));
+    LONGS_EQUAL(WEECHAT_RELAY_MSG_INITIAL_ALLOC * 2, msg->data_alloc);
+    LONGS_EQUAL(16 + sizeof (buffer), msg->data_size);
+    MEMCMP_EQUAL(msg->data + 16, buffer, sizeof (buffer));
 
     weechat_relay_msg_free (msg);
 }

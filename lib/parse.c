@@ -29,205 +29,9 @@
 #include <zstd.h>
 
 #include "weechat-relay.h"
+#include "object.h"
+#include "parse.h"
 
-
-struct t_weechat_relay_obj *weechat_relay_parse_read_object (
-    struct t_weechat_relay_parsed_msg *parsed_msg,
-    enum t_weechat_relay_obj_type type);
-
-
-/*
- * Searches type.
- *
- * Returns index of type found (enum t_weechat_relay_obj_type),
- * -1 if not found.
- */
-
-int
-weechat_relay_parse_search_type (const char *type)
-{
-    int i;
-
-    if (!type)
-        return -1;
-
-    for (i = 0; i < WEECHAT_RELAY_NUM_OBJ_TYPES; i++)
-    {
-        if (strcmp (type, weechat_relay_obj_types_str[i]) == 0)
-            return i;
-    }
-
-    return -1;
-}
-
-/*
- * Allocates an object structure.
- *
- * Returns the new object, NULL if error.
- */
-
-struct t_weechat_relay_obj *
-weechat_relay_parse_obj_alloc (enum t_weechat_relay_obj_type type)
-{
-    struct t_weechat_relay_obj *obj;
-
-    obj = calloc (1, sizeof (*obj));
-    if (!obj)
-        return NULL;
-
-    obj->type = type;
-
-    return obj;
-}
-
-/*
- * Frees an object.
- */
-
-void
-weechat_relay_parse_obj_free (struct t_weechat_relay_obj *obj)
-{
-    int i, j;
-
-    if (!obj)
-        return;
-
-    switch (obj->type)
-    {
-        case WEECHAT_RELAY_OBJ_TYPE_CHAR:
-            break;
-        case WEECHAT_RELAY_OBJ_TYPE_INTEGER:
-            break;
-        case WEECHAT_RELAY_OBJ_TYPE_LONG:
-            break;
-        case WEECHAT_RELAY_OBJ_TYPE_STRING:
-            if (obj->value_string)
-                free (obj->value_string);
-            break;
-        case WEECHAT_RELAY_OBJ_TYPE_BUFFER:
-            if (obj->value_buffer.buffer)
-                free (obj->value_buffer.buffer);
-            break;
-        case WEECHAT_RELAY_OBJ_TYPE_POINTER:
-            break;
-        case WEECHAT_RELAY_OBJ_TYPE_TIME:
-            break;
-        case WEECHAT_RELAY_OBJ_TYPE_HASHTABLE:
-            for (i = 0; i < obj->value_hashtable.count; i++)
-            {
-                if (obj->value_hashtable.keys)
-                    weechat_relay_parse_obj_free (obj->value_hashtable.keys[i]);
-                if (obj->value_hashtable.values)
-                    weechat_relay_parse_obj_free (obj->value_hashtable.values[i]);
-            }
-            if (obj->value_hashtable.keys)
-                free (obj->value_hashtable.keys);
-            if (obj->value_hashtable.values)
-                free (obj->value_hashtable.values);
-            break;
-        case WEECHAT_RELAY_OBJ_TYPE_HDATA:
-            if (obj->value_hdata.hpath)
-                free (obj->value_hdata.hpath);
-            if (obj->value_hdata.keys)
-                free (obj->value_hdata.keys);
-            if (obj->value_hdata.hpaths)
-            {
-                for (i = 0; i < obj->value_hdata.num_hpaths; i++)
-                {
-                    if (obj->value_hdata.hpaths[i])
-                        free (obj->value_hdata.hpaths[i]);
-                }
-                free (obj->value_hdata.hpaths);
-            }
-            if (obj->value_hdata.keys_names)
-            {
-                for (i = 0; i < obj->value_hdata.num_keys; i++)
-                {
-                    if (obj->value_hdata.keys_names[i])
-                        free (obj->value_hdata.keys_names[i]);
-                }
-                free (obj->value_hdata.keys_names);
-            }
-            if (obj->value_hdata.keys_types)
-                free (obj->value_hdata.keys_types);
-            for (i = 0; i < obj->value_hdata.count; i++)
-            {
-                if (obj->value_hdata.ppath && obj->value_hdata.ppath[i])
-                {
-                    for (j = 0; j < obj->value_hdata.num_hpaths; j++)
-                    {
-                        weechat_relay_parse_obj_free (
-                            obj->value_hdata.ppath[i][j]);
-                    }
-                    free (obj->value_hdata.ppath[i]);
-                }
-                if (obj->value_hdata.values && obj->value_hdata.values[i])
-                {
-                    for (j = 0; j < obj->value_hdata.num_keys; j++)
-                    {
-                        weechat_relay_parse_obj_free (
-                            obj->value_hdata.values[i][j]);
-                    }
-                    free (obj->value_hdata.values[i]);
-                }
-            }
-            if (obj->value_hdata.ppath)
-                free (obj->value_hdata.ppath);
-            if (obj->value_hdata.values)
-                free (obj->value_hdata.values);
-            break;
-        case WEECHAT_RELAY_OBJ_TYPE_INFO:
-            if (obj->value_info.name)
-                free (obj->value_info.name);
-            if (obj->value_info.value)
-                free (obj->value_info.value);
-            break;
-        case WEECHAT_RELAY_OBJ_TYPE_INFOLIST:
-            if (obj->value_infolist.name)
-                free (obj->value_infolist.name);
-            if (obj->value_infolist.items)
-            {
-                for (i = 0; i < obj->value_infolist.count; i++)
-                {
-                    if (obj->value_infolist.items[i])
-                    {
-                        if (obj->value_infolist.items[i]->variables)
-                        {
-                            for (j = 0; j < obj->value_infolist.items[i]->count; j++)
-                            {
-                                if (obj->value_infolist.items[i]->variables[j])
-                                {
-                                    if (obj->value_infolist.items[i]->variables[j]->name)
-                                        free (obj->value_infolist.items[i]->variables[j]->name);
-                                    weechat_relay_parse_obj_free (obj->value_infolist.items[i]->variables[j]->obj);
-                                    free (obj->value_infolist.items[i]->variables[j]);
-                                }
-                            }
-                            free (obj->value_infolist.items[i]->variables);
-                        }
-                        free (obj->value_infolist.items[i]);
-                    }
-                }
-                free (obj->value_infolist.items);
-            }
-            break;
-        case WEECHAT_RELAY_OBJ_TYPE_ARRAY:
-            if (obj->value_array.values)
-            {
-                for (i = 0; i < obj->value_array.count; i++)
-                {
-                    if (obj->value_array.values[i])
-                        weechat_relay_parse_obj_free (obj->value_array.values[i]);
-                }
-                free (obj->value_array.values);
-            }
-            break;
-        case WEECHAT_RELAY_NUM_OBJ_TYPES:
-            break;
-    }
-
-    free (obj);
-}
 
 /*
  * Reads bytes in message.
@@ -282,7 +86,7 @@ weechat_relay_parse_read_type (struct t_weechat_relay_parsed_msg *parsed_msg,
 
     str_type[3] = 0;
 
-    type_found = weechat_relay_parse_search_type (str_type);
+    type_found = weechat_relay_obj_search_type (str_type);
     if (type_found < 0)
         return 0;
 
@@ -450,7 +254,7 @@ weechat_relay_parse_obj_char (struct t_weechat_relay_parsed_msg *parsed_msg)
     if (!parsed_msg)
         return NULL;
 
-    obj = weechat_relay_parse_obj_alloc (WEECHAT_RELAY_OBJ_TYPE_CHAR);
+    obj = weechat_relay_obj_alloc (WEECHAT_RELAY_OBJ_TYPE_CHAR);
     if (!obj)
         goto error;
 
@@ -461,7 +265,7 @@ weechat_relay_parse_obj_char (struct t_weechat_relay_parsed_msg *parsed_msg)
 
 error:
     if (obj)
-        weechat_relay_parse_obj_free (obj);
+        weechat_relay_obj_free (obj);
     return NULL;
 }
 
@@ -479,7 +283,7 @@ weechat_relay_parse_obj_integer (struct t_weechat_relay_parsed_msg *parsed_msg)
     if (!parsed_msg)
         return NULL;
 
-    obj = weechat_relay_parse_obj_alloc (WEECHAT_RELAY_OBJ_TYPE_INTEGER);
+    obj = weechat_relay_obj_alloc (WEECHAT_RELAY_OBJ_TYPE_INTEGER);
     if (!obj)
         goto error;
 
@@ -490,7 +294,7 @@ weechat_relay_parse_obj_integer (struct t_weechat_relay_parsed_msg *parsed_msg)
 
 error:
     if (obj)
-        weechat_relay_parse_obj_free (obj);
+        weechat_relay_obj_free (obj);
     return NULL;
 }
 
@@ -512,7 +316,7 @@ weechat_relay_parse_obj_long (struct t_weechat_relay_parsed_msg *parsed_msg)
     if (!parsed_msg)
         return NULL;
 
-    obj = weechat_relay_parse_obj_alloc (WEECHAT_RELAY_OBJ_TYPE_LONG);
+    obj = weechat_relay_obj_alloc (WEECHAT_RELAY_OBJ_TYPE_LONG);
     if (!obj)
         goto error;
 
@@ -534,7 +338,7 @@ weechat_relay_parse_obj_long (struct t_weechat_relay_parsed_msg *parsed_msg)
 
 error:
     if (obj)
-        weechat_relay_parse_obj_free (obj);
+        weechat_relay_obj_free (obj);
     return NULL;
 }
 
@@ -552,7 +356,7 @@ weechat_relay_parse_obj_string (struct t_weechat_relay_parsed_msg *parsed_msg)
     if (!parsed_msg)
         return NULL;
 
-    obj = weechat_relay_parse_obj_alloc (WEECHAT_RELAY_OBJ_TYPE_STRING);
+    obj = weechat_relay_obj_alloc (WEECHAT_RELAY_OBJ_TYPE_STRING);
     if (!obj)
         goto error;
 
@@ -563,7 +367,7 @@ weechat_relay_parse_obj_string (struct t_weechat_relay_parsed_msg *parsed_msg)
 
 error:
     if (obj)
-        weechat_relay_parse_obj_free (obj);
+        weechat_relay_obj_free (obj);
     return NULL;
 }
 
@@ -581,7 +385,7 @@ weechat_relay_parse_obj_buffer (struct t_weechat_relay_parsed_msg *parsed_msg)
     if (!parsed_msg)
         return NULL;
 
-    obj = weechat_relay_parse_obj_alloc (WEECHAT_RELAY_OBJ_TYPE_BUFFER);
+    obj = weechat_relay_obj_alloc (WEECHAT_RELAY_OBJ_TYPE_BUFFER);
     if (!obj)
         goto error;
 
@@ -596,7 +400,7 @@ weechat_relay_parse_obj_buffer (struct t_weechat_relay_parsed_msg *parsed_msg)
 
 error:
     if (obj)
-        weechat_relay_parse_obj_free (obj);
+        weechat_relay_obj_free (obj);
     return NULL;
 }
 
@@ -614,7 +418,7 @@ weechat_relay_parse_obj_pointer (struct t_weechat_relay_parsed_msg *parsed_msg)
     if (!parsed_msg)
         return NULL;
 
-    obj = weechat_relay_parse_obj_alloc (WEECHAT_RELAY_OBJ_TYPE_POINTER);
+    obj = weechat_relay_obj_alloc (WEECHAT_RELAY_OBJ_TYPE_POINTER);
     if (!obj)
         goto error;
 
@@ -625,7 +429,7 @@ weechat_relay_parse_obj_pointer (struct t_weechat_relay_parsed_msg *parsed_msg)
 
 error:
     if (obj)
-        weechat_relay_parse_obj_free (obj);
+        weechat_relay_obj_free (obj);
     return NULL;
 }
 
@@ -647,7 +451,7 @@ weechat_relay_parse_obj_time (struct t_weechat_relay_parsed_msg *parsed_msg)
     if (!parsed_msg)
         return NULL;
 
-    obj = weechat_relay_parse_obj_alloc (WEECHAT_RELAY_OBJ_TYPE_TIME);
+    obj = weechat_relay_obj_alloc (WEECHAT_RELAY_OBJ_TYPE_TIME);
     if (!obj)
         goto error;
 
@@ -669,7 +473,7 @@ weechat_relay_parse_obj_time (struct t_weechat_relay_parsed_msg *parsed_msg)
 
 error:
     if (obj)
-        weechat_relay_parse_obj_free (obj);
+        weechat_relay_obj_free (obj);
     return NULL;
 }
 
@@ -688,7 +492,7 @@ weechat_relay_parse_obj_hashtable (struct t_weechat_relay_parsed_msg *parsed_msg
     if (!parsed_msg)
         return NULL;
 
-    obj = weechat_relay_parse_obj_alloc (WEECHAT_RELAY_OBJ_TYPE_HASHTABLE);
+    obj = weechat_relay_obj_alloc (WEECHAT_RELAY_OBJ_TYPE_HASHTABLE);
     if (!obj)
         goto error;
 
@@ -729,7 +533,7 @@ weechat_relay_parse_obj_hashtable (struct t_weechat_relay_parsed_msg *parsed_msg
 
 error:
     if (obj)
-        weechat_relay_parse_obj_free (obj);
+        weechat_relay_obj_free (obj);
     return NULL;
 }
 
@@ -834,7 +638,7 @@ weechat_relay_parse_hdata_split_keys (const char *keys,
             str_type = strndup (pos_colon + 1, 3);
             if (!str_type)
                 goto error;
-            type = weechat_relay_parse_search_type (str_type);
+            type = weechat_relay_obj_search_type (str_type);
             free (str_type);
             if (type < 0)
                 goto error;
@@ -850,7 +654,7 @@ weechat_relay_parse_hdata_split_keys (const char *keys,
             str_type = strndup (pos_colon + 1, 3);
             if (!str_type)
                 goto error;
-            type = weechat_relay_parse_search_type (str_type);
+            type = weechat_relay_obj_search_type (str_type);
             free (str_type);
             if (type < 0)
                 goto error;
@@ -896,7 +700,7 @@ weechat_relay_parse_obj_hdata (struct t_weechat_relay_parsed_msg *parsed_msg)
     if (!parsed_msg)
         return NULL;
 
-    obj = weechat_relay_parse_obj_alloc (WEECHAT_RELAY_OBJ_TYPE_HDATA);
+    obj = weechat_relay_obj_alloc (WEECHAT_RELAY_OBJ_TYPE_HDATA);
     if (!obj)
         goto error;
 
@@ -967,7 +771,7 @@ weechat_relay_parse_obj_hdata (struct t_weechat_relay_parsed_msg *parsed_msg)
 
 error:
     if (obj)
-        weechat_relay_parse_obj_free (obj);
+        weechat_relay_obj_free (obj);
     return NULL;
 }
 
@@ -985,7 +789,7 @@ weechat_relay_parse_obj_info (struct t_weechat_relay_parsed_msg *parsed_msg)
     if (!parsed_msg)
         return NULL;
 
-    obj = weechat_relay_parse_obj_alloc (WEECHAT_RELAY_OBJ_TYPE_INFO);
+    obj = weechat_relay_obj_alloc (WEECHAT_RELAY_OBJ_TYPE_INFO);
     if (!obj)
         goto error;
 
@@ -998,7 +802,7 @@ weechat_relay_parse_obj_info (struct t_weechat_relay_parsed_msg *parsed_msg)
 
 error:
     if (obj)
-        weechat_relay_parse_obj_free (obj);
+        weechat_relay_obj_free (obj);
     return NULL;
 }
 
@@ -1018,7 +822,7 @@ weechat_relay_parse_obj_infolist (struct t_weechat_relay_parsed_msg *parsed_msg)
     if (!parsed_msg)
         return NULL;
 
-    obj = weechat_relay_parse_obj_alloc (WEECHAT_RELAY_OBJ_TYPE_INFOLIST);
+    obj = weechat_relay_obj_alloc (WEECHAT_RELAY_OBJ_TYPE_INFOLIST);
     if (!obj)
         goto error;
 
@@ -1065,7 +869,7 @@ weechat_relay_parse_obj_infolist (struct t_weechat_relay_parsed_msg *parsed_msg)
 
 error:
     if (obj)
-        weechat_relay_parse_obj_free (obj);
+        weechat_relay_obj_free (obj);
     return NULL;
 }
 
@@ -1085,7 +889,7 @@ weechat_relay_parse_obj_array (struct t_weechat_relay_parsed_msg *parsed_msg)
     if (!parsed_msg)
         return NULL;
 
-    obj = weechat_relay_parse_obj_alloc (WEECHAT_RELAY_OBJ_TYPE_ARRAY);
+    obj = weechat_relay_obj_alloc (WEECHAT_RELAY_OBJ_TYPE_ARRAY);
     if (!obj)
         goto error;
 
@@ -1114,7 +918,7 @@ weechat_relay_parse_obj_array (struct t_weechat_relay_parsed_msg *parsed_msg)
 
 error:
     if (obj)
-        weechat_relay_parse_obj_free (obj);
+        weechat_relay_obj_free (obj);
     return NULL;
 }
 
@@ -1490,7 +1294,7 @@ weechat_relay_parse_msg_free (struct t_weechat_relay_parsed_msg *parsed_msg)
 
     for (i = 0; i < parsed_msg->num_objects; i++)
     {
-        weechat_relay_parse_obj_free (parsed_msg->objects[i]);
+        weechat_relay_obj_free (parsed_msg->objects[i]);
     }
     if (parsed_msg->objects)
         free (parsed_msg->objects);

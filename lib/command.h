@@ -1,6 +1,4 @@
 /*
- * tests.cpp - run WeeChat Relay tests
- *
  * Copyright (C) 2019-2021 Sébastien Helleu <flashcode@flashtux.org>
  *
  * This file is part of WeeChat Relay.
@@ -19,30 +17,10 @@
  * along with WeeChat Relay.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <iostream>
-#include <stdlib.h>
-#include <stdio.h>
+#ifndef WEECHAT_RELAY_COMMAND_H
+#define WEECHAT_RELAY_COMMAND_H
 
-#include "CppUTest/CommandLineTestRunner.h"
+extern char *weechat_relay_cmd_escape (const char *string,
+                                       const char *chars_to_escape);
 
-/* import tests from libs */
-
-/* library */
-IMPORT_TEST_GROUP(LibCommand);
-IMPORT_TEST_GROUP(LibMessage);
-IMPORT_TEST_GROUP(LibObject);
-IMPORT_TEST_GROUP(LibParse);
-IMPORT_TEST_GROUP(LibSession);
-
-/* cli */
-IMPORT_TEST_GROUP(SrcCli);
-IMPORT_TEST_GROUP(SrcMessage);
-IMPORT_TEST_GROUP(SrcNetwork);
-IMPORT_TEST_GROUP(SrcUtil);
-
-
-int
-main (int argc, char *argv[])
-{
-    return CommandLineTestRunner::RunAllTests (argc, argv);
-}
+#endif /* WEECHAT_RELAY_COMMAND_H */

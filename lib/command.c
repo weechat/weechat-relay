@@ -31,6 +31,7 @@
 #include <gnutls/gnutls.h>
 
 #include "weechat-relay.h"
+#include "command.h"
 
 
 const char *weechat_relay_compression_string[WEECHAT_RELAY_NUM_COMPRESSIONS] =
@@ -87,10 +88,10 @@ weechat_relay_cmd_escape (const char *string, const char *chars_to_escape)
  */
 
 ssize_t
-weechat_relay_cmd (struct t_weechat_relay_session *session,
-                   const char *msg_id,
-                   const char *command,
-                   const char *arguments[])
+weechat_relay_cmd_send (struct t_weechat_relay_session *session,
+                        const char *msg_id,
+                        const char *command,
+                        const char *arguments[])
 {
     char *message;
     size_t length;
@@ -189,7 +190,7 @@ weechat_relay_cmd_handshake (struct t_weechat_relay_session *session,
     args[0] = options;
     args[1] = NULL;
 
-    num_sent = weechat_relay_cmd (session, msg_id, "handshake", args);
+    num_sent = weechat_relay_cmd_send (session, msg_id, "handshake", args);
 
 end:
     if (options)
@@ -244,7 +245,7 @@ weechat_relay_cmd_init (struct t_weechat_relay_session *session,
     args[0] = options;
     args[1] = NULL;
 
-    num_sent = weechat_relay_cmd (session, msg_id, "init", args);
+    num_sent = weechat_relay_cmd_send (session, msg_id, "init", args);
 
 end:
     if (password2)
@@ -273,7 +274,7 @@ weechat_relay_cmd_hdata (struct t_weechat_relay_session *session,
     args[1] = keys;
     args[2] = NULL;
 
-    return weechat_relay_cmd (session, msg_id, "hdata", args);
+    return weechat_relay_cmd_send (session, msg_id, "hdata", args);
 }
 
 /*
@@ -292,7 +293,7 @@ weechat_relay_cmd_info (struct t_weechat_relay_session *session,
     args[0] = name;
     args[1] = NULL;
 
-    return weechat_relay_cmd (session, msg_id, "info", args);
+    return weechat_relay_cmd_send (session, msg_id, "info", args);
 }
 
 /*
@@ -315,7 +316,7 @@ weechat_relay_cmd_infolist (struct t_weechat_relay_session *session,
     args[2] = arguments;
     args[3] = NULL;
 
-    return weechat_relay_cmd (session, msg_id, "infolist", args);
+    return weechat_relay_cmd_send (session, msg_id, "infolist", args);
 }
 
 /*
@@ -334,7 +335,7 @@ weechat_relay_cmd_nicklist (struct t_weechat_relay_session *session,
     args[0] = buffer;
     args[1] = NULL;
 
-    return weechat_relay_cmd (session, msg_id, "nicklist", args);
+    return weechat_relay_cmd_send (session, msg_id, "nicklist", args);
 }
 
 /*
@@ -355,7 +356,7 @@ weechat_relay_cmd_input (struct t_weechat_relay_session *session,
     args[1] = data;
     args[2] = NULL;
 
-    return weechat_relay_cmd (session, msg_id, "input", args);
+    return weechat_relay_cmd_send (session, msg_id, "input", args);
 }
 
 /*
@@ -381,7 +382,7 @@ weechat_relay_cmd_completion (struct t_weechat_relay_session *session,
     args[2] = data;
     args[3] = NULL;
 
-    return weechat_relay_cmd (session, msg_id, "completion", args);
+    return weechat_relay_cmd_send (session, msg_id, "completion", args);
 }
 
 /*
@@ -402,7 +403,7 @@ weechat_relay_cmd_sync (struct t_weechat_relay_session *session,
     args[1] = options;
     args[2] = NULL;
 
-    return weechat_relay_cmd (session, msg_id, "sync", args);
+    return weechat_relay_cmd_send (session, msg_id, "sync", args);
 }
 
 /*
@@ -423,7 +424,7 @@ weechat_relay_cmd_desync (struct t_weechat_relay_session *session,
     args[1] = options;
     args[2] = NULL;
 
-    return weechat_relay_cmd (session, msg_id, "desync", args);
+    return weechat_relay_cmd_send (session, msg_id, "desync", args);
 }
 
 /*
@@ -436,7 +437,7 @@ ssize_t
 weechat_relay_cmd_test (struct t_weechat_relay_session *session,
                         const char *msg_id)
 {
-    return weechat_relay_cmd (session, msg_id, "test", NULL);
+    return weechat_relay_cmd_send (session, msg_id, "test", NULL);
 }
 
 /*
@@ -455,7 +456,7 @@ weechat_relay_cmd_ping (struct t_weechat_relay_session *session,
     args[0] = arguments;
     args[1] = NULL;
 
-    return weechat_relay_cmd (session, msg_id, "ping", args);
+    return weechat_relay_cmd_send (session, msg_id, "ping", args);
 }
 
 /*
@@ -468,5 +469,5 @@ ssize_t
 weechat_relay_cmd_quit (struct t_weechat_relay_session *session,
                         const char *msg_id)
 {
-    return weechat_relay_cmd (session, msg_id, "quit", NULL);
+    return weechat_relay_cmd_send (session, msg_id, "quit", NULL);
 }

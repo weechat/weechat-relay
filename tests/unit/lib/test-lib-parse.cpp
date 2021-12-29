@@ -26,71 +26,8 @@ extern "C"
 #include "string.h"
 #include "tests/tests.h"
 #include "lib/weechat-relay.h"
-
-extern const char *weechat_relay_obj_types_str[];
-
-extern int weechat_relay_parse_search_type (const char *type);
-extern struct t_weechat_relay_obj *weechat_relay_parse_obj_alloc (
-    enum t_weechat_relay_obj_type type);
-extern void weechat_relay_parse_obj_free (
-    struct t_weechat_relay_obj *obj);
-extern int weechat_relay_parse_read_bytes (
-    struct t_weechat_relay_parsed_msg *parsed_msg, void *output, size_t count);
-extern int weechat_relay_parse_read_type (
-    struct t_weechat_relay_parsed_msg *parsed_msg,
-    enum t_weechat_relay_obj_type *type);
-extern int weechat_relay_parse_read_integer (
-    struct t_weechat_relay_parsed_msg *parsed_msg, int *value);
-extern int weechat_relay_parse_read_string (
-    struct t_weechat_relay_parsed_msg *parsed_msg, char **string);
-extern int weechat_relay_parse_read_buffer (
-    struct t_weechat_relay_parsed_msg *parsed_msg, void **buffer, int *length);
-extern int weechat_relay_parse_read_pointer (
-    struct t_weechat_relay_parsed_msg *parsed_msg, const void **pointer);
-extern struct t_weechat_relay_obj *weechat_relay_parse_obj_char (
-    struct t_weechat_relay_parsed_msg *parsed_msg);
-extern struct t_weechat_relay_obj *weechat_relay_parse_obj_integer (
-    struct t_weechat_relay_parsed_msg *parsed_msg);
-extern struct t_weechat_relay_obj *weechat_relay_parse_obj_long (
-    struct t_weechat_relay_parsed_msg *parsed_msg);
-extern struct t_weechat_relay_obj *weechat_relay_parse_obj_string (
-    struct t_weechat_relay_parsed_msg *parsed_msg);
-extern struct t_weechat_relay_obj *weechat_relay_parse_obj_buffer (
-    struct t_weechat_relay_parsed_msg *parsed_msg);
-extern struct t_weechat_relay_obj *weechat_relay_parse_obj_pointer (
-    struct t_weechat_relay_parsed_msg *parsed_msg);
-extern struct t_weechat_relay_obj *weechat_relay_parse_obj_time (
-    struct t_weechat_relay_parsed_msg *parsed_msg);
-extern struct t_weechat_relay_obj *weechat_relay_parse_obj_hashtable (
-    struct t_weechat_relay_parsed_msg *parsed_msg);
-extern int weechat_relay_parse_hdata_split_hpath (
-    const char *hpath, char ***hpaths, int *num_hpaths);
-extern int weechat_relay_parse_hdata_split_keys (
-    const char *keys, char ***keys_names,
-    enum t_weechat_relay_obj_type **keys_types, int *num_keys);
-extern struct t_weechat_relay_obj *weechat_relay_parse_obj_hdata (
-    struct t_weechat_relay_parsed_msg *parsed_msg);
-extern struct t_weechat_relay_obj *weechat_relay_parse_obj_info (
-    struct t_weechat_relay_parsed_msg *parsed_msg);
-extern struct t_weechat_relay_obj *weechat_relay_parse_obj_infolist (
-    struct t_weechat_relay_parsed_msg *parsed_msg);
-extern struct t_weechat_relay_obj *weechat_relay_parse_obj_array (
-    struct t_weechat_relay_parsed_msg *parsed_msg);
-extern struct t_weechat_relay_obj *weechat_relay_parse_read_object (
-    struct t_weechat_relay_parsed_msg *parsed_msg,
-    enum t_weechat_relay_obj_type type);
-extern void *weechat_relay_parse_decompress_zlib (const void *data,
-                                                  size_t size,
-                                                  size_t initial_output_size,
-                                                  size_t *size_decompressed);
-extern void *weechat_relay_parse_decompress_zstd (const void *data,
-                                                  size_t size,
-                                                  size_t initial_output_size,
-                                                  size_t *size_decompressed);
-extern struct t_weechat_relay_parsed_msg *weechat_relay_parse_msg_alloc (
-    const void *buffer, size_t size);
-extern void weechat_relay_parse_msg_free (
-    struct t_weechat_relay_parsed_msg *parsed_msg);
+#include "lib/object.h"
+#include "lib/parse.h"
 }
 
 #define CHECK_OBJS_FAKE_MSG                                     \
@@ -134,49 +71,6 @@ extern void weechat_relay_parse_msg_free (
 TEST_GROUP(LibParse)
 {
 };
-
-/*
- * Tests functions:
- *   weechat_relay_parse_search_type
- */
-
-TEST(LibParse, SearchType)
-{
-    int i;
-
-    LONGS_EQUAL(-1, weechat_relay_parse_search_type (NULL));
-    LONGS_EQUAL(-1, weechat_relay_parse_search_type (""));
-    LONGS_EQUAL(-1, weechat_relay_parse_search_type ("xxx"));
-
-    for (i = 0; i < WEECHAT_RELAY_NUM_OBJ_TYPES; i++)
-    {
-        LONGS_EQUAL(i,
-                    weechat_relay_parse_search_type (
-                        weechat_relay_obj_types_str[i]));
-    }
-}
-
-/*
- * Tests functions:
- *   weechat_relay_parse_obj_alloc
- *   weechat_relay_parse_obj_free
- */
-
-TEST(LibParse, ObjAllocFree)
-{
-    struct t_weechat_relay_obj *obj;
-    int i;
-
-    weechat_relay_parse_obj_free (NULL);
-
-    for (i = 0; i < WEECHAT_RELAY_NUM_OBJ_TYPES; i++)
-    {
-        obj = weechat_relay_parse_obj_alloc ((t_weechat_relay_obj_type)i);
-        CHECK(obj);
-        LONGS_EQUAL(i, obj->type);
-        weechat_relay_parse_obj_free (obj);
-    }
-}
 
 /*
  * Tests functions:
@@ -536,7 +430,7 @@ TEST(LibParse, ObjChar)
         CHECK(obj);
         LONGS_EQUAL(WEECHAT_RELAY_OBJ_TYPE_CHAR, obj->type);
         LONGS_EQUAL('a', obj->value_char);
-        weechat_relay_parse_obj_free (obj);
+        weechat_relay_obj_free (obj);
     }
 
     weechat_relay_parse_msg_free (parsed_msg);
@@ -581,7 +475,7 @@ TEST(LibParse, ObjInteger)
         CHECK(obj);
         LONGS_EQUAL(WEECHAT_RELAY_OBJ_TYPE_INTEGER, obj->type);
         LONGS_EQUAL(123456, obj->value_integer);
-        weechat_relay_parse_obj_free (obj);
+        weechat_relay_obj_free (obj);
     }
 
     /* valid integer: -123456 */
@@ -592,7 +486,7 @@ TEST(LibParse, ObjInteger)
     CHECK(obj);
     LONGS_EQUAL(WEECHAT_RELAY_OBJ_TYPE_INTEGER, obj->type);
     LONGS_EQUAL(-123456, obj->value_integer);
-    weechat_relay_parse_obj_free (obj);
+    weechat_relay_obj_free (obj);
 
     weechat_relay_parse_msg_free (parsed_msg);
 }
@@ -651,7 +545,7 @@ TEST(LibParse, ObjLong)
         CHECK(obj);
         LONGS_EQUAL(WEECHAT_RELAY_OBJ_TYPE_LONG, obj->type);
         LONGS_EQUAL(1234567890, obj->value_long);
-        weechat_relay_parse_obj_free (obj);
+        weechat_relay_obj_free (obj);
     }
 
     /* valid integer: -1234567890 */
@@ -662,7 +556,7 @@ TEST(LibParse, ObjLong)
     CHECK(obj);
     LONGS_EQUAL(WEECHAT_RELAY_OBJ_TYPE_LONG, obj->type);
     LONGS_EQUAL(-1234567890, obj->value_long);
-    weechat_relay_parse_obj_free (obj);
+    weechat_relay_obj_free (obj);
 
     weechat_relay_parse_msg_free (parsed_msg);
 }
@@ -709,7 +603,7 @@ TEST(LibParse, ObjString)
     CHECK(obj);
     LONGS_EQUAL(WEECHAT_RELAY_OBJ_TYPE_STRING, obj->type);
     POINTERS_EQUAL(NULL, obj->value_string);
-    weechat_relay_parse_obj_free (obj);
+    weechat_relay_obj_free (obj);
 
     /* valid string: "" (empty) */
     parsed_msg->buffer = str_empty;
@@ -719,7 +613,7 @@ TEST(LibParse, ObjString)
     CHECK(obj);
     LONGS_EQUAL(WEECHAT_RELAY_OBJ_TYPE_STRING, obj->type);
     STRCMP_EQUAL("", obj->value_string);
-    weechat_relay_parse_obj_free (obj);
+    weechat_relay_obj_free (obj);
 
     for (i = 0; i < 2; i++)
     {
@@ -734,7 +628,7 @@ TEST(LibParse, ObjString)
         CHECK(obj);
         LONGS_EQUAL(WEECHAT_RELAY_OBJ_TYPE_STRING, obj->type);
         STRCMP_EQUAL("abc", obj->value_string);
-        weechat_relay_parse_obj_free (obj);
+        weechat_relay_obj_free (obj);
     }
 
     weechat_relay_parse_msg_free (parsed_msg);
@@ -783,7 +677,7 @@ TEST(LibParse, ObjBuffer)
     LONGS_EQUAL(WEECHAT_RELAY_OBJ_TYPE_BUFFER, obj->type);
     POINTERS_EQUAL(NULL, obj->value_buffer.buffer);
     LONGS_EQUAL(-1, obj->value_buffer.length);
-    weechat_relay_parse_obj_free (obj);
+    weechat_relay_obj_free (obj);
 
     /* valid buffer: NULL (length = 0) */
     parsed_msg->buffer = buffer_null2;
@@ -794,7 +688,7 @@ TEST(LibParse, ObjBuffer)
     LONGS_EQUAL(WEECHAT_RELAY_OBJ_TYPE_BUFFER, obj->type);
     POINTERS_EQUAL(NULL, obj->value_buffer.buffer);
     LONGS_EQUAL(0, obj->value_buffer.length);
-    weechat_relay_parse_obj_free (obj);
+    weechat_relay_obj_free (obj);
 
     for (i = 0; i < 2; i++)
     {
@@ -811,7 +705,7 @@ TEST(LibParse, ObjBuffer)
         MEMCMP_EQUAL(buffer_abc + 4, obj->value_buffer.buffer,
                      sizeof (buffer_abc) - 4);
         LONGS_EQUAL(sizeof (buffer_abc) - 4, obj->value_buffer.length);
-        weechat_relay_parse_obj_free (obj);
+        weechat_relay_obj_free (obj);
     }
 
     weechat_relay_parse_msg_free (parsed_msg);
@@ -866,7 +760,7 @@ TEST(LibParse, ObjPointer)
     CHECK(obj);
     LONGS_EQUAL(WEECHAT_RELAY_OBJ_TYPE_POINTER, obj->type);
     POINTERS_EQUAL(NULL, obj->value_pointer);
-    weechat_relay_parse_obj_free (obj);
+    weechat_relay_obj_free (obj);
 
     for (i = 0; i < 2; i++)
     {
@@ -881,7 +775,7 @@ TEST(LibParse, ObjPointer)
         CHECK(obj);
         LONGS_EQUAL(WEECHAT_RELAY_OBJ_TYPE_POINTER, obj->type);
         POINTERS_EQUAL(0x1a2b3c4d5, obj->value_pointer);
-        weechat_relay_parse_obj_free (obj);
+        weechat_relay_obj_free (obj);
     }
 
     weechat_relay_parse_msg_free (parsed_msg);
@@ -940,7 +834,7 @@ TEST(LibParse, ObjTime)
         CHECK(obj);
         LONGS_EQUAL(WEECHAT_RELAY_OBJ_TYPE_TIME, obj->type);
         LONGS_EQUAL(1321993456, obj->value_time);
-        weechat_relay_parse_obj_free (obj);
+        weechat_relay_obj_free (obj);
     }
 
     weechat_relay_parse_msg_free (parsed_msg);
@@ -1036,7 +930,7 @@ TEST(LibParse, ObjHashtable)
         CHECK(obj->value_hashtable.values[1]);
         LONGS_EQUAL(WEECHAT_RELAY_OBJ_TYPE_INTEGER, obj->value_hashtable.values[1]->type);
         LONGS_EQUAL(2, obj->value_hashtable.values[1]->value_integer);
-        weechat_relay_parse_obj_free (obj);
+        weechat_relay_obj_free (obj);
     }
 
     weechat_relay_parse_msg_free (parsed_msg);
@@ -1295,7 +1189,7 @@ TEST(LibParse, ObjHdata)
         STRCMP_EQUAL("xy", obj->value_hdata.values[1][0]->value_string);
         LONGS_EQUAL(9, obj->value_hdata.values[1][1]->value_integer);
         LONGS_EQUAL('X', obj->value_hdata.values[1][2]->value_char);
-        weechat_relay_parse_obj_free (obj);
+        weechat_relay_obj_free (obj);
     }
 
     weechat_relay_parse_msg_free (parsed_msg);
@@ -1347,7 +1241,7 @@ TEST(LibParse, ObjInfo)
         LONGS_EQUAL(WEECHAT_RELAY_OBJ_TYPE_INFO, obj->type);
         STRCMP_EQUAL("abc", obj->value_info.name);
         STRCMP_EQUAL("def", obj->value_info.value);
-        weechat_relay_parse_obj_free (obj);
+        weechat_relay_obj_free (obj);
     }
 
     weechat_relay_parse_msg_free (parsed_msg);
@@ -1455,7 +1349,7 @@ TEST(LibParse, ObjInfolist)
                     obj->value_infolist.items[1]->variables[1]->obj->type);
         POINTERS_EQUAL(NULL,
                        obj->value_infolist.items[1]->variables[1]->obj->value_string);
-        weechat_relay_parse_obj_free (obj);
+        weechat_relay_obj_free (obj);
     }
 
     weechat_relay_parse_msg_free (parsed_msg);
@@ -1535,7 +1429,7 @@ TEST(LibParse, ObjArray)
         CHECK(obj->value_array.values[1]);
         LONGS_EQUAL(WEECHAT_RELAY_OBJ_TYPE_STRING, obj->value_array.values[1]->type);
         STRCMP_EQUAL("def", obj->value_array.values[1]->value_string);
-        weechat_relay_parse_obj_free (obj);
+        weechat_relay_obj_free (obj);
     }
 
     weechat_relay_parse_msg_free (parsed_msg);
