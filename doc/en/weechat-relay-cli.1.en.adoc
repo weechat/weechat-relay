@@ -64,7 +64,7 @@ messages received from WeeChat.
 WeeChat Relay is written by Sébastien Helleu and contributors (complete list is
 in the AUTHORS.adoc file).
 
-Copyright (C) 2019-2021 {author}
+Copyright (C) 2019-2022 {author}
 
 WeeChat Relay is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
