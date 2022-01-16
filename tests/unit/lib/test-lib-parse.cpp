@@ -1331,24 +1331,24 @@ TEST(LibParse, ObjInfolist)
         CHECK(obj->value_infolist.items[0]->variables[0]);
         STRCMP_EQUAL("abc", obj->value_infolist.items[0]->variables[0]->name);
         LONGS_EQUAL(WEECHAT_RELAY_OBJ_TYPE_INTEGER,
-                    obj->value_infolist.items[0]->variables[0]->obj->type);
+                    obj->value_infolist.items[0]->variables[0]->value->type);
         LONGS_EQUAL(8,
-                    obj->value_infolist.items[0]->variables[0]->obj->value_integer);
+                    obj->value_infolist.items[0]->variables[0]->value->value_integer);
         CHECK(obj->value_infolist.items[1]);
         LONGS_EQUAL(2, obj->value_infolist.items[1]->count);
         CHECK(obj->value_infolist.items[1]->variables);
         CHECK(obj->value_infolist.items[1]->variables[0]);
         STRCMP_EQUAL("def", obj->value_infolist.items[1]->variables[0]->name);
         LONGS_EQUAL(WEECHAT_RELAY_OBJ_TYPE_INTEGER,
-                    obj->value_infolist.items[1]->variables[0]->obj->type);
+                    obj->value_infolist.items[1]->variables[0]->value->type);
         LONGS_EQUAL(4,
-                    obj->value_infolist.items[1]->variables[0]->obj->value_integer);
+                    obj->value_infolist.items[1]->variables[0]->value->value_integer);
         CHECK(obj->value_infolist.items[1]->variables[1]);
         STRCMP_EQUAL("ghi", obj->value_infolist.items[1]->variables[1]->name);
         LONGS_EQUAL(WEECHAT_RELAY_OBJ_TYPE_STRING,
-                    obj->value_infolist.items[1]->variables[1]->obj->type);
+                    obj->value_infolist.items[1]->variables[1]->value->type);
         POINTERS_EQUAL(NULL,
-                       obj->value_infolist.items[1]->variables[1]->obj->value_string);
+                       obj->value_infolist.items[1]->variables[1]->value->value_string);
         weechat_relay_obj_free (obj);
     }
 
@@ -1421,6 +1421,7 @@ TEST(LibParse, ObjArray)
             obj = weechat_relay_parse_read_object (parsed_msg, WEECHAT_RELAY_OBJ_TYPE_ARRAY);
         CHECK(obj);
         LONGS_EQUAL(WEECHAT_RELAY_OBJ_TYPE_ARRAY, obj->type);
+        LONGS_EQUAL(WEECHAT_RELAY_OBJ_TYPE_STRING, obj->value_array.type);
         LONGS_EQUAL(2, obj->value_array.count);
         CHECK(obj->value_array.values);
         CHECK(obj->value_array.values[0]);

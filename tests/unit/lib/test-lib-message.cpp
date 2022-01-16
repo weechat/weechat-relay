@@ -85,12 +85,12 @@ TEST(LibMessage, SetBytes)
     LONGS_EQUAL(1, weechat_relay_msg_add_bytes (msg, str1, strlen (str1)));
     LONGS_EQUAL(WEECHAT_RELAY_MSG_INITIAL_ALLOC, msg->data_alloc);
     LONGS_EQUAL(16, msg->data_size);
-    MEMCMP_EQUAL(msg->data + 13, str1, strlen (str1));
+    MEMCMP_EQUAL(str1, msg->data + 13, strlen (str1));
 
     LONGS_EQUAL(1, weechat_relay_msg_set_bytes (msg, 13, str2, strlen (str2)));
     LONGS_EQUAL(WEECHAT_RELAY_MSG_INITIAL_ALLOC, msg->data_alloc);
     LONGS_EQUAL(16, msg->data_size);
-    MEMCMP_EQUAL(msg->data + 13, str2, strlen (str2));
+    MEMCMP_EQUAL(str2, msg->data + 13, strlen (str2));
 
     weechat_relay_msg_free (msg);
 }
@@ -115,13 +115,13 @@ TEST(LibMessage, AddBytes)
     LONGS_EQUAL(1, weechat_relay_msg_add_bytes (msg, str, strlen (str)));
     LONGS_EQUAL(WEECHAT_RELAY_MSG_INITIAL_ALLOC, msg->data_alloc);
     LONGS_EQUAL(16, msg->data_size);
-    MEMCMP_EQUAL(msg->data + 13, str, strlen (str));
+    MEMCMP_EQUAL(str, msg->data + 13, strlen (str));
 
     memset (buffer, 123, sizeof (buffer));
     LONGS_EQUAL(1, weechat_relay_msg_add_bytes (msg, buffer, sizeof (buffer)));
     LONGS_EQUAL(WEECHAT_RELAY_MSG_INITIAL_ALLOC * 2, msg->data_alloc);
     LONGS_EQUAL(16 + sizeof (buffer), msg->data_size);
-    MEMCMP_EQUAL(msg->data + 16, buffer, sizeof (buffer));
+    MEMCMP_EQUAL(buffer, msg->data + 16, sizeof (buffer));
 
     weechat_relay_msg_free (msg);
 }
@@ -145,7 +145,7 @@ TEST(LibMessage, AddType)
         ptr_type = weechat_relay_obj_types_str[i];
         LONGS_EQUAL(1, weechat_relay_msg_add_type (msg, (enum t_weechat_relay_obj_type)i));
         LONGS_EQUAL(pos + strlen (ptr_type), msg->data_size);
-        MEMCMP_EQUAL(msg->data + pos, ptr_type, strlen (ptr_type));
+        MEMCMP_EQUAL(ptr_type, msg->data + pos, strlen (ptr_type));
     }
 
     weechat_relay_msg_free (msg);
@@ -154,21 +154,27 @@ TEST(LibMessage, AddType)
 /*
  * Tests functions:
  *   weechat_relay_msg_add_char
+ *   weechat_relay_msg_add_object
  */
 
 TEST(LibMessage, AddChar)
 {
     struct t_weechat_relay_msg *msg;
+    struct t_weechat_relay_obj obj;
     char ch = 123;
 
     msg = weechat_relay_msg_new ("test");
 
     LONGS_EQUAL(0, weechat_relay_msg_add_char (NULL, 1));
 
-    LONGS_EQUAL(1, weechat_relay_msg_add_char (msg, ch));
+    obj.type = WEECHAT_RELAY_OBJ_TYPE_CHAR;
+    obj.value_char = ch;
+    LONGS_EQUAL(1, weechat_relay_msg_add_object (msg, &obj));
     LONGS_EQUAL(WEECHAT_RELAY_MSG_INITIAL_ALLOC, msg->data_alloc);
-    LONGS_EQUAL(14, msg->data_size);
-    BYTES_EQUAL(msg->data[13], ch);
+    LONGS_EQUAL(17, msg->data_size);
+    MEMCMP_EQUAL(weechat_relay_obj_types_str[WEECHAT_RELAY_OBJ_TYPE_CHAR],
+                 msg->data + 13, 3);
+    BYTES_EQUAL(msg->data[16], ch);
 
     weechat_relay_msg_free (msg);
 }
@@ -176,12 +182,14 @@ TEST(LibMessage, AddChar)
 
 /*
  * Tests functions:
- *   weechat_relay_msg_add_int
+ *   weechat_relay_msg_add_integer
+ *   weechat_relay_msg_add_object
  */
 
-TEST(LibMessage, AddInt)
+TEST(LibMessage, AddInteger)
 {
     struct t_weechat_relay_msg *msg;
+    struct t_weechat_relay_obj obj;
     int number1 = 123456;
     uint32_t value32_number1;
     int number2 = -112233;
@@ -189,19 +197,27 @@ TEST(LibMessage, AddInt)
 
     msg = weechat_relay_msg_new ("test");
 
-    LONGS_EQUAL(0, weechat_relay_msg_add_int (NULL, 1));
+    LONGS_EQUAL(0, weechat_relay_msg_add_integer (NULL, 1));
 
-    LONGS_EQUAL(1, weechat_relay_msg_add_int (msg, number1));
+    obj.type = WEECHAT_RELAY_OBJ_TYPE_INTEGER;
+    obj.value_integer = number1;
+    LONGS_EQUAL(1, weechat_relay_msg_add_object (msg, &obj));
     LONGS_EQUAL(WEECHAT_RELAY_MSG_INITIAL_ALLOC, msg->data_alloc);
-    LONGS_EQUAL(17, msg->data_size);
+    LONGS_EQUAL(20, msg->data_size);
+    MEMCMP_EQUAL(weechat_relay_obj_types_str[WEECHAT_RELAY_OBJ_TYPE_INTEGER],
+                 msg->data + 13, 3);
     value32_number1 = htonl ((uint32_t)number1);
-    MEMCMP_EQUAL(msg->data + 13, &value32_number1, 4);
+    MEMCMP_EQUAL(&value32_number1, msg->data + 16, 4);
 
-    LONGS_EQUAL(1, weechat_relay_msg_add_int (msg, number2));
+    obj.type = WEECHAT_RELAY_OBJ_TYPE_INTEGER;
+    obj.value_integer = number2;
+    LONGS_EQUAL(1, weechat_relay_msg_add_object (msg, &obj));
     LONGS_EQUAL(WEECHAT_RELAY_MSG_INITIAL_ALLOC, msg->data_alloc);
-    LONGS_EQUAL(21, msg->data_size);
+    LONGS_EQUAL(27, msg->data_size);
+    MEMCMP_EQUAL(weechat_relay_obj_types_str[WEECHAT_RELAY_OBJ_TYPE_INTEGER],
+                 msg->data + 20, 3);
     value32_number2 = htonl ((uint32_t)number2);
-    MEMCMP_EQUAL(msg->data + 17, &value32_number2, 4);
+    MEMCMP_EQUAL(&value32_number2, msg->data + 23, 4);
 
     weechat_relay_msg_free (msg);
 }
@@ -209,11 +225,13 @@ TEST(LibMessage, AddInt)
 /*
  * Tests functions:
  *   weechat_relay_msg_add_long
+ *   weechat_relay_msg_add_object
  */
 
 TEST(LibMessage, AddLong)
 {
     struct t_weechat_relay_msg *msg;
+    struct t_weechat_relay_obj obj;
     long number1 = 123456789012;
     const char *str_number1 = "123456789012";
     long number2 = -112233445566;
@@ -223,17 +241,25 @@ TEST(LibMessage, AddLong)
 
     LONGS_EQUAL(0, weechat_relay_msg_add_long (NULL, 1));
 
-    LONGS_EQUAL(1, weechat_relay_msg_add_long (msg, number1));
+    obj.type = WEECHAT_RELAY_OBJ_TYPE_LONG;
+    obj.value_long = number1;
+    LONGS_EQUAL(1, weechat_relay_msg_add_object (msg, &obj));
     LONGS_EQUAL(WEECHAT_RELAY_MSG_INITIAL_ALLOC, msg->data_alloc);
-    LONGS_EQUAL(26, msg->data_size);
-    BYTES_EQUAL(12, msg->data[13]);
-    MEMCMP_EQUAL(msg->data + 14, str_number1, strlen (str_number1));
+    LONGS_EQUAL(29, msg->data_size);
+    MEMCMP_EQUAL(weechat_relay_obj_types_str[WEECHAT_RELAY_OBJ_TYPE_LONG],
+                 msg->data + 13, 3);
+    BYTES_EQUAL(12, msg->data[16]);
+    MEMCMP_EQUAL(str_number1, msg->data + 17, strlen (str_number1));
 
-    LONGS_EQUAL(1, weechat_relay_msg_add_long (msg, number2));
+    obj.type = WEECHAT_RELAY_OBJ_TYPE_LONG;
+    obj.value_long = number2;
+    LONGS_EQUAL(1, weechat_relay_msg_add_object (msg, &obj));
     LONGS_EQUAL(WEECHAT_RELAY_MSG_INITIAL_ALLOC, msg->data_alloc);
-    LONGS_EQUAL(40, msg->data_size);
-    BYTES_EQUAL(13, msg->data[26]);
-    MEMCMP_EQUAL(msg->data + 27, str_number2, strlen (str_number2));
+    LONGS_EQUAL(46, msg->data_size);
+    MEMCMP_EQUAL(weechat_relay_obj_types_str[WEECHAT_RELAY_OBJ_TYPE_LONG],
+                 msg->data + 29, 3);
+    BYTES_EQUAL(13, msg->data[32]);
+    MEMCMP_EQUAL(str_number2, msg->data + 33, strlen (str_number2));
 
     weechat_relay_msg_free (msg);
 }
@@ -241,11 +267,13 @@ TEST(LibMessage, AddLong)
 /*
  * Tests functions:
  *   weechat_relay_msg_add_string
+ *   weechat_relay_msg_add_object
  */
 
 TEST(LibMessage, AddString)
 {
     struct t_weechat_relay_msg *msg;
+    struct t_weechat_relay_obj obj;
     const char *str = "abcdef";
     uint32_t value32;
 
@@ -254,26 +282,40 @@ TEST(LibMessage, AddString)
     LONGS_EQUAL(0, weechat_relay_msg_add_string (NULL, str));
 
     /* NULL string: length = -1, no content */
-    LONGS_EQUAL(1, weechat_relay_msg_add_string (msg, NULL));
+    obj.type = WEECHAT_RELAY_OBJ_TYPE_STRING;
+    obj.value_string = NULL;
+    LONGS_EQUAL(1, weechat_relay_msg_add_object (msg, &obj));
     LONGS_EQUAL(WEECHAT_RELAY_MSG_INITIAL_ALLOC, msg->data_alloc);
-    LONGS_EQUAL(17, msg->data_size);
+    LONGS_EQUAL(20, msg->data_size);
+    MEMCMP_EQUAL(weechat_relay_obj_types_str[WEECHAT_RELAY_OBJ_TYPE_STRING],
+                 msg->data + 13, 3);
     value32 = htonl (-1);
-    MEMCMP_EQUAL(msg->data + 13, &value32, 4);
+    MEMCMP_EQUAL(&value32, msg->data + 16, 4);
 
     /* empty string: length = 0, no content */
-    LONGS_EQUAL(1, weechat_relay_msg_add_string (msg, ""));
+    obj.type = WEECHAT_RELAY_OBJ_TYPE_STRING;
+    obj.value_string = strdup ("");
+    LONGS_EQUAL(1, weechat_relay_msg_add_object (msg, &obj));
     LONGS_EQUAL(WEECHAT_RELAY_MSG_INITIAL_ALLOC, msg->data_alloc);
-    LONGS_EQUAL(21, msg->data_size);
+    LONGS_EQUAL(27, msg->data_size);
+    MEMCMP_EQUAL(weechat_relay_obj_types_str[WEECHAT_RELAY_OBJ_TYPE_STRING],
+                 msg->data + 20, 3);
     value32 = htonl (0);
-    MEMCMP_EQUAL(msg->data + 17, &value32, 4);
+    MEMCMP_EQUAL(&value32, msg->data + 23, 4);
+    free (obj.value_string);
 
     /* string: length = length of string, content = the string (without \0) */
-    LONGS_EQUAL(1, weechat_relay_msg_add_string (msg, str));
+    obj.type = WEECHAT_RELAY_OBJ_TYPE_STRING;
+    obj.value_string = strdup (str);
+    LONGS_EQUAL(1, weechat_relay_msg_add_object (msg, &obj));
     LONGS_EQUAL(WEECHAT_RELAY_MSG_INITIAL_ALLOC, msg->data_alloc);
-    LONGS_EQUAL(31, msg->data_size);
+    LONGS_EQUAL(40, msg->data_size);
+    MEMCMP_EQUAL(weechat_relay_obj_types_str[WEECHAT_RELAY_OBJ_TYPE_STRING],
+                 msg->data + 27, 3);
     value32 = htonl (strlen (str));
-    MEMCMP_EQUAL(msg->data + 21, &value32, 4);
-    MEMCMP_EQUAL(msg->data + 25, str, strlen (str));
+    MEMCMP_EQUAL(&value32, msg->data + 30, 4);
+    MEMCMP_EQUAL(str, msg->data + 34, strlen (str));
+    free (obj.value_string);
 
     weechat_relay_msg_free (msg);
 }
@@ -281,40 +323,65 @@ TEST(LibMessage, AddString)
 /*
  * Tests functions:
  *   weechat_relay_msg_add_buffer
+ *   weechat_relay_msg_add_object
  */
 
 TEST(LibMessage, AddBuffer)
 {
     struct t_weechat_relay_msg *msg;
+    struct t_weechat_relay_obj obj;
+    struct t_weechat_relay_obj_buffer *ptr_buf;
     const void *str = "abcdef";
     uint32_t value32;
 
     msg = weechat_relay_msg_new ("test");
 
-    LONGS_EQUAL(0, weechat_relay_msg_add_buffer (NULL, NULL, 0));
-    LONGS_EQUAL(0, weechat_relay_msg_add_buffer (NULL, str, 0));
+    obj.type = WEECHAT_RELAY_OBJ_TYPE_BUFFER;
+    ptr_buf = &obj.value_buffer;
+
+    LONGS_EQUAL(0, weechat_relay_msg_add_buffer (NULL, NULL));
+
+    obj.value_buffer.buffer = NULL;
+    obj.value_buffer.length = 0;
+    LONGS_EQUAL(0, weechat_relay_msg_add_buffer (NULL, ptr_buf));
+
+    obj.value_buffer.buffer = (void *)str;
+    obj.value_buffer.length = 0;
+    LONGS_EQUAL(0, weechat_relay_msg_add_buffer (NULL, ptr_buf));
 
     /* NULL buffer: length = -1, no content */
-    LONGS_EQUAL(1, weechat_relay_msg_add_buffer (msg, NULL, 0));
+    ptr_buf->buffer = NULL;
+    ptr_buf->length = 0;
+    LONGS_EQUAL(1, weechat_relay_msg_add_object (msg, &obj));
     LONGS_EQUAL(WEECHAT_RELAY_MSG_INITIAL_ALLOC, msg->data_alloc);
-    LONGS_EQUAL(17, msg->data_size);
+    LONGS_EQUAL(20, msg->data_size);
+    MEMCMP_EQUAL(weechat_relay_obj_types_str[WEECHAT_RELAY_OBJ_TYPE_BUFFER],
+                 msg->data + 13, 3);
     value32 = htonl (-1);
-    MEMCMP_EQUAL(msg->data + 13, &value32, 4);
+    MEMCMP_EQUAL(&value32, msg->data + 16, 4);
 
     /* empty buffer: length = 0, no content */
-    LONGS_EQUAL(1, weechat_relay_msg_add_buffer (msg, "", 0));
+    ptr_buf->buffer = (void *)str;
+    ptr_buf->length = 0;
+    LONGS_EQUAL(1, weechat_relay_msg_add_object (msg, &obj));
     LONGS_EQUAL(WEECHAT_RELAY_MSG_INITIAL_ALLOC, msg->data_alloc);
-    LONGS_EQUAL(21, msg->data_size);
+    LONGS_EQUAL(27, msg->data_size);
+    MEMCMP_EQUAL(weechat_relay_obj_types_str[WEECHAT_RELAY_OBJ_TYPE_BUFFER],
+                 msg->data + 20, 3);
     value32 = htonl (0);
-    MEMCMP_EQUAL(msg->data + 17, &value32, 4);
+    MEMCMP_EQUAL(&value32, msg->data + 23, 4);
 
     /* buffer: length = length of buffer, content = the buffer */
-    LONGS_EQUAL(1, weechat_relay_msg_add_buffer (msg, str, 6));
+    ptr_buf->buffer = (void *)str;
+    ptr_buf->length = 6;
+    LONGS_EQUAL(1, weechat_relay_msg_add_object (msg, &obj));
     LONGS_EQUAL(WEECHAT_RELAY_MSG_INITIAL_ALLOC, msg->data_alloc);
-    LONGS_EQUAL(31, msg->data_size);
+    LONGS_EQUAL(40, msg->data_size);
+    MEMCMP_EQUAL(weechat_relay_obj_types_str[WEECHAT_RELAY_OBJ_TYPE_BUFFER],
+                 msg->data + 27, 3);
     value32 = htonl (6);
-    MEMCMP_EQUAL(msg->data + 21, &value32, 4);
-    MEMCMP_EQUAL(msg->data + 25, str, 6);
+    MEMCMP_EQUAL(&value32, msg->data + 30, 4);
+    MEMCMP_EQUAL(str, msg->data + 34, 6);
 
     weechat_relay_msg_free (msg);
 }
@@ -322,11 +389,13 @@ TEST(LibMessage, AddBuffer)
 /*
  * Tests functions:
  *   weechat_relay_msg_add_pointer
+ *   weechat_relay_msg_add_object
  */
 
 TEST(LibMessage, AddPointer)
 {
     struct t_weechat_relay_msg *msg;
+    struct t_weechat_relay_obj obj;
     void *pointer = (void *)0x123456789abc;
     const char *str_pointer = "123456789abc";
 
@@ -335,17 +404,26 @@ TEST(LibMessage, AddPointer)
     LONGS_EQUAL(0, weechat_relay_msg_add_pointer (NULL, (void *)1));
 
     /* NULL pointer */
-    LONGS_EQUAL(1, weechat_relay_msg_add_pointer (msg, NULL));
+    obj.type = WEECHAT_RELAY_OBJ_TYPE_POINTER;
+    obj.value_pointer = NULL;
+    LONGS_EQUAL(1, weechat_relay_msg_add_object (msg, &obj));
     LONGS_EQUAL(WEECHAT_RELAY_MSG_INITIAL_ALLOC, msg->data_alloc);
-    LONGS_EQUAL(15, msg->data_size);
-    BYTES_EQUAL(1, msg->data[13]);
-    BYTES_EQUAL('0', msg->data[14]);
+    LONGS_EQUAL(18, msg->data_size);
+    MEMCMP_EQUAL(weechat_relay_obj_types_str[WEECHAT_RELAY_OBJ_TYPE_POINTER],
+                 msg->data + 13, 3);
+    BYTES_EQUAL(1, msg->data[16]);
+    BYTES_EQUAL('0', msg->data[17]);
 
-    LONGS_EQUAL(1, weechat_relay_msg_add_pointer (msg, pointer));
+    /* other pointer */
+    obj.type = WEECHAT_RELAY_OBJ_TYPE_POINTER;
+    obj.value_pointer = pointer;
+    LONGS_EQUAL(1, weechat_relay_msg_add_object (msg, &obj));
     LONGS_EQUAL(WEECHAT_RELAY_MSG_INITIAL_ALLOC, msg->data_alloc);
-    LONGS_EQUAL(28, msg->data_size);
-    BYTES_EQUAL(12, msg->data[15]);
-    MEMCMP_EQUAL(msg->data + 16, str_pointer, strlen (str_pointer));
+    LONGS_EQUAL(34, msg->data_size);
+    MEMCMP_EQUAL(weechat_relay_obj_types_str[WEECHAT_RELAY_OBJ_TYPE_POINTER],
+                 msg->data + 18, 3);
+    BYTES_EQUAL(12, msg->data[21]);
+    MEMCMP_EQUAL(str_pointer, msg->data + 22, strlen (str_pointer));
 
     weechat_relay_msg_free (msg);
 }
@@ -353,11 +431,13 @@ TEST(LibMessage, AddPointer)
 /*
  * Tests functions:
  *   weechat_relay_msg_add_time
+ *   weechat_relay_msg_add_object
  */
 
 TEST(LibMessage, AddTime)
 {
     struct t_weechat_relay_msg *msg;
+    struct t_weechat_relay_obj obj;
     time_t time = 123456789;
     const char *str_time = "123456789";
 
@@ -365,11 +445,622 @@ TEST(LibMessage, AddTime)
 
     LONGS_EQUAL(0, weechat_relay_msg_add_time (NULL, 123));
 
-    LONGS_EQUAL(1, weechat_relay_msg_add_time (msg, time));
+    obj.type = WEECHAT_RELAY_OBJ_TYPE_TIME;
+    obj.value_time = time;
+    LONGS_EQUAL(1, weechat_relay_msg_add_object (msg, &obj));
     LONGS_EQUAL(WEECHAT_RELAY_MSG_INITIAL_ALLOC, msg->data_alloc);
-    LONGS_EQUAL(23, msg->data_size);
-    BYTES_EQUAL(9, msg->data[13]);
-    MEMCMP_EQUAL(msg->data + 14, str_time, strlen (str_time));
+    LONGS_EQUAL(26, msg->data_size);
+    MEMCMP_EQUAL(weechat_relay_obj_types_str[WEECHAT_RELAY_OBJ_TYPE_TIME],
+                 msg->data + 13, 3);
+    BYTES_EQUAL(9, msg->data[16]);
+    MEMCMP_EQUAL(str_time, msg->data + 17, strlen (str_time));
+
+    weechat_relay_msg_free (msg);
+}
+
+/*
+ * Tests functions:
+ *   weechat_relay_msg_add_hashtable
+ *   weechat_relay_msg_add_object
+ */
+
+TEST(LibMessage, AddHashtable)
+{
+    struct t_weechat_relay_msg *msg;
+    struct t_weechat_relay_obj obj;
+    struct t_weechat_relay_obj_hashtable *ptr_hash;
+    struct t_weechat_relay_obj obj_str1, obj_str2, obj_int1, obj_int2;
+    uint32_t value32;
+
+    msg = weechat_relay_msg_new ("test");
+
+    obj.type = WEECHAT_RELAY_OBJ_TYPE_HASHTABLE;
+    ptr_hash = &obj.value_hashtable;
+
+    obj_str1.type = WEECHAT_RELAY_OBJ_TYPE_STRING;
+    obj_str1.value_string = strdup ("string1");
+    obj_str2.type = WEECHAT_RELAY_OBJ_TYPE_STRING;
+    obj_str2.value_string = strdup ("string2");
+
+    obj_int1.type = WEECHAT_RELAY_OBJ_TYPE_INTEGER;
+    obj_int1.value_integer = 123;
+    obj_int2.type = WEECHAT_RELAY_OBJ_TYPE_INTEGER;
+    obj_int2.value_integer = 456;
+
+    ptr_hash->type_keys = WEECHAT_RELAY_OBJ_TYPE_ARRAY;
+    ptr_hash->type_values = WEECHAT_RELAY_OBJ_TYPE_INTEGER;
+    ptr_hash->count = 0;
+    ptr_hash->keys = NULL;
+    ptr_hash->values = NULL;
+
+    LONGS_EQUAL(0, weechat_relay_msg_add_hashtable (NULL, NULL));
+    LONGS_EQUAL(0, weechat_relay_msg_add_hashtable (msg, NULL));
+    LONGS_EQUAL(0, weechat_relay_msg_add_hashtable (NULL, ptr_hash));
+
+    /* wrong types */
+    ptr_hash->type_keys = WEECHAT_RELAY_OBJ_TYPE_ARRAY;
+    ptr_hash->type_values = WEECHAT_RELAY_OBJ_TYPE_INTEGER;
+    ptr_hash->count = 0;
+    ptr_hash->keys = NULL;
+    ptr_hash->values = NULL;
+    LONGS_EQUAL(0, weechat_relay_msg_add_hashtable (msg, ptr_hash));
+    ptr_hash->type_keys = WEECHAT_RELAY_OBJ_TYPE_STRING;
+    ptr_hash->type_values = WEECHAT_RELAY_OBJ_TYPE_ARRAY;
+    ptr_hash->count = 0;
+    ptr_hash->keys = NULL;
+    ptr_hash->values = NULL;
+    LONGS_EQUAL(0, weechat_relay_msg_add_hashtable (msg, ptr_hash));
+    weechat_relay_msg_free (msg);
+
+    /* empty hashtable */
+    msg = weechat_relay_msg_new ("test");
+    ptr_hash->type_keys = WEECHAT_RELAY_OBJ_TYPE_STRING;
+    ptr_hash->type_values = WEECHAT_RELAY_OBJ_TYPE_INTEGER;
+    ptr_hash->count = 0;
+    ptr_hash->keys = NULL;
+    ptr_hash->values = NULL;
+    LONGS_EQUAL(1, weechat_relay_msg_add_object (msg, &obj));
+    LONGS_EQUAL(WEECHAT_RELAY_MSG_INITIAL_ALLOC, msg->data_alloc);
+    LONGS_EQUAL(26, msg->data_size);
+    MEMCMP_EQUAL(weechat_relay_obj_types_str[WEECHAT_RELAY_OBJ_TYPE_HASHTABLE],
+                 msg->data + 13,
+                 3);
+    MEMCMP_EQUAL(weechat_relay_obj_types_str[WEECHAT_RELAY_OBJ_TYPE_STRING],
+                 msg->data + 16,
+                 3);
+    MEMCMP_EQUAL(weechat_relay_obj_types_str[WEECHAT_RELAY_OBJ_TYPE_INTEGER],
+                 msg->data + 19,
+                 3);
+    value32 = htonl (0);
+    MEMCMP_EQUAL(&value32, msg->data + 22, 4);
+    weechat_relay_msg_free (msg);
+
+    /* hashtable with 2 keys */
+    msg = weechat_relay_msg_new ("test");
+    ptr_hash->type_keys = WEECHAT_RELAY_OBJ_TYPE_STRING;
+    ptr_hash->type_values = WEECHAT_RELAY_OBJ_TYPE_INTEGER;
+    ptr_hash->count = 2;
+    ptr_hash->keys = (struct t_weechat_relay_obj **)malloc (2 * sizeof (*ptr_hash->keys));
+    ptr_hash->values = (struct t_weechat_relay_obj **)malloc (2 * sizeof (*ptr_hash->values));
+    ptr_hash->keys[0] = &obj_str1;
+    ptr_hash->keys[1] = &obj_str2;
+    ptr_hash->values[0] = &obj_int1;
+    ptr_hash->values[1] = &obj_int2;
+    LONGS_EQUAL(1, weechat_relay_msg_add_object (msg, &obj));
+    LONGS_EQUAL(WEECHAT_RELAY_MSG_INITIAL_ALLOC, msg->data_alloc);
+    LONGS_EQUAL(56, msg->data_size);
+    MEMCMP_EQUAL(weechat_relay_obj_types_str[WEECHAT_RELAY_OBJ_TYPE_HASHTABLE],
+                 msg->data + 13,
+                 3);
+    MEMCMP_EQUAL(weechat_relay_obj_types_str[WEECHAT_RELAY_OBJ_TYPE_STRING],
+                 msg->data + 16,
+                 3);
+    MEMCMP_EQUAL(weechat_relay_obj_types_str[WEECHAT_RELAY_OBJ_TYPE_INTEGER],
+                 msg->data + 19,
+                 3);
+    /* count */
+    value32 = htonl (2);
+    MEMCMP_EQUAL(&value32, msg->data + 22, 4);
+    /* item 1: "string1" -> 123 */
+    value32 = htonl (7);
+    MEMCMP_EQUAL(&value32, msg->data + 26, 4);
+    MEMCMP_EQUAL("string1", msg->data + 30, 7);
+    value32 = htonl (123);
+    MEMCMP_EQUAL(&value32, msg->data + 37, 4);
+    /* item 2: "string2" -> 456 */
+    value32 = htonl (7);
+    MEMCMP_EQUAL(&value32, msg->data + 41, 4);
+    MEMCMP_EQUAL("string2", msg->data + 45, 7);
+    value32 = htonl (456);
+    MEMCMP_EQUAL(&value32, msg->data + 52, 4);
+    free (ptr_hash->keys);
+    free (ptr_hash->values);
+    weechat_relay_msg_free (msg);
+
+    free (obj_str1.value_string);
+    free (obj_str2.value_string);
+}
+
+/*
+ * Tests functions:
+ *   weechat_relay_msg_add_hdata
+ *   weechat_relay_msg_add_object
+ */
+
+TEST(LibMessage, AddHdata)
+{
+    struct t_weechat_relay_msg *msg;
+    struct t_weechat_relay_obj obj;
+    struct t_weechat_relay_obj_hdata *ptr_hdata;
+    uint32_t value32;
+
+    msg = weechat_relay_msg_new ("test");
+
+    obj.type = WEECHAT_RELAY_OBJ_TYPE_HDATA;
+    ptr_hdata = &obj.value_hdata;
+
+    ptr_hdata->hpath = NULL;
+    ptr_hdata->num_hpaths = 0;
+    ptr_hdata->hpaths = NULL;
+    ptr_hdata->keys = NULL;
+    ptr_hdata->num_keys = 0;
+    ptr_hdata->keys_names = NULL;
+    ptr_hdata->keys_types = NULL;
+    ptr_hdata->count = 0;
+    ptr_hdata->ppath = NULL;
+    ptr_hdata->values = NULL;
+
+    LONGS_EQUAL(0, weechat_relay_msg_add_hdata (NULL, NULL));
+    LONGS_EQUAL(0, weechat_relay_msg_add_hdata (msg, NULL));
+    LONGS_EQUAL(0, weechat_relay_msg_add_hdata (NULL, ptr_hdata));
+
+    /* missing data in hdata */
+    ptr_hdata->hpath = strdup ("path1/path2/path3");
+    LONGS_EQUAL(0, weechat_relay_msg_add_hdata (msg, ptr_hdata));
+    ptr_hdata->num_hpaths = 3;
+    LONGS_EQUAL(0, weechat_relay_msg_add_hdata (msg, ptr_hdata));
+    ptr_hdata->hpaths = (char **)malloc (3 * sizeof (*ptr_hdata->hpaths));
+    ptr_hdata->hpaths[0] = strdup ("path1");
+    ptr_hdata->hpaths[1] = strdup ("path2");
+    ptr_hdata->hpaths[2] = strdup ("path3");
+    LONGS_EQUAL(0, weechat_relay_msg_add_hdata (msg, ptr_hdata));
+    ptr_hdata->keys = strdup ("key1:str,key2:int");
+    LONGS_EQUAL(0, weechat_relay_msg_add_hdata (msg, ptr_hdata));
+    ptr_hdata->num_keys = 2;
+    LONGS_EQUAL(0, weechat_relay_msg_add_hdata (msg, ptr_hdata));
+    ptr_hdata->keys_names = (char **)malloc (2 * sizeof (*ptr_hdata->keys_names));
+    ptr_hdata->keys_names[0] = strdup ("key1");
+    ptr_hdata->keys_names[1] = strdup ("key2");
+    LONGS_EQUAL(0, weechat_relay_msg_add_hdata (msg, ptr_hdata));
+    ptr_hdata->keys_types = (enum t_weechat_relay_obj_type *)malloc (2 * sizeof (*ptr_hdata->keys_types));
+    ptr_hdata->keys_types[0] = WEECHAT_RELAY_OBJ_TYPE_STRING;
+    ptr_hdata->keys_types[1] = WEECHAT_RELAY_OBJ_TYPE_INTEGER;
+    LONGS_EQUAL(0, weechat_relay_msg_add_hdata (msg, ptr_hdata));
+    ptr_hdata->count = 2;
+    LONGS_EQUAL(0, weechat_relay_msg_add_hdata (msg, ptr_hdata));
+    ptr_hdata->ppath = (struct t_weechat_relay_obj ***)malloc (2 * sizeof (*ptr_hdata->ppath));
+    ptr_hdata->ppath[0] = (struct t_weechat_relay_obj **)malloc (3 * sizeof (**ptr_hdata->ppath));
+    ptr_hdata->ppath[0][0] = (struct t_weechat_relay_obj *)malloc (sizeof (***ptr_hdata->ppath));
+    ptr_hdata->ppath[0][0]->type = WEECHAT_RELAY_OBJ_TYPE_POINTER;
+    ptr_hdata->ppath[0][0]->value_pointer = (const void *)0x123;
+    ptr_hdata->ppath[0][1] = (struct t_weechat_relay_obj *)malloc (sizeof (***ptr_hdata->ppath));
+    ptr_hdata->ppath[0][1]->type = WEECHAT_RELAY_OBJ_TYPE_POINTER;
+    ptr_hdata->ppath[0][1]->value_pointer = (const void *)0x456;
+    ptr_hdata->ppath[0][2] = (struct t_weechat_relay_obj *)malloc (sizeof (***ptr_hdata->ppath));
+    ptr_hdata->ppath[0][2]->type = WEECHAT_RELAY_OBJ_TYPE_POINTER;
+    ptr_hdata->ppath[0][2]->value_pointer = (const void *)0x789;
+    ptr_hdata->ppath[1] = (struct t_weechat_relay_obj **)malloc (3 * sizeof (**ptr_hdata->ppath));
+    ptr_hdata->ppath[1][0] = (struct t_weechat_relay_obj *)malloc (sizeof (***ptr_hdata->ppath));
+    ptr_hdata->ppath[1][0]->type = WEECHAT_RELAY_OBJ_TYPE_POINTER;
+    ptr_hdata->ppath[1][0]->value_pointer = (const void *)0xaaa;
+    ptr_hdata->ppath[1][1] = (struct t_weechat_relay_obj *)malloc (sizeof (***ptr_hdata->ppath));
+    ptr_hdata->ppath[1][1]->type = WEECHAT_RELAY_OBJ_TYPE_POINTER;
+    ptr_hdata->ppath[1][1]->value_pointer = (const void *)0xbbb;
+    ptr_hdata->ppath[1][2] = (struct t_weechat_relay_obj *)malloc (sizeof (***ptr_hdata->ppath));
+    ptr_hdata->ppath[1][2]->type = WEECHAT_RELAY_OBJ_TYPE_POINTER;
+    ptr_hdata->ppath[1][2]->value_pointer = (const void *)0xccc;
+    LONGS_EQUAL(0, weechat_relay_msg_add_hdata (msg, ptr_hdata));
+    ptr_hdata->values = (struct t_weechat_relay_obj ***)malloc (2 * sizeof (*ptr_hdata->values));
+    ptr_hdata->values[0] = (struct t_weechat_relay_obj **)malloc (2 * sizeof (**ptr_hdata->values));
+    ptr_hdata->values[0][0] = (struct t_weechat_relay_obj *)malloc (sizeof (***ptr_hdata->values));
+    ptr_hdata->values[0][0]->type = WEECHAT_RELAY_OBJ_TYPE_STRING;
+    ptr_hdata->values[0][0]->value_string = strdup ("string1");
+    ptr_hdata->values[0][1] = (struct t_weechat_relay_obj *)malloc (sizeof (***ptr_hdata->values));
+    ptr_hdata->values[0][1]->type = WEECHAT_RELAY_OBJ_TYPE_INTEGER;
+    ptr_hdata->values[0][1]->value_integer = 123;
+    ptr_hdata->values[1] = (struct t_weechat_relay_obj **)malloc (2 * sizeof (**ptr_hdata->values));
+    ptr_hdata->values[1][0] = (struct t_weechat_relay_obj *)malloc (sizeof (***ptr_hdata->values));
+    ptr_hdata->values[1][0]->type = WEECHAT_RELAY_OBJ_TYPE_STRING;
+    ptr_hdata->values[1][0]->value_string = strdup ("string2");
+    ptr_hdata->values[1][1] = (struct t_weechat_relay_obj *)malloc (sizeof (***ptr_hdata->values));
+    ptr_hdata->values[1][1]->type = WEECHAT_RELAY_OBJ_TYPE_INTEGER;
+    ptr_hdata->values[1][1]->value_integer = 456;
+
+    /* hdata OK */
+    LONGS_EQUAL(1, weechat_relay_msg_add_object (msg, &obj));
+    LONGS_EQUAL(WEECHAT_RELAY_MSG_INITIAL_ALLOC, msg->data_alloc);
+    LONGS_EQUAL(116, msg->data_size);
+    MEMCMP_EQUAL(weechat_relay_obj_types_str[WEECHAT_RELAY_OBJ_TYPE_HDATA],
+                 msg->data + 13,
+                 3);
+    value32 = htonl (17);
+    MEMCMP_EQUAL(&value32, msg->data + 16, 4);
+    MEMCMP_EQUAL("path1/path2/path3", msg->data + 20, 17);
+    value32 = htonl (17);
+    MEMCMP_EQUAL(&value32, msg->data + 37, 4);
+    MEMCMP_EQUAL("key1:str,key2:int", msg->data + 41, 17);
+    value32 = htonl (2);
+    MEMCMP_EQUAL(&value32, msg->data + 58, 4);
+    /* obj1 */
+    LONGS_EQUAL(3, msg->data[62]);
+    MEMCMP_EQUAL("123", msg->data + 63, 3);
+    LONGS_EQUAL(3, msg->data[66]);
+    MEMCMP_EQUAL("456", msg->data + 67, 3);
+    LONGS_EQUAL(3, msg->data[70]);
+    MEMCMP_EQUAL("789", msg->data + 71, 3);
+    value32 = htonl (7);
+    MEMCMP_EQUAL(&value32, msg->data + 74, 4);
+    MEMCMP_EQUAL("string1", msg->data + 78, 7);
+    value32 = htonl (123);
+    MEMCMP_EQUAL(&value32, msg->data + 85, 4);
+    /* obj2 */
+    LONGS_EQUAL(3, msg->data[89]);
+    MEMCMP_EQUAL("aaa", msg->data + 90, 3);
+    LONGS_EQUAL(3, msg->data[93]);
+    MEMCMP_EQUAL("bbb", msg->data + 94, 3);
+    LONGS_EQUAL(3, msg->data[97]);
+    MEMCMP_EQUAL("ccc", msg->data + 98, 3);
+    value32 = htonl (7);
+    MEMCMP_EQUAL(&value32, msg->data + 101, 4);
+    MEMCMP_EQUAL("string2", msg->data + 105, 7);
+    value32 = htonl (456);
+    MEMCMP_EQUAL(&value32, msg->data + 112, 4);
+
+    free (ptr_hdata->hpath);
+    free (ptr_hdata->hpaths[0]);
+    free (ptr_hdata->hpaths[1]);
+    free (ptr_hdata->hpaths[2]);
+    free (ptr_hdata->hpaths);
+    free (ptr_hdata->keys);
+    free (ptr_hdata->keys_names[0]);
+    free (ptr_hdata->keys_names[1]);
+    free (ptr_hdata->keys_names);
+    free (ptr_hdata->keys_types);
+    free (ptr_hdata->ppath[0][0]);
+    free (ptr_hdata->ppath[0][1]);
+    free (ptr_hdata->ppath[0][2]);
+    free (ptr_hdata->ppath[1][0]);
+    free (ptr_hdata->ppath[1][1]);
+    free (ptr_hdata->ppath[1][2]);
+    free (ptr_hdata->ppath[0]);
+    free (ptr_hdata->ppath[1]);
+    free (ptr_hdata->ppath);
+    free (ptr_hdata->values[0][0]->value_string);
+    free (ptr_hdata->values[1][0]->value_string);
+    free (ptr_hdata->values[0][0]);
+    free (ptr_hdata->values[0][1]);
+    free (ptr_hdata->values[1][0]);
+    free (ptr_hdata->values[1][1]);
+    free (ptr_hdata->values[0]);
+    free (ptr_hdata->values[1]);
+    free (ptr_hdata->values);
+
+    weechat_relay_msg_free (msg);
+}
+
+/*
+ * Tests functions:
+ *   weechat_relay_msg_add_info
+ *   weechat_relay_msg_add_object
+ */
+
+TEST(LibMessage, AddInfo)
+{
+    struct t_weechat_relay_msg *msg;
+    struct t_weechat_relay_obj obj;
+    struct t_weechat_relay_obj_info *ptr_info;
+    uint32_t value32;
+
+    msg = weechat_relay_msg_new ("test");
+
+    obj.type = WEECHAT_RELAY_OBJ_TYPE_INFO;
+    ptr_info = &obj.value_info;
+
+    ptr_info->name = NULL;
+    ptr_info->value = NULL;
+
+    LONGS_EQUAL(0, weechat_relay_msg_add_info (NULL, NULL));
+    LONGS_EQUAL(0, weechat_relay_msg_add_info (msg, NULL));
+
+    /* NULL name and value */
+    ptr_info->name = NULL;
+    ptr_info->value = NULL;
+    LONGS_EQUAL(1, weechat_relay_msg_add_object (msg, &obj));
+    LONGS_EQUAL(WEECHAT_RELAY_MSG_INITIAL_ALLOC, msg->data_alloc);
+    LONGS_EQUAL(24, msg->data_size);
+    MEMCMP_EQUAL(weechat_relay_obj_types_str[WEECHAT_RELAY_OBJ_TYPE_INFO],
+                 msg->data + 13,
+                 3);
+    value32 = htonl (-1);
+    MEMCMP_EQUAL(&value32, msg->data + 16, 4);
+    value32 = htonl (-1);
+    MEMCMP_EQUAL(&value32, msg->data + 20, 4);
+
+    /* empty name and value */
+    ptr_info->name = strdup ("");
+    ptr_info->value = strdup ("");
+    LONGS_EQUAL(1, weechat_relay_msg_add_object (msg, &obj));
+    LONGS_EQUAL(WEECHAT_RELAY_MSG_INITIAL_ALLOC, msg->data_alloc);
+    LONGS_EQUAL(35, msg->data_size);
+    MEMCMP_EQUAL(weechat_relay_obj_types_str[WEECHAT_RELAY_OBJ_TYPE_INFO],
+                 msg->data + 24,
+                 3);
+    value32 = htonl (0);
+    MEMCMP_EQUAL(&value32, msg->data + 27, 4);
+    value32 = htonl (0);
+    MEMCMP_EQUAL(&value32, msg->data + 31, 4);
+    free (ptr_info->name);
+    free (ptr_info->value);
+
+    /* name and value */
+    ptr_info->name = strdup ("name");
+    ptr_info->value = strdup ("value");
+    LONGS_EQUAL(1, weechat_relay_msg_add_object (msg, &obj));
+    LONGS_EQUAL(WEECHAT_RELAY_MSG_INITIAL_ALLOC, msg->data_alloc);
+    LONGS_EQUAL(55, msg->data_size);
+    MEMCMP_EQUAL(weechat_relay_obj_types_str[WEECHAT_RELAY_OBJ_TYPE_INFO],
+                 msg->data + 35,
+                 3);
+    value32 = htonl (4);
+    MEMCMP_EQUAL(&value32, msg->data + 38, 4);
+    MEMCMP_EQUAL("name", msg->data + 42, 4);
+    value32 = htonl (5);
+    MEMCMP_EQUAL(&value32, msg->data + 46, 4);
+    MEMCMP_EQUAL("value", msg->data + 50, 5);
+    free (ptr_info->name);
+    free (ptr_info->value);
+
+    weechat_relay_msg_free (msg);
+}
+
+/*
+ * Tests functions:
+ *   weechat_relay_msg_add_infolist
+ *   weechat_relay_msg_add_object
+ */
+
+TEST(LibMessage, AddInfolist)
+{
+    struct t_weechat_relay_msg *msg;
+    struct t_weechat_relay_obj obj;
+    struct t_weechat_relay_obj_infolist *ptr_infolist;
+    uint32_t value32;
+
+    msg = weechat_relay_msg_new ("test");
+
+    obj.type = WEECHAT_RELAY_OBJ_TYPE_INFOLIST;
+    ptr_infolist = &obj.value_infolist;
+
+    ptr_infolist->name = NULL;
+    ptr_infolist->count = -1;
+    ptr_infolist->items = NULL;
+
+    LONGS_EQUAL(0, weechat_relay_msg_add_infolist (NULL, NULL));
+    LONGS_EQUAL(0, weechat_relay_msg_add_infolist (msg, NULL));
+    LONGS_EQUAL(0, weechat_relay_msg_add_infolist (NULL, ptr_infolist));
+
+    /* missing data in infolist */
+    ptr_infolist->name = NULL;
+    ptr_infolist->count = -1;
+    ptr_infolist->items = NULL;
+    LONGS_EQUAL(0, weechat_relay_msg_add_infolist (msg, ptr_infolist));
+    ptr_infolist->name = strdup ("test");
+    LONGS_EQUAL(0, weechat_relay_msg_add_infolist (msg, ptr_infolist));
+    ptr_infolist->count = 2;
+    ptr_infolist->items = (struct t_weechat_relay_obj_infolist_item **)malloc (2 * sizeof (*ptr_infolist->items));
+    ptr_infolist->items[0] = (struct t_weechat_relay_obj_infolist_item *)malloc (sizeof (*ptr_infolist->items[0]));
+    ptr_infolist->items[0]->count = 2;
+    ptr_infolist->items[0]->variables = (struct t_weechat_relay_obj_infolist_var **)malloc (2 * sizeof (*ptr_infolist->items[0]->variables));
+    ptr_infolist->items[0]->variables[0] = (struct t_weechat_relay_obj_infolist_var *)malloc (sizeof (*ptr_infolist->items[0]->variables[0]));
+    ptr_infolist->items[0]->variables[0]->name = strdup ("var1");
+    ptr_infolist->items[0]->variables[0]->value = (struct t_weechat_relay_obj *)malloc (sizeof (*ptr_infolist->items[0]->variables[0]->value));
+    ptr_infolist->items[0]->variables[0]->value->type = WEECHAT_RELAY_OBJ_TYPE_STRING;
+    ptr_infolist->items[0]->variables[0]->value->value_string = strdup ("item1_value");
+    ptr_infolist->items[0]->variables[1] = (struct t_weechat_relay_obj_infolist_var *)malloc (sizeof (*ptr_infolist->items[0]->variables[1]));
+    ptr_infolist->items[0]->variables[1]->name = strdup ("var2");
+    ptr_infolist->items[0]->variables[1]->value = (struct t_weechat_relay_obj *)malloc (sizeof (*ptr_infolist->items[0]->variables[1]->value));
+    ptr_infolist->items[0]->variables[1]->value->type = WEECHAT_RELAY_OBJ_TYPE_INTEGER;
+    ptr_infolist->items[0]->variables[1]->value->value_integer = 123;
+    ptr_infolist->items[1] = (struct t_weechat_relay_obj_infolist_item *)malloc (sizeof (*ptr_infolist->items[1]));
+    ptr_infolist->items[1]->count = 2;
+    ptr_infolist->items[1]->variables = (struct t_weechat_relay_obj_infolist_var **)malloc (2 * sizeof (*ptr_infolist->items[1]->variables));
+    ptr_infolist->items[1]->variables[0] = (struct t_weechat_relay_obj_infolist_var *)malloc (sizeof (*ptr_infolist->items[1]->variables[0]));
+    ptr_infolist->items[1]->variables[0]->name = strdup ("var1");
+    ptr_infolist->items[1]->variables[0]->value = (struct t_weechat_relay_obj *)malloc (sizeof (*ptr_infolist->items[0]->variables[0]->value));
+    ptr_infolist->items[1]->variables[0]->value->type = WEECHAT_RELAY_OBJ_TYPE_STRING;
+    ptr_infolist->items[1]->variables[0]->value->value_string = strdup ("item2_value");
+    ptr_infolist->items[1]->variables[1] = (struct t_weechat_relay_obj_infolist_var *)malloc (sizeof (*ptr_infolist->items[1]->variables[1]));
+    ptr_infolist->items[1]->variables[1]->name = strdup ("var2");
+    ptr_infolist->items[1]->variables[1]->value = (struct t_weechat_relay_obj *)malloc (sizeof (*ptr_infolist->items[0]->variables[1]->value));
+    ptr_infolist->items[1]->variables[1]->value->type = WEECHAT_RELAY_OBJ_TYPE_INTEGER;
+    ptr_infolist->items[1]->variables[1]->value->value_integer = 456;
+    LONGS_EQUAL(1, weechat_relay_msg_add_object (msg, &obj));
+    LONGS_EQUAL(WEECHAT_RELAY_MSG_INITIAL_ALLOC, msg->data_alloc);
+    LONGS_EQUAL(118, msg->data_size);
+    MEMCMP_EQUAL(weechat_relay_obj_types_str[WEECHAT_RELAY_OBJ_TYPE_INFOLIST],
+                 msg->data + 13,
+                 3);
+    /* name */
+    value32 = htonl (4);
+    MEMCMP_EQUAL(&value32, msg->data + 16, 4);
+    MEMCMP_EQUAL("test", msg->data + 20, 4);
+    /* count */
+    value32 = htonl (2);
+    MEMCMP_EQUAL(&value32, msg->data + 24, 4);
+    /* item 1: count */
+    value32 = htonl (2);
+    MEMCMP_EQUAL(&value32, msg->data + 28, 4);
+    /* item 1: var 1 */
+    value32 = htonl (4);
+    MEMCMP_EQUAL(&value32, msg->data + 32, 4);
+    MEMCMP_EQUAL("var1", msg->data + 36, 4);
+    MEMCMP_EQUAL(weechat_relay_obj_types_str[WEECHAT_RELAY_OBJ_TYPE_STRING],
+                 msg->data + 40, 3);
+    value32 = htonl (11);
+    MEMCMP_EQUAL(&value32, msg->data + 43, 4);
+    MEMCMP_EQUAL("item1_value", msg->data + 47, 11);
+    /* item 1: var 2 */
+    value32 = htonl (4);
+    MEMCMP_EQUAL(&value32, msg->data + 58, 4);
+    MEMCMP_EQUAL("var2", msg->data + 62, 4);
+    MEMCMP_EQUAL(weechat_relay_obj_types_str[WEECHAT_RELAY_OBJ_TYPE_INTEGER],
+                 msg->data + 66, 3);
+    value32 = htonl (123);
+    MEMCMP_EQUAL(&value32, msg->data + 69, 4);
+    /* item 2: count */
+    value32 = htonl (2);
+    MEMCMP_EQUAL(&value32, msg->data + 73, 4);
+    /* item 2: var 1 */
+    value32 = htonl (4);
+    MEMCMP_EQUAL(&value32, msg->data + 77, 4);
+    MEMCMP_EQUAL("var1", msg->data + 81, 4);
+    MEMCMP_EQUAL(weechat_relay_obj_types_str[WEECHAT_RELAY_OBJ_TYPE_STRING],
+                 msg->data + 85, 3);
+    value32 = htonl (11);
+    MEMCMP_EQUAL(&value32, msg->data + 88, 4);
+    MEMCMP_EQUAL("item2_value", msg->data + 92, 11);
+    /* item 2: var 2 */
+    value32 = htonl (4);
+    MEMCMP_EQUAL(&value32, msg->data + 103, 4);
+    MEMCMP_EQUAL("var2", msg->data + 107, 4);
+    MEMCMP_EQUAL(weechat_relay_obj_types_str[WEECHAT_RELAY_OBJ_TYPE_INTEGER],
+                 msg->data + 111, 3);
+    value32 = htonl (456);
+    MEMCMP_EQUAL(&value32, msg->data + 114, 4);
+
+    free (ptr_infolist->name);
+    free (ptr_infolist->items[0]->variables[0]->name);
+    free (ptr_infolist->items[0]->variables[0]->value->value_string);
+    free (ptr_infolist->items[0]->variables[0]->value);
+    free (ptr_infolist->items[0]->variables[1]->name);
+    free (ptr_infolist->items[0]->variables[1]->value);
+    free (ptr_infolist->items[0]->variables[0]);
+    free (ptr_infolist->items[0]->variables[1]);
+    free (ptr_infolist->items[0]->variables);
+    free (ptr_infolist->items[1]->variables[0]->name);
+    free (ptr_infolist->items[1]->variables[0]->value->value_string);
+    free (ptr_infolist->items[1]->variables[0]->value);
+    free (ptr_infolist->items[1]->variables[1]->name);
+    free (ptr_infolist->items[1]->variables[1]->value);
+    free (ptr_infolist->items[1]->variables[0]);
+    free (ptr_infolist->items[1]->variables[1]);
+    free (ptr_infolist->items[1]->variables);
+    free (ptr_infolist->items[0]);
+    free (ptr_infolist->items[1]);
+    free (ptr_infolist->items);
+
+    weechat_relay_msg_free (msg);
+}
+
+/*
+ * Tests functions:
+ *   weechat_relay_msg_add_array
+ *   weechat_relay_msg_add_object
+ */
+
+TEST(LibMessage, AddArray)
+{
+    struct t_weechat_relay_msg *msg;
+    struct t_weechat_relay_obj obj;
+    struct t_weechat_relay_obj_array *ptr_array;
+    uint32_t value32;
+
+    msg = weechat_relay_msg_new ("test");
+
+    obj.type = WEECHAT_RELAY_OBJ_TYPE_ARRAY;
+    ptr_array = &obj.value_array;
+
+    ptr_array->type = WEECHAT_RELAY_OBJ_TYPE_STRING;
+    ptr_array->count = -1;
+    ptr_array->values = NULL;
+
+    LONGS_EQUAL(0, weechat_relay_msg_add_array (NULL, NULL));
+    LONGS_EQUAL(0, weechat_relay_msg_add_array (msg, NULL));
+    LONGS_EQUAL(0, weechat_relay_msg_add_array (NULL, ptr_array));
+
+    /* missing data in array */
+    ptr_array->type = WEECHAT_RELAY_OBJ_TYPE_STRING;
+    ptr_array->count = -1;
+    ptr_array->values = NULL;
+    LONGS_EQUAL(0, weechat_relay_msg_add_array (msg, ptr_array));
+
+    /* array of 2 strings */
+    ptr_array->type = WEECHAT_RELAY_OBJ_TYPE_STRING;
+    ptr_array->count = 2;
+    ptr_array->values = (struct t_weechat_relay_obj **)malloc (2 * sizeof (*ptr_array->values));
+    ptr_array->values[0] = (struct t_weechat_relay_obj *)malloc (sizeof (*ptr_array->values[0]));
+    ptr_array->values[0]->type = WEECHAT_RELAY_OBJ_TYPE_STRING;
+    ptr_array->values[0]->value_string = strdup ("value1");
+    ptr_array->values[1] = (struct t_weechat_relay_obj *)malloc (sizeof (*ptr_array->values[0]));
+    ptr_array->values[1]->type = WEECHAT_RELAY_OBJ_TYPE_STRING;
+    ptr_array->values[1]->value_string = strdup ("value2");
+    LONGS_EQUAL(1, weechat_relay_msg_add_object (msg, &obj));
+    LONGS_EQUAL(WEECHAT_RELAY_MSG_INITIAL_ALLOC, msg->data_alloc);
+    LONGS_EQUAL(43, msg->data_size);
+    MEMCMP_EQUAL(weechat_relay_obj_types_str[WEECHAT_RELAY_OBJ_TYPE_ARRAY],
+                 msg->data + 13, 3);
+    /* type */
+    MEMCMP_EQUAL(weechat_relay_obj_types_str[WEECHAT_RELAY_OBJ_TYPE_STRING],
+                 msg->data + 16, 3);
+    /* count */
+    value32 = htonl (2);
+    MEMCMP_EQUAL(&value32, msg->data + 19, 4);
+    /* item 1: "value1" */
+    value32 = htonl (6);
+    MEMCMP_EQUAL(&value32, msg->data + 23, 4);
+    MEMCMP_EQUAL("value1", msg->data + 27, 6);
+    /* item 2: "value2" */
+    value32 = htonl (6);
+    MEMCMP_EQUAL(&value32, msg->data + 33, 4);
+    MEMCMP_EQUAL("value2", msg->data + 37, 6);
+
+    free (ptr_array->values[0]->value_string);
+    free (ptr_array->values[1]->value_string);
+    free (ptr_array->values[0]);
+    free (ptr_array->values[1]);
+    free (ptr_array->values);
+
+    /* array of 2 integers */
+    ptr_array->type = WEECHAT_RELAY_OBJ_TYPE_INTEGER;
+    ptr_array->count = 2;
+    ptr_array->values = (struct t_weechat_relay_obj **)malloc (2 * sizeof (*ptr_array->values));
+    ptr_array->values[0] = (struct t_weechat_relay_obj *)malloc (sizeof (*ptr_array->values[0]));
+    ptr_array->values[0]->type = WEECHAT_RELAY_OBJ_TYPE_INTEGER;
+    ptr_array->values[0]->value_integer = 123;
+    ptr_array->values[1] = (struct t_weechat_relay_obj *)malloc (sizeof (*ptr_array->values[0]));
+    ptr_array->values[1]->type = WEECHAT_RELAY_OBJ_TYPE_INTEGER;
+    ptr_array->values[1]->value_integer = 456;
+    LONGS_EQUAL(1, weechat_relay_msg_add_object (msg, &obj));
+    LONGS_EQUAL(WEECHAT_RELAY_MSG_INITIAL_ALLOC, msg->data_alloc);
+    LONGS_EQUAL(61, msg->data_size);
+    MEMCMP_EQUAL(weechat_relay_obj_types_str[WEECHAT_RELAY_OBJ_TYPE_ARRAY],
+                 msg->data + 43, 3);
+    /* type */
+    MEMCMP_EQUAL(weechat_relay_obj_types_str[WEECHAT_RELAY_OBJ_TYPE_INTEGER],
+                 msg->data + 46, 3);
+    /* count */
+    value32 = htonl (2);
+    MEMCMP_EQUAL(&value32, msg->data + 49, 4);
+    /* item 1: 123 */
+    value32 = htonl (123);
+    MEMCMP_EQUAL(&value32, msg->data + 53, 4);
+    /* item 2: 456 */
+    value32 = htonl (456);
+    MEMCMP_EQUAL(&value32, msg->data + 57, 4);
+
+    free (ptr_array->values[0]);
+    free (ptr_array->values[1]);
+    free (ptr_array->values);
 
     weechat_relay_msg_free (msg);
 }

@@ -62,7 +62,7 @@ weechat_relay_msg_new (const char *id)
     new_msg->data_size = 0;
 
     /* add size and compression flag (they will be set later) */
-    weechat_relay_msg_add_int (new_msg, 0);
+    weechat_relay_msg_add_integer (new_msg, 0);
     weechat_relay_msg_add_char (new_msg, 0);
 
     /* add id */
@@ -183,7 +183,7 @@ weechat_relay_msg_add_char (struct t_weechat_relay_msg *msg, char c)
  */
 
 int
-weechat_relay_msg_add_int (struct t_weechat_relay_msg *msg, int value)
+weechat_relay_msg_add_integer (struct t_weechat_relay_msg *msg, int value)
 {
     uint32_t value32;
 
@@ -230,7 +230,7 @@ weechat_relay_msg_add_string (struct t_weechat_relay_msg *msg,
     if (string)
     {
         length = strlen (string);
-        if (!weechat_relay_msg_add_int (msg, length))
+        if (!weechat_relay_msg_add_integer (msg, length))
             return 0;
         if (length > 0)
             return weechat_relay_msg_add_bytes (msg, string, length);
@@ -239,7 +239,7 @@ weechat_relay_msg_add_string (struct t_weechat_relay_msg *msg,
     }
     else
     {
-        return weechat_relay_msg_add_int (msg, -1);
+        return weechat_relay_msg_add_integer (msg, -1);
     }
 }
 
@@ -253,20 +253,21 @@ weechat_relay_msg_add_string (struct t_weechat_relay_msg *msg,
 
 int
 weechat_relay_msg_add_buffer (struct t_weechat_relay_msg *msg,
-                              const void *buffer, size_t length)
+                              struct t_weechat_relay_obj_buffer *buffer)
 {
-    if (buffer)
+    if (!buffer)
+        return 0;
+
+    if (buffer->buffer)
     {
-        if (!weechat_relay_msg_add_int (msg, length))
+        if (!weechat_relay_msg_add_integer (msg, buffer->length))
             return 0;
-        if (length > 0)
-            return weechat_relay_msg_add_bytes (msg, buffer, length);
-        else
-            return 1;
+        return (buffer->length > 0) ?
+            weechat_relay_msg_add_bytes (msg, buffer->buffer, buffer->length) : 1;
     }
     else
     {
-        return weechat_relay_msg_add_int (msg, -1);
+        return weechat_relay_msg_add_integer (msg, -1);
     }
 }
 
@@ -280,7 +281,7 @@ weechat_relay_msg_add_buffer (struct t_weechat_relay_msg *msg,
 
 int
 weechat_relay_msg_add_pointer (struct t_weechat_relay_msg *msg,
-                               void *pointer)
+                               const void *pointer)
 {
     char str_pointer[128];
     unsigned char length;
@@ -312,6 +313,294 @@ weechat_relay_msg_add_time (struct t_weechat_relay_msg *msg, time_t time)
     if (!weechat_relay_msg_add_bytes (msg, &length, 1))
         return 0;
     return weechat_relay_msg_add_bytes (msg, str_time, length);
+}
+
+/*
+ * Adds a hashtable to a message.
+ *
+ * Returns:
+ *   1: OK
+ *   0: error
+ */
+
+int
+weechat_relay_msg_add_hashtable (struct t_weechat_relay_msg *msg,
+                                 struct t_weechat_relay_obj_hashtable *hashtable)
+{
+    int i;
+
+    if (!hashtable)
+        return 0;
+
+    if ((hashtable->type_keys != WEECHAT_RELAY_OBJ_TYPE_INTEGER)
+        && (hashtable->type_keys != WEECHAT_RELAY_OBJ_TYPE_STRING)
+        && (hashtable->type_keys != WEECHAT_RELAY_OBJ_TYPE_POINTER)
+        && (hashtable->type_keys != WEECHAT_RELAY_OBJ_TYPE_BUFFER)
+        && (hashtable->type_keys != WEECHAT_RELAY_OBJ_TYPE_TIME))
+    {
+        return 0;
+    }
+
+    if ((hashtable->type_values != WEECHAT_RELAY_OBJ_TYPE_INTEGER)
+        && (hashtable->type_values != WEECHAT_RELAY_OBJ_TYPE_STRING)
+        && (hashtable->type_values != WEECHAT_RELAY_OBJ_TYPE_POINTER)
+        && (hashtable->type_values != WEECHAT_RELAY_OBJ_TYPE_BUFFER)
+        && (hashtable->type_values != WEECHAT_RELAY_OBJ_TYPE_TIME))
+    {
+        return 0;
+    }
+
+    if (!weechat_relay_msg_add_type (msg, hashtable->type_keys))
+        return 0;
+    if (!weechat_relay_msg_add_type (msg, hashtable->type_values))
+        return 0;
+    if (!weechat_relay_msg_add_integer (msg, hashtable->count))
+        return 0;
+
+    for (i = 0; i < hashtable->count; i++)
+    {
+        weechat_relay_msg_add_object_value (msg, hashtable->keys[i]);
+        weechat_relay_msg_add_object_value (msg, hashtable->values[i]);
+    }
+
+    return 1;
+}
+
+/*
+ * Adds a hdata to a message.
+ *
+ * Returns:
+ *   1: OK
+ *   0: error
+ */
+
+int
+weechat_relay_msg_add_hdata (struct t_weechat_relay_msg *msg,
+                             struct t_weechat_relay_obj_hdata *hdata)
+{
+    int i, j;
+
+    if (!hdata || !hdata->hpath || (hdata->num_hpaths <= 0) || !hdata->hpaths
+        || !hdata->keys || (hdata->num_keys <= 0) || !hdata->keys_names
+        || !hdata->keys_types || (hdata->count <= 0) || !hdata->ppath
+        || !hdata->values)
+    {
+        return 0;
+    }
+
+    if (!weechat_relay_msg_add_string (msg, hdata->hpath))
+        return 0;
+    if (!weechat_relay_msg_add_string (msg, hdata->keys))
+        return 0;
+    if (!weechat_relay_msg_add_integer (msg, hdata->count))
+        return 0;
+
+    for (i = 0; i < hdata->count; i++)
+    {
+        for (j = 0; j < hdata->num_hpaths; j++)
+        {
+            if (!weechat_relay_msg_add_pointer (msg, hdata->ppath[i][j]->value_pointer))
+                return 0;
+        }
+        for (j = 0; j < hdata->num_keys; j++)
+        {
+            if (!weechat_relay_msg_add_object_value (msg, hdata->values[i][j]))
+                return 0;
+        }
+    }
+
+    return 1;
+}
+
+/*
+ * Adds an info to a message.
+ *
+ * Returns:
+ *   1: OK
+ *   0: error
+ */
+
+int
+weechat_relay_msg_add_info (struct t_weechat_relay_msg *msg,
+                            struct t_weechat_relay_obj_info *info)
+{
+    if (!info)
+        return 0;
+
+    if (!weechat_relay_msg_add_string (msg, info->name))
+        return 0;
+    if (!weechat_relay_msg_add_string (msg, info->value))
+        return 0;
+
+    return 1;
+}
+
+/*
+ * Adds an infolist to a message.
+ *
+ * Returns:
+ *   1: OK
+ *   0: error
+ */
+
+int
+weechat_relay_msg_add_infolist (struct t_weechat_relay_msg *msg,
+                                struct t_weechat_relay_obj_infolist *infolist)
+{
+    int i, j;
+    struct t_weechat_relay_obj_infolist_item *ptr_item;
+    struct t_weechat_relay_obj_infolist_var *ptr_var;
+
+    if (!infolist || (infolist->count < 0))
+        return 0;
+
+    if (!weechat_relay_msg_add_string (msg, infolist->name))
+        return 0;
+    if (!weechat_relay_msg_add_integer (msg, infolist->count))
+        return 0;
+
+    /* loop on items */
+    for (i = 0; i < infolist->count; i++)
+    {
+        ptr_item = infolist->items[i];
+        if (!weechat_relay_msg_add_integer (msg, ptr_item->count))
+            return 0;
+        /* loop on variables in item */
+        for (j = 0; j < ptr_item->count; j++)
+        {
+            ptr_var = ptr_item->variables[j];
+            if (!weechat_relay_msg_add_string (msg, ptr_var->name))
+                return 0;
+            if (!weechat_relay_msg_add_object (msg, ptr_var->value))
+                return 0;
+        }
+    }
+
+    return 1;
+}
+
+/*
+ * Adds an array to a message.
+ *
+ * Returns:
+ *   1: OK
+ *   0: error
+ */
+
+int
+weechat_relay_msg_add_array (struct t_weechat_relay_msg *msg,
+                             struct t_weechat_relay_obj_array *array)
+{
+    int i;
+
+    if (!array || (array->count < 0))
+        return 0;
+
+    if (!weechat_relay_msg_add_type (msg, array->type))
+        return 0;
+    if (!weechat_relay_msg_add_integer (msg, array->count))
+        return 0;
+
+    for (i = 0; i < array->count; i++)
+    {
+        if (!weechat_relay_msg_add_object_value (msg, array->values[i]))
+            return 0;
+    }
+
+    return 1;
+}
+
+/*
+ * Adds the value of an object to a message (without the object type), which
+ * can be any type supported in enum t_weechat_relay_obj_type.
+ *
+ * Returns:
+ *   1: OK
+ *   0: error
+ */
+
+int
+weechat_relay_msg_add_object_value (struct t_weechat_relay_msg *msg,
+                                    struct t_weechat_relay_obj *obj)
+{
+    switch (obj->type)
+    {
+        case WEECHAT_RELAY_OBJ_TYPE_CHAR:
+            if (!weechat_relay_msg_add_char (msg, obj->value_char))
+                return 0;
+            break;
+        case WEECHAT_RELAY_OBJ_TYPE_INTEGER:
+            if (!weechat_relay_msg_add_integer (msg, obj->value_integer))
+                return 0;
+            break;
+        case WEECHAT_RELAY_OBJ_TYPE_LONG:
+            if (!weechat_relay_msg_add_long (msg, obj->value_long))
+                return 0;
+            break;
+        case WEECHAT_RELAY_OBJ_TYPE_STRING:
+            if (!weechat_relay_msg_add_string (msg, obj->value_string))
+                return 0;
+            break;
+        case WEECHAT_RELAY_OBJ_TYPE_BUFFER:
+            if (!weechat_relay_msg_add_buffer (msg, &obj->value_buffer))
+                return 0;
+            break;
+        case WEECHAT_RELAY_OBJ_TYPE_POINTER:
+            if (!weechat_relay_msg_add_pointer (msg, (void *)obj->value_pointer))
+                return 0;
+            break;
+        case WEECHAT_RELAY_OBJ_TYPE_TIME:
+            if (!weechat_relay_msg_add_time (msg, obj->value_time))
+                return 0;
+            break;
+        case WEECHAT_RELAY_OBJ_TYPE_HASHTABLE:
+            if (!weechat_relay_msg_add_hashtable (msg, &obj->value_hashtable))
+                return 0;
+            break;
+        case WEECHAT_RELAY_OBJ_TYPE_HDATA:
+            if (!weechat_relay_msg_add_hdata (msg, &obj->value_hdata))
+                return 0;
+            break;
+        case WEECHAT_RELAY_OBJ_TYPE_INFO:
+            if (!weechat_relay_msg_add_info (msg, &obj->value_info))
+                return 0;
+            break;
+        case WEECHAT_RELAY_OBJ_TYPE_INFOLIST:
+            if (!weechat_relay_msg_add_infolist (msg, &obj->value_infolist))
+                return 0;
+            break;
+        case WEECHAT_RELAY_OBJ_TYPE_ARRAY:
+            if (!weechat_relay_msg_add_array (msg, &obj->value_array))
+                return 0;
+            break;
+        case WEECHAT_RELAY_NUM_OBJ_TYPES:
+            break;
+
+    }
+
+    return 1;
+}
+
+/*
+ * Adds an object to a message, which can be any type supported in
+ * enum t_weechat_relay_obj_type.
+ *
+ * Returns:
+ *   1: OK
+ *   0: error
+ */
+
+int
+weechat_relay_msg_add_object (struct t_weechat_relay_msg *msg,
+                              struct t_weechat_relay_obj *obj)
+{
+    if (!weechat_relay_msg_add_type (msg, obj->type))
+        return 0;
+
+    if (!weechat_relay_msg_add_object_value (msg, obj))
+        return 0;
+
+    return 1;
 }
 
 /*

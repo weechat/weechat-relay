@@ -102,9 +102,9 @@
     weechat_relay_msg_add_type (msg, WEECHAT_RELAY_OBJ_TYPE_CHAR);      \
     weechat_relay_msg_add_char (msg, 'Z');                              \
     weechat_relay_msg_add_type (msg, WEECHAT_RELAY_OBJ_TYPE_INTEGER);   \
-    weechat_relay_msg_add_int (msg, 123456);                            \
+    weechat_relay_msg_add_integer (msg, 123456);                        \
     weechat_relay_msg_add_type (msg, WEECHAT_RELAY_OBJ_TYPE_INTEGER);   \
-    weechat_relay_msg_add_int (msg, -987654);                           \
+    weechat_relay_msg_add_integer (msg, -987654);                       \
     weechat_relay_msg_add_type (msg, WEECHAT_RELAY_OBJ_TYPE_LONG);      \
     weechat_relay_msg_add_long (msg, 1234567890L);                      \
     weechat_relay_msg_add_type (msg, WEECHAT_RELAY_OBJ_TYPE_LONG);      \

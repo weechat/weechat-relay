@@ -861,7 +861,7 @@ weechat_relay_parse_obj_infolist (struct t_weechat_relay_parsed_msg *parsed_msg)
                 goto error;
             if (!weechat_relay_parse_read_type (parsed_msg, &type))
                 goto error;
-            obj->value_infolist.items[i]->variables[j]->obj = weechat_relay_parse_read_object (parsed_msg, type);
+            obj->value_infolist.items[i]->variables[j]->value = weechat_relay_parse_read_object (parsed_msg, type);
         }
     }
 
@@ -883,7 +883,6 @@ struct t_weechat_relay_obj *
 weechat_relay_parse_obj_array (struct t_weechat_relay_parsed_msg *parsed_msg)
 {
     struct t_weechat_relay_obj *obj;
-    enum t_weechat_relay_obj_type type;
     int i;
 
     if (!parsed_msg)
@@ -893,7 +892,7 @@ weechat_relay_parse_obj_array (struct t_weechat_relay_parsed_msg *parsed_msg)
     if (!obj)
         goto error;
 
-    if (!weechat_relay_parse_read_type (parsed_msg, &type))
+    if (!weechat_relay_parse_read_type (parsed_msg, &obj->value_array.type))
         goto error;
 
     if (!weechat_relay_parse_read_integer (parsed_msg, &obj->value_array.count))
@@ -908,8 +907,9 @@ weechat_relay_parse_obj_array (struct t_weechat_relay_parsed_msg *parsed_msg)
 
     for (i = 0; i < obj->value_array.count; i++)
     {
-        obj->value_array.values[i] = weechat_relay_parse_read_object (parsed_msg,
-                                                                      type);
+        obj->value_array.values[i] = weechat_relay_parse_read_object (
+            parsed_msg,
+            obj->value_array.type);
         if (!obj->value_array.values[i])
             goto error;
     }

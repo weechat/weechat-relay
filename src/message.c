@@ -256,7 +256,7 @@ relay_message_display_infolist (struct t_weechat_relay_obj_infolist *value)
             ptr_var = ptr_item->variables[j];
             relay_message_printf ("%s:\n", ptr_var->name);
             parse_indent += 2;
-            relay_message_display_object (ptr_var->obj);
+            relay_message_display_object (ptr_var->value);
             parse_indent -= 2;
         }
         parse_indent -= 2;

@@ -48,7 +48,7 @@ enum t_weechat_relay_compression
 
 #define WEECHAT_RELAY_MSG_INITIAL_ALLOC 4096
 
-/* object ids in binary messages */
+/* Object ids in binary messages */
 enum t_weechat_relay_obj_type
 {
     WEECHAT_RELAY_OBJ_TYPE_CHAR = 0,
@@ -67,7 +67,7 @@ enum t_weechat_relay_obj_type
     WEECHAT_RELAY_NUM_OBJ_TYPES,
 };
 
-/* structure to send a binary message (WeeChat -> client) */
+/* Structure to send a binary message (WeeChat -> client) */
 struct t_weechat_relay_msg
 {
     char *id;                          /* message id                        */
@@ -76,7 +76,7 @@ struct t_weechat_relay_msg
     size_t data_size;                  /* current size of buffer            */
 };
 
-/* message parsing */
+/* Message objects: used to build messages and parse them */
 struct t_weechat_relay_obj;
 
 struct t_weechat_relay_obj_buffer
@@ -94,15 +94,24 @@ struct t_weechat_relay_obj_hashtable
     struct t_weechat_relay_obj **values;
 };
 
+/*
+ * When building a message, only fields hpath/keys/count/ppath/values are used,
+ * when parsing a message, all fields are set by the parser.
+ */
 struct t_weechat_relay_obj_hdata
 {
+    /* hpath */
     char *hpath;
     int num_hpaths;
     char **hpaths;
+
+    /* keys */
     char *keys;
     int num_keys;
     char **keys_names;
     enum t_weechat_relay_obj_type *keys_types;
+
+    /* objects */
     int count;
     struct t_weechat_relay_obj ***ppath;
     struct t_weechat_relay_obj ***values;
@@ -117,7 +126,7 @@ struct t_weechat_relay_obj_info
 struct t_weechat_relay_obj_infolist_var
 {
     char *name;
-    struct t_weechat_relay_obj *obj;
+    struct t_weechat_relay_obj *value;
 };
 
 struct t_weechat_relay_obj_infolist_item
@@ -135,6 +144,7 @@ struct t_weechat_relay_obj_infolist
 
 struct t_weechat_relay_obj_array
 {
+    enum t_weechat_relay_obj_type type;
     int count;
     struct t_weechat_relay_obj **values;
 };
@@ -194,7 +204,7 @@ struct t_weechat_relay_session
     size_t buffer_size;                /* size of buffer                    */
 };
 
-/* arrays */
+/* Arrays */
 
 extern const char *weechat_relay_compression_string[WEECHAT_RELAY_NUM_COMPRESSIONS];
 extern const char *weechat_relay_obj_types_str[WEECHAT_RELAY_NUM_OBJ_TYPES];
@@ -270,27 +280,41 @@ extern ssize_t weechat_relay_cmd_quit (struct t_weechat_relay_session *session,
 /* Relay messages (WeeChat -> client) */
 
 extern struct t_weechat_relay_msg *weechat_relay_msg_new (const char *id);
-extern int weechat_relay_msg_add_bytes (struct t_weechat_relay_msg *msg,
-                                        const void *buffer, size_t size);
 extern int weechat_relay_msg_set_bytes (struct t_weechat_relay_msg *msg,
                                         size_t position, const void *buffer,
                                         size_t size);
+extern int weechat_relay_msg_add_bytes (struct t_weechat_relay_msg *msg,
+                                        const void *buffer, size_t size);
 extern int weechat_relay_msg_add_type (struct t_weechat_relay_msg *msg,
                                        enum t_weechat_relay_obj_type obj_type);
 extern int weechat_relay_msg_add_char (struct t_weechat_relay_msg *msg,
                                        char c);
-extern int weechat_relay_msg_add_int (struct t_weechat_relay_msg *msg,
-                                      int value);
+extern int weechat_relay_msg_add_integer (struct t_weechat_relay_msg *msg,
+                                          int value);
 extern int weechat_relay_msg_add_long (struct t_weechat_relay_msg *msg,
                                        long value);
 extern int weechat_relay_msg_add_string (struct t_weechat_relay_msg *msg,
                                          const char *string);
 extern int weechat_relay_msg_add_buffer (struct t_weechat_relay_msg *msg,
-                                         const void *data, size_t length);
+                                         struct t_weechat_relay_obj_buffer *buffer);
 extern int weechat_relay_msg_add_pointer (struct t_weechat_relay_msg *msg,
-                                          void *pointer);
+                                          const void *pointer);
 extern int weechat_relay_msg_add_time (struct t_weechat_relay_msg *msg,
                                        time_t time);
+extern int weechat_relay_msg_add_hashtable (struct t_weechat_relay_msg *msg,
+                                            struct t_weechat_relay_obj_hashtable *hashtable);
+extern int weechat_relay_msg_add_hdata (struct t_weechat_relay_msg *msg,
+                                        struct t_weechat_relay_obj_hdata *hdata);
+extern int weechat_relay_msg_add_info (struct t_weechat_relay_msg *msg,
+                                       struct t_weechat_relay_obj_info *info);
+extern int weechat_relay_msg_add_infolist (struct t_weechat_relay_msg *msg,
+                                           struct t_weechat_relay_obj_infolist *infolist);
+extern int weechat_relay_msg_add_array (struct t_weechat_relay_msg *msg,
+                                        struct t_weechat_relay_obj_array *array);
+extern int weechat_relay_msg_add_object_value (struct t_weechat_relay_msg *msg,
+                                               struct t_weechat_relay_obj *obj);
+extern int weechat_relay_msg_add_object (struct t_weechat_relay_msg *msg,
+                                         struct t_weechat_relay_obj *obj);
 extern void *weechat_relay_msg_compress_zlib (struct t_weechat_relay_msg *msg,
                                               int compression_level,
                                               size_t *size);

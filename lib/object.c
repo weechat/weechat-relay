@@ -193,7 +193,7 @@ weechat_relay_obj_free (struct t_weechat_relay_obj *obj)
                                 {
                                     if (obj->value_infolist.items[i]->variables[j]->name)
                                         free (obj->value_infolist.items[i]->variables[j]->name);
-                                    weechat_relay_obj_free (obj->value_infolist.items[i]->variables[j]->obj);
+                                    weechat_relay_obj_free (obj->value_infolist.items[i]->variables[j]->value);
                                     free (obj->value_infolist.items[i]->variables[j]);
                                 }
                             }
