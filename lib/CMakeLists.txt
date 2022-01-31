@@ -26,7 +26,7 @@ set(WEECHAT_RELAY_SRC
 )
 
 find_package(ZLIB REQUIRED)
-pkg_check_modules(LIBZSTD libzstd)
+pkg_check_modules(LIBZSTD REQUIRED libzstd)
 
 list(APPEND LINK_LIBS ${ZLIB_LIBRARY} ${LIBZSTD_LDFLAGS})
 
