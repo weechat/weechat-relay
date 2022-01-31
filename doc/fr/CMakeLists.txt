@@ -41,5 +41,5 @@ if(BUILD_DOC)
     COMMENT "Building weechat_relay_api.fr.html"
   )
   add_custom_target(doc-relay-api-fr ALL DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/weechat_relay_api.fr.html)
-  install(FILES ${CMAKE_CURRENT_BINARY_DIR}/weechat_relay_api.fr.html DESTINATION ${SHAREDIR}/doc/${PROJECT_NAME})
+  install(FILES ${CMAKE_CURRENT_BINARY_DIR}/weechat_relay_api.fr.html DESTINATION ${DATAROOTDIR}/doc/${PROJECT_NAME})
 endif()
