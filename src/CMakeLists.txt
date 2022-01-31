@@ -19,7 +19,6 @@
 
 if(BUILD_CLI)
 
-  find_package(GnuTLS REQUIRED)
   find_package(Readline REQUIRED)
 
   list(APPEND LINK_LIBS ${READLINE_LIBRARIES})
