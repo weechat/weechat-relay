@@ -73,7 +73,7 @@ weechat_relay_session_send (struct t_weechat_relay_session *session,
 {
     ssize_t num_sent;
 
-    if (!session || (size == 0))
+    if (!session || !buffer || (size == 0))
         return -1;
 
     if (session->ssl)
@@ -101,7 +101,7 @@ weechat_relay_session_recv (struct t_weechat_relay_session *session,
 {
     ssize_t num_recv;
 
-    if (!session || (size == 0))
+    if (!session || !buffer || (size == 0))
         return -1;
 
     if (session->ssl)
