@@ -229,6 +229,9 @@ weechat_relay_session_buffer_pop (struct t_weechat_relay_session *session,
 void
 weechat_relay_session_free (struct t_weechat_relay_session *session)
 {
+    if (!session)
+        return;
+
     if (session->buffer)
         free (session->buffer);
 
