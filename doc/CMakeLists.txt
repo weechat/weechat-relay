@@ -20,7 +20,7 @@
 if(BUILD_DOC OR BUILD_MAN)
   find_package(Asciidoctor)
   if(ASCIIDOCTOR_FOUND)
-    set(ASCIIDOCTOR_ARGS -a experimental -a reproducible -a "prewrap!" -a "webfonts!" -a icons=font -a revnumber="${VERSION}" -a sectanchors -a source-highlighter=prettify)
+    set(ASCIIDOCTOR_ARGS -a experimental -a reproducible -a "prewrap!" -a "webfonts!" -a icons=font -a revnumber="${VERSION}" -a sectanchors -a source-highlighter=pygments -a pygments-style=native)
     add_subdirectory(en)
     add_subdirectory(fr)
   else()
