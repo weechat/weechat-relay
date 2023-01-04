@@ -1,7 +1,7 @@
 /*
  * test-lib-parse.cpp - test parsing of binary messages
  *
- * Copyright (C) 2019-2022 Sébastien Helleu <flashcode@flashtux.org>
+ * Copyright (C) 2019-2023 Sébastien Helleu <flashcode@flashtux.org>
  *
  * This file is part of WeeChat Relay.
  *
