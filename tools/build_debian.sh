@@ -38,12 +38,12 @@
 #
 # Examples:
 #
-#   …/build-debian.sh devel debian/sid
-#   …/build-debian.sh stable debian/stretch
-#   …/build-debian.sh 1.9 ubuntu/artful
-#   …/build-debian.sh 1.9-2 ubuntu/zesty
+#   …/build_debian.sh devel debian/sid
+#   …/build_debian.sh stable debian/stretch
+#   …/build_debian.sh 1.9 ubuntu/artful
+#   …/build_debian.sh 1.9-2 ubuntu/zesty
 #
-#   …/build-debian.sh test-patches
+#   …/build_debian.sh test-patches
 #
 # Environment variables that can be used:
 #
