@@ -22,7 +22,7 @@
 # Updates git version in config-git.h if the output of "git describe" has changed.
 #
 # Syntax:
-#    git-version.sh <rootdir> <version> <headerfile>
+#    set_git_version.sh <rootdir> <version> <headerfile>
 #
 #       rootdir   : root directory with WeeChat Relay files (to search .git/ directory)
 #       version   : WeeChat Relay version, for example 1.0.0 or 1.1.0-dev
