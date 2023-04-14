@@ -43,12 +43,6 @@ timeval_diff (struct timeval *tv1, struct timeval *tv2)
     diff_sec = tv2->tv_sec - tv1->tv_sec;
     diff_usec = tv2->tv_usec - tv1->tv_usec;
 
-    if (diff_usec < 0)
-    {
-        diff_usec += 1000000;
-        diff_sec--;
-    }
-
     return (diff_sec * 1000000) + diff_usec;
 }
 
