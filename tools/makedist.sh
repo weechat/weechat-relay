@@ -19,7 +19,7 @@
 #
 
 #
-# Build gzip/bzip2/xz tarballs for WeeChat Relay using git-archive.
+# Build compressed tarballs for WeeChat Relay using git-archive.
 #
 # Syntax:  makedist.sh [<version> [<tree-ish> [<path>]]]
 #
@@ -63,11 +63,5 @@ FILE="${OUTPATH}/weechat-relay-${VERSION}.tar"
 echo "Building package ${FILE}.gz"
 git archive --prefix="${PREFIX}" "${TREEISH}" | gzip -c >"${FILE}.gz"
 
-echo "Building package ${FILE}.bz2"
-git archive --prefix="${PREFIX}" "${TREEISH}" | bzip2 -c >"${FILE}.bz2"
-
 echo "Building package ${FILE}.xz"
 git archive --prefix="${PREFIX}" "${TREEISH}" | xz -c >"${FILE}.xz"
-
-echo "Building package ${FILE}.zst"
-git archive --prefix="${PREFIX}" "${TREEISH}" | zstd -c -15 >"${FILE}.zst"
