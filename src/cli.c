@@ -276,7 +276,7 @@ relay_cli_send_command (const char *command)
     if (!command)
         return -1;
 
-    size = strlen (command) + 1 + 1;
+    size = strlen (command) + 2 + 1;
     buffer = malloc (size);
     if (!buffer)
         return -1;
