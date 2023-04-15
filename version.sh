@@ -22,48 +22,58 @@
 # Returns current stable or devel version of WeeChat Relay.
 #
 # Syntax:
-#   version.sh stable|devel|devel-full|devel-major|devel-minor|devel-patch
+#   version.sh <name>
 #
-#     stable         the stable version (e.g. 1.2.3)
-#     stable-major   the stable version, major number (e.g. 1)
-#     stable-minor   the stable version, minor number (e.g. 2)
-#     stable-patch   the stable version, patch number (e.g. 3)
-#     stable-number  the stable version, as hex number (e.g. 0x010203)
+#   name is one of:
 #
-#     devel          the devel version (e.g. 1.3.0)
-#     devel-full     the devel version, with suffix (e.g. 1.3.0-dev)
-#     devel-major    the devel version, major number (e.g. 1)
-#     devel-minor    the devel version, minor number (e.g. 3)
-#     devel-patch    the devel version, patch number (e.g. 0)
-#     devel-number   the devel version, as hex number (e.g. 0x010300)
+#     stable         the stable version (e.g. "1.2.3")
+#     stable-major   the major version of stable ("1" for "1.2.3")
+#     stable-minor   the minor version of stable ("2" for "1.2.3")
+#     stable-patch   the patch version of stable ("3" for "1.2.3")
+#     stable-number  the stable version as hex number ("0x010203" for "1.2.3")
+#     devel          the devel with only digits/dots (e.g. "1.3.0")
+#     devel-full     the full devel (e.g. "1.3.0-dev")
+#     devel-major    the major version of devel ("1" for "1.3.0-dev")
+#     devel-minor    the minor version of devel ("3" for "1.3.0-dev")
+#     devel-patch    the patch version of devel ("0-dev" for "1.3.0-dev")
+#     devel-number   the devel version as hex number ("0x010300" for "1.3.0-dev")
 #
 
-WEECHAT_RELAY_STABLE_MAJOR="0"
-WEECHAT_RELAY_STABLE_MINOR="0"
-WEECHAT_RELAY_STABLE_PATCH="0"
+WEECHAT_RELAY_STABLE="0.0.0"
+WEECHAT_RELAY_DEVEL="1.0.0-dev"
 
-WEECHAT_RELAY_DEVEL_MAJOR="1"
-WEECHAT_RELAY_DEVEL_MINOR="0"
-WEECHAT_RELAY_DEVEL_PATCH="0"
-WEECHAT_RELAY_DEVEL_SUFFIX="-dev"
+STABLE_MAJOR=$(echo "${WEECHAT_RELAY_STABLE}" | cut -d"." -f1)
+STABLE_MINOR=$(echo "${WEECHAT_RELAY_STABLE}" | cut -d"." -f2)
+STABLE_PATCH=$(echo "${WEECHAT_RELAY_STABLE}" | cut -d"." -f3-)
+STABLE_PATCH_DIGITS=$(echo "${WEECHAT_RELAY_STABLE}" | cut -d"." -f3- | cut -d"-" -f1)
+
+DEVEL_MAJOR=$(echo "${WEECHAT_RELAY_DEVEL}" | cut -d"." -f1)
+DEVEL_MINOR=$(echo "${WEECHAT_RELAY_DEVEL}" | cut -d"." -f2)
+DEVEL_PATCH=$(echo "${WEECHAT_RELAY_DEVEL}" | cut -d"." -f3-)
+DEVEL_PATCH_DIGITS=$(echo "${WEECHAT_RELAY_DEVEL}" | cut -d"." -f3- | cut -d"-" -f1)
 
 if [ $# -lt 1 ]; then
-    echo >&2 "Syntax: $0 stable|stable-major|stable-minor|stable-patch|stable-number|devel|devel-full|devel-major|devel-minor|devel-patch|devel-number"
+    echo >&2 "Syntax: $0 <name>"
+    echo >&2 "name: stable, stable-major, stable-minor, stable-patch, stable-number,"
+    echo >&2 "      devel, devel-full, devel-major, devel-minor, devel-patch, devel-number"
     exit 1
 fi
 
 case $1 in
-    stable ) echo "${WEECHAT_RELAY_STABLE_MAJOR}.${WEECHAT_RELAY_STABLE_MINOR}.${WEECHAT_RELAY_STABLE_PATCH}" ;;
-    stable-major ) echo "${WEECHAT_RELAY_STABLE_MAJOR}" ;;
-    stable-minor ) echo "${WEECHAT_RELAY_STABLE_MINOR}" ;;
-    stable-patch ) echo "${WEECHAT_RELAY_STABLE_PATCH}" ;;
-    stable-number ) echo "0x$(printf '%02d' ${WEECHAT_RELAY_STABLE_MAJOR})$(printf '%02d' ${WEECHAT_RELAY_STABLE_MINOR})$(printf '%02d' ${WEECHAT_RELAY_STABLE_PATCH})" ;;
-    devel ) echo "${WEECHAT_RELAY_DEVEL_MAJOR}.${WEECHAT_RELAY_DEVEL_MINOR}.${WEECHAT_RELAY_DEVEL_PATCH}" ;;
-    devel-full ) echo "${WEECHAT_RELAY_DEVEL_MAJOR}.${WEECHAT_RELAY_DEVEL_MINOR}.${WEECHAT_RELAY_DEVEL_PATCH}${WEECHAT_RELAY_DEVEL_SUFFIX}" ;;
-    devel-major ) echo "${WEECHAT_RELAY_DEVEL_MAJOR}" ;;
-    devel-minor ) echo "${WEECHAT_RELAY_DEVEL_MINOR}" ;;
-    devel-patch ) echo "${WEECHAT_RELAY_DEVEL_PATCH}" ;;
-    devel-number ) echo "0x$(printf '%02d' ${WEECHAT_RELAY_DEVEL_MAJOR})$(printf '%02d' ${WEECHAT_RELAY_DEVEL_MINOR})$(printf '%02d' ${WEECHAT_RELAY_DEVEL_PATCH})" ;;
+    # stable
+    stable ) echo "${WEECHAT_RELAY_STABLE}" ;;
+    stable-major ) echo "${STABLE_MAJOR}" ;;
+    stable-minor ) echo "${STABLE_MINOR}" ;;
+    stable-patch ) echo "${STABLE_PATCH}" ;;
+    stable-number ) echo "0x$(printf "%02d" "${STABLE_MAJOR}")$(printf "%02d" "${STABLE_MINOR}")$(printf "%02d" "${STABLE_PATCH_DIGITS}")" ;;
+    # devel
+    devel ) echo "${WEECHAT_RELAY_DEVEL}" | cut -d"-" -f1 ;;
+    devel-full ) echo "${WEECHAT_RELAY_DEVEL}" ;;
+    devel-major ) echo "${DEVEL_MAJOR}" ;;
+    devel-minor ) echo "${DEVEL_MINOR}" ;;
+    devel-patch ) echo "${DEVEL_PATCH}" ;;
+    devel-number ) echo "0x$(printf "%02d" "${DEVEL_MAJOR}")$(printf "%02d" "${DEVEL_MINOR}")$(printf "%02d" "${DEVEL_PATCH_DIGITS}")" ;;
+    # error
     * ) echo >&2 "ERROR: unknown version."
         exit 1 ;;
 esac
