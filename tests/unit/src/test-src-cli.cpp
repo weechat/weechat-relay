@@ -332,6 +332,18 @@ TEST(SrcCli, ParseArgs)
                          HOSTNAME_NULL, PORT_NULL);
     RELAY_CHECK_CLI_COMMANDS(0);
 
+    /* OK: version-git */
+    argv[1] = "-V";
+    argv[2] = NULL;
+    RELAY_CHECK_CLI_ARGS(0, DEBUG_0, IPV4_OFF, IPV6_OFF, SSL_OFF,
+                         HOSTNAME_NULL, PORT_NULL);
+    RELAY_CHECK_CLI_COMMANDS(0);
+    argv[1] = "--version-git";
+    argv[2] = NULL;
+    RELAY_CHECK_CLI_ARGS(0, DEBUG_0, IPV4_OFF, IPV6_OFF, SSL_OFF,
+                         HOSTNAME_NULL, PORT_NULL);
+    RELAY_CHECK_CLI_COMMANDS(0);
+
     /* OK with debug (1) */
     argv[1] = "-d";
     argv[2] = "localhost";

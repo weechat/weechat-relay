@@ -146,15 +146,16 @@ relay_cli_parse_args (int argc, char *argv[])
 {
     int rc, i, opt, long_index;
     struct option long_options[] = {
-        { "ipv4",     no_argument,       NULL, '4' },
-        { "ipv6",     no_argument,       NULL, '6' },
-        { "command",  required_argument, NULL, 'c' },
-        { "debug",    no_argument,       NULL, 'd' },
-        { "help",     no_argument,       NULL, 'h' },
-        { "license",  no_argument,       NULL, 'l' },
-        { "port",     required_argument, NULL, 'p' },
-        { "ssl",      no_argument,       NULL, 's' },
-        { "version",  no_argument,       NULL, 'v' },
+        { "ipv4",        no_argument,       NULL, '4' },
+        { "ipv6",        no_argument,       NULL, '6' },
+        { "command",     required_argument, NULL, 'c' },
+        { "debug",       no_argument,       NULL, 'd' },
+        { "help",        no_argument,       NULL, 'h' },
+        { "license",     no_argument,       NULL, 'l' },
+        { "port",        required_argument, NULL, 'p' },
+        { "ssl",         no_argument,       NULL, 's' },
+        { "version",     no_argument,       NULL, 'v' },
+        { "version-git", no_argument,       NULL, 'V' },
         { NULL,       0,                 NULL, 0   },
     };
 
@@ -176,7 +177,7 @@ relay_cli_parse_args (int argc, char *argv[])
     long_index = 0;
 
     while ((rc == 1)
-           && (opt = getopt_long (argc, argv, "46c:dhlp:sv",
+           && (opt = getopt_long (argc, argv, "46c:dhlp:svV",
                                long_options, &long_index)) != -1)
     {
         switch (opt)
@@ -217,8 +218,11 @@ relay_cli_parse_args (int argc, char *argv[])
                 relay_cli_ssl = 1;
                 break;
             case 'v':
-                printf ("%s (%s)\n",
-                        WEECHAT_RELAY_VERSION, WEECHAT_RELAY_VERSION_GIT);
+                printf ("%s\n",  WEECHAT_RELAY_VERSION);
+                rc = 0;
+                break;
+            case 'V':
+                printf ("%s\n", WEECHAT_RELAY_VERSION_GIT);
                 rc = 0;
                 break;
             default:
