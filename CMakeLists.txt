@@ -64,8 +64,8 @@ endif()
 
 # build options
 option(BUILD_CLI     "Build the testing CLI program" ON)
-option(BUILD_DOC     "Enable build of documentation" ON)
-option(BUILD_MAN     "Enable build of man pages"     ON)
+option(BUILD_DOC     "Enable build of documentation" OFF)
+option(BUILD_MAN     "Enable build of man pages"     OFF)
 option(BUILD_TESTS   "Build tests"                   OFF)
 option(CODE_COVERAGE "Enable code coverage"          OFF)
 
