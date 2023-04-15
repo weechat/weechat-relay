@@ -26,8 +26,15 @@ project(weechat-relay C)
 set(CMAKE_VERBOSE_MAKEFILE OFF)
 set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake ${CMAKE_MODULE_PATH})
 set(CMAKE_SKIP_RPATH ON)
-set(CMAKE_C_FLAGS   "${CMAKE_C_FLAGS} -fsigned-char -Wall -Wextra -Werror-implicit-function-declaration")
+
+# compiler options
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fsigned-char -Wall -Wextra -Werror-implicit-function-declaration")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsigned-char -Wall -Wextra")
+if (CMAKE_C_COMPILER_ID STREQUAL "GNU")
+  # extra options specific to gcc/g++
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wformat-overflow=2 -Wformat-truncation=2")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wformat-overflow=2 -Wformat-truncation=2")
+endif()
 
 # version
 execute_process(COMMAND ${CMAKE_SOURCE_DIR}/version.sh devel-full OUTPUT_VARIABLE VERSION OUTPUT_STRIP_TRAILING_WHITESPACE)
