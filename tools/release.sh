@@ -88,7 +88,7 @@ release_build ()
     make install
     make changelog
     make rn
-    make test
+    make test CTEST_OUTPUT_ON_FAILURE=TRUE
     make dist
     VERSION_WEECHAT_RELAY=$("${BUILD_DIR}/install/bin/weechat-relay-cli" --version)
     if [ "${VERSION_WEECHAT_RELAY}" != "${VERSION}" ]; then
@@ -117,7 +117,7 @@ release_test_pkg ()
         -DBUILD_TESTS=ON \
         "${PKG_DIR}"
     make install
-    make test
+    make test CTEST_OUTPUT_ON_FAILURE=TRUE
     VERSION_WEECHAT_RELAY=$("${PKG_BUILD_DIR}/install/bin/weechat-relay-cli" --version)
     if [ "${VERSION_WEECHAT_RELAY}" != "${VERSION}" ]; then
         release_error "unexpected version \"${VERSION_WEECHAT_RELAY}\" (expected: \"${VERSION}\")"
