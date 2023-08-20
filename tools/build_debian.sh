@@ -108,7 +108,7 @@ test_patches ()
     set +e
     patches_ok=0
     patches_error=0
-    for file in "${ROOT_DIR}"/tools/debian/patches/*.patch; do
+    for file in "${root_dir}"/tools/debian/patches/*.patch; do
         echo "=== Testing patch ${file} ==="
         if git apply --check "${file}"; then
             patches_ok=$((patches_ok+1))
