@@ -34,34 +34,34 @@
 #
 
 # check git repository
-ROOT_DIR=$(git rev-parse --show-toplevel)
-if [ -z "${ROOT_DIR}" ] || [ ! -d "${ROOT_DIR}/.git" ]; then
+root_dir=$(git rev-parse --show-toplevel)
+if [ -z "${root_dir}" ] || [ ! -d "${root_dir}/.git" ]; then
     echo "This script must be run from WeeChat Relay git repository."
     exit 1
 fi
 
 # default values
-VERSION="$("${ROOT_DIR}/version.sh" devel-full)"
-TREEISH="HEAD"
-OUTPATH="$(pwd)"
+version="$("${root_dir}/version.sh" devel-full)"
+treeish="HEAD"
+outpath="$(pwd)"
 
 if [ $# -ge 1 ]; then
-    VERSION=$1
+    version=$1
 fi
 if [ $# -ge 2 ]; then
-    TREEISH=$2
+    treeish=$2
 fi
 if [ $# -ge 3 ]; then
-    OUTPATH=$(cd "$3" || exit 1; pwd)
+    outpath=$(cd "$3" || exit 1; pwd)
 fi
 
-cd "${ROOT_DIR}" || exit 1
+cd "${root_dir}" || exit 1
 
-PREFIX="weechat-relay-${VERSION}/"
-FILE="${OUTPATH}/weechat-relay-${VERSION}.tar"
+prefix="weechat-relay-${version}/"
+file="${outpath}/weechat-relay-${version}.tar"
 
-echo "Building package ${FILE}.gz"
-git archive --prefix="${PREFIX}" "${TREEISH}" | gzip -c >"${FILE}.gz"
+echo "Building package ${file}.gz"
+git archive --prefix="${prefix}" "${treeish}" | gzip -c >"${file}.gz"
 
-echo "Building package ${FILE}.xz"
-git archive --prefix="${PREFIX}" "${TREEISH}" | xz -c >"${FILE}.xz"
+echo "Building package ${file}.xz"
+git archive --prefix="${prefix}" "${treeish}" | xz -c >"${file}.xz"

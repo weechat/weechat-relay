@@ -39,18 +39,18 @@
 #     devel-number   the devel version as hex number ("0x010300" for "1.3.0-dev")
 #
 
-WEECHAT_RELAY_STABLE="0.0.0"
-WEECHAT_RELAY_DEVEL="1.0.0-dev"
+weechat_relay_stable="0.0.0"
+weechat_relay_devel="1.0.0-dev"
 
-STABLE_MAJOR=$(echo "${WEECHAT_RELAY_STABLE}" | cut -d"." -f1)
-STABLE_MINOR=$(echo "${WEECHAT_RELAY_STABLE}" | cut -d"." -f2)
-STABLE_PATCH=$(echo "${WEECHAT_RELAY_STABLE}" | cut -d"." -f3-)
-STABLE_PATCH_DIGITS=$(echo "${WEECHAT_RELAY_STABLE}" | cut -d"." -f3- | cut -d"-" -f1)
+stable_major=$(echo "${weechat_relay_stable}" | cut -d"." -f1)
+stable_minor=$(echo "${weechat_relay_stable}" | cut -d"." -f2)
+stable_patch=$(echo "${weechat_relay_stable}" | cut -d"." -f3-)
+stable_patch_digits=$(echo "${weechat_relay_stable}" | cut -d"." -f3- | cut -d"-" -f1)
 
-DEVEL_MAJOR=$(echo "${WEECHAT_RELAY_DEVEL}" | cut -d"." -f1)
-DEVEL_MINOR=$(echo "${WEECHAT_RELAY_DEVEL}" | cut -d"." -f2)
-DEVEL_PATCH=$(echo "${WEECHAT_RELAY_DEVEL}" | cut -d"." -f3-)
-DEVEL_PATCH_DIGITS=$(echo "${WEECHAT_RELAY_DEVEL}" | cut -d"." -f3- | cut -d"-" -f1)
+devel_major=$(echo "${weechat_relay_devel}" | cut -d"." -f1)
+devel_minor=$(echo "${weechat_relay_devel}" | cut -d"." -f2)
+devel_patch=$(echo "${weechat_relay_devel}" | cut -d"." -f3-)
+devel_patch_digits=$(echo "${weechat_relay_devel}" | cut -d"." -f3- | cut -d"-" -f1)
 
 if [ $# -lt 1 ]; then
     echo >&2 "Syntax: $0 <name>"
@@ -61,18 +61,18 @@ fi
 
 case $1 in
     # stable
-    stable ) echo "${WEECHAT_RELAY_STABLE}" ;;
-    stable-major ) echo "${STABLE_MAJOR}" ;;
-    stable-minor ) echo "${STABLE_MINOR}" ;;
-    stable-patch ) echo "${STABLE_PATCH}" ;;
-    stable-number ) printf "0x%02d%02d%02d\n" "${STABLE_MAJOR}" "${STABLE_MINOR}" "${STABLE_PATCH_DIGITS}" ;;
+    stable ) echo "${weechat_relay_stable}" ;;
+    stable-major ) echo "${stable_major}" ;;
+    stable-minor ) echo "${stable_minor}" ;;
+    stable-patch ) echo "${stable_patch}" ;;
+    stable-number ) printf "0x%02d%02d%02d\n" "${stable_major}" "${stable_minor}" "${stable_patch_digits}" ;;
     # devel
-    devel ) echo "${WEECHAT_RELAY_DEVEL}" | cut -d"-" -f1 ;;
-    devel-full ) echo "${WEECHAT_RELAY_DEVEL}" ;;
-    devel-major ) echo "${DEVEL_MAJOR}" ;;
-    devel-minor ) echo "${DEVEL_MINOR}" ;;
-    devel-patch ) echo "${DEVEL_PATCH}" ;;
-    devel-number ) printf "0x%02d%02d%02d\n" "${DEVEL_MAJOR}" "${DEVEL_MINOR}" "${DEVEL_PATCH_DIGITS}" ;;
+    devel ) echo "${weechat_relay_devel}" | cut -d"-" -f1 ;;
+    devel-full ) echo "${weechat_relay_devel}" ;;
+    devel-major ) echo "${devel_major}" ;;
+    devel-minor ) echo "${devel_minor}" ;;
+    devel-patch ) echo "${devel_patch}" ;;
+    devel-number ) printf "0x%02d%02d%02d\n" "${devel_major}" "${devel_minor}" "${devel_patch_digits}" ;;
     # error
     * ) echo >&2 "ERROR: unknown version."
         exit 1 ;;
