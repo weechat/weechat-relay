@@ -130,7 +130,7 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/weechat-relay.cygport.in
 # install some files (only on Cygwin)
 if(CYGWIN)
   install(FILES
-    ${CMAKE_CURRENT_SOURCE_DIR}/AUTHORS.adoc
+    ${CMAKE_CURRENT_SOURCE_DIR}/AUTHORS.md
     ${CMAKE_CURRENT_SOURCE_DIR}/CHANGELOG.md
     ${CMAKE_CURRENT_SOURCE_DIR}/CONTRIBUTING.md
     ${CMAKE_CURRENT_SOURCE_DIR}/README.md

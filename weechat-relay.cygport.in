@@ -96,7 +96,7 @@ libweechatrelay_DESCRIPTION="WeeChat Relay is a C library to communicate \
 between WeeChat and a client using the \"weechat\" relay protocol."
 libweechatrelay_CONTENTS="
     usr/lib/libweechatrelay.dll
-    usr/share/doc/weechat/AUTHORS.adoc
+    usr/share/doc/weechat/AUTHORS.md
     usr/share/doc/weechat/CHANGELOG.md
     usr/share/doc/weechat/CONTRIBUTING.md
     usr/share/doc/weechat/COPYING

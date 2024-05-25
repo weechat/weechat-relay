@@ -65,7 +65,7 @@ et afficher les messages binaires reçus de WeeChat.
 == COPYRIGHT
 
 WeeChat Relay est écrit par Sébastien Helleu et des contributeurs (la liste
-complète est dans le fichier AUTHORS.adoc).
+complète est dans le fichier AUTHORS.md).
 
 Copyright (C) 2019-2023 {author}
 
