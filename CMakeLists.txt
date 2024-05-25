@@ -131,7 +131,7 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/weechat-relay.cygport.in
 if(CYGWIN)
   install(FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/AUTHORS.adoc
-    ${CMAKE_CURRENT_SOURCE_DIR}/ChangeLog.adoc
+    ${CMAKE_CURRENT_SOURCE_DIR}/CHANGELOG.md
     ${CMAKE_CURRENT_SOURCE_DIR}/Contributing.adoc
     ${CMAKE_CURRENT_SOURCE_DIR}/README.adoc
     DESTINATION ${DATAROOTDIR}/doc/${PROJECT_NAME})

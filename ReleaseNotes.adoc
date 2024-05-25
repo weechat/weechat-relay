@@ -12,9 +12,7 @@ https://weechat.org/files/releasenotes/relay/ReleaseNotes-devel.html[here]). +
 It is recommended to read it when upgrading to a new stable
 version.
 
-For a complete list of changes, please look at
-https://weechat.org/files/changelog/relay/ChangeLog-devel.html[ChangeLog]
-(file _ChangeLog.adoc_ in sources).
+For a complete list of changes, please look at CHANGELOG.md.
 
 
 [[v1.0.0]]
