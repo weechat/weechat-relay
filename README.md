@@ -34,7 +34,7 @@ The following packages are **required**:
 
 Installation in system directories (requires _root_ privileges):
 
-``` bash
+```bash
 mkdir build
 cd build
 cmake ..
@@ -83,7 +83,7 @@ weechat-relay-cli --help
 
 Example:
 
-```bash
+```text
 $ weechat-relay-cli -dd -s -p 12345 localhost
 Connected to 127.0.0.1 (SSL)
 weechat-relay> init password=my_secret_password
