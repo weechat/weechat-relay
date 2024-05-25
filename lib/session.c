@@ -1,7 +1,7 @@
 /*
  * session.c - session functions of WeeChat Relay lib
  *
- * Copyright (C) 2019-2023 Sébastien Helleu <flashcode@flashtux.org>
+ * Copyright (C) 2019-2024 Sébastien Helleu <flashcode@flashtux.org>
  *
  * This file is part of WeeChat Relay.
  *
