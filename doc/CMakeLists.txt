@@ -33,32 +33,6 @@ if(BUILD_DOC OR BUILD_MAN)
       -a pygments-style=native
     )
 
-    # sed arguments used to replace links in release notes
-    set(SED_LINKS_ARGS
-      -e "'s/issue #\\([0-9][0-9]*\\)/https:\\/\\/github.com\\/weechat\\/weechat\\/issues\\/\\1[issue #\\1^]/g'"
-      -e "'s/debian #\\([0-9][0-9]*\\)/http:\\/\\/bugs.debian.org\\/cgi-bin\\/bugreport.cgi?bug=\\1[debian bug #\\1^]/g'"
-      -e "'s/\\(CVE-[0-9][0-9]*-[0-9][0-9]*\\)/https:\\/\\/cve.mitre.org\\/cgi-bin\\/cvename.cgi?name=\\1[\\1^]/g'"
-    )
-
-    # Release notes
-    add_custom_command(
-      OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/ReleaseNotes-links.adoc"
-      COMMAND sed ARGS ${SED_LINKS_ARGS} "${CMAKE_CURRENT_SOURCE_DIR}/../ReleaseNotes.adoc" > "${CMAKE_CURRENT_BINARY_DIR}/ReleaseNotes-links.adoc"
-      DEPENDS
-      "${CMAKE_CURRENT_SOURCE_DIR}/../ReleaseNotes.adoc"
-      WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
-    )
-    add_custom_command(
-      OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/ReleaseNotes.html"
-      COMMAND "${ASCIIDOCTOR_EXECUTABLE}" ARGS ${ASCIIDOCTOR_ARGS} -a docinfodir="${CMAKE_CURRENT_SOURCE_DIR}" -o ReleaseNotes.html "${CMAKE_CURRENT_BINARY_DIR}/ReleaseNotes-links.adoc"
-      DEPENDS
-      "${CMAKE_CURRENT_SOURCE_DIR}/docinfo.html"
-      "${CMAKE_CURRENT_BINARY_DIR}/ReleaseNotes-links.adoc"
-      WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
-      COMMENT "Building ReleaseNotes.html"
-    )
-    add_custom_target(rn DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/ReleaseNotes.html")
-
     # man/doc in all languages
     add_subdirectory(en)
     add_subdirectory(fr)
