@@ -1,97 +1,89 @@
-= WeeChat Relay
-:author: Sébastien Helleu
-:email: flashcode@flashtux.org
-:lang: en
+# WeeChat Relay
 
+[![CI](https://github.com/weechat/weechat-relay/workflows/CI/badge.svg)](https://github.com/weechat/weechat-relay/actions)
+[![Code coverage](https://codecov.io/gh/weechat/weechat-relay/branch/master/graph/badge.svg)](https://codecov.io/gh/weechat/weechat-relay)
 
-image:https://github.com/weechat/weechat-relay/workflows/CI/badge.svg["CI", link="https://github.com/weechat/weechat-relay/actions"]
-image:https://codecov.io/gh/weechat/weechat-relay/branch/master/graph/badge.svg["Code coverage", link="https://codecov.io/gh/weechat/weechat-relay"]
+WeeChat Relay is a C library to communicate between WeeChat and a client using the "weechat" relay protocol.
 
-WeeChat Relay is a C library to communicate between WeeChat and a client using
-the "weechat" relay protocol.
+> [!IMPORTANT]
+> This library is under development, there is no stable version yet.\
+**DO NOT USE IN PRODUCTION!**
 
-[IMPORTANT]
-This library is under development, there is no stable version yet. +
-*DO NOT USE IN PRODUCTION!*
+Homepage: [https://weechat.org/](https://weechat.org/)
 
-Homepage: https://weechat.org/
+## Features
 
-== Features
+- Communication between WeeChat and a client:
+  - from client to WeeChat: build and send commands, decode binary messages received from WeeChat
+  - from WeeChat to client: build and send binary messages.
+- Command-line interface to the WeeChat Relay library (`weechat-relay-cli`), which can be used for tests, debug or in shell scripts.
 
-* Communication between WeeChat and a client:
-** from client to WeeChat: build and send commands, decode binary messages
-   received from WeeChat
-** from WeeChat to client: build and send binary messages.
-* Command-line interface to the WeeChat Relay library (`weechat-relay-cli`),
-  which can be used for tests, debug or in shell scripts.
+## Install
 
-== Install
+### Dependencies
 
-=== Dependencies
+The following packages are **required**:
 
-Following packages are *required*:
+- CMake
+- GnuTLS
+- GNU Readline (for `weechat-relay-cli`)
+- libzstd
+- zlib
 
-* CMake
-* GnuTLS
-* GNU Readline (for `weechat-relay-cli`)
-* libzstd
-* zlib
+### Compile
 
-=== Compile
+Installation in system directories (requires _root_ privileges):
 
-* Installation in system directories (requires _root_ privileges):
+``` bash
+mkdir build
+cd build
+cmake ..
+make
+sudo make install
+```
 
-----
-$ mkdir build
-$ cd build
-$ cmake ..
-$ make
-$ sudo make install
-----
+Installation in custom directory (for example your home):
 
-* Installation in custom directory (for example your home):
+```bash
+mkdir build
+cd build
+cmake -DCMAKE_INSTALL_PREFIX=/path/to/directory ..
+make
+make install
+```
 
-----
-$ mkdir build
-$ cd build
-$ cmake -DCMAKE_INSTALL_PREFIX=/path/to/directory ..
-$ make
-$ make install
-----
+### Run tests
 
-=== Run tests
+The following packages are **required** to compile tests:
 
-Following packages are *required* to compile tests:
-
-* libcpputest-dev
-* C++ compiler
+- libcpputest-dev
+- C++ compiler
 
 Tests must be enabled when compiling WeeChat Relay:
 
-----
-$ cmake -DBUILD_TESTS=ON ..
-----
+```bash
+cmake -DBUILD_TESTS=ON ..
+```
 
 They can be launched after compilation from the build directory:
 
-----
-$ ctest -V
-----
+```bash
+ctest -V
+```
 
-== Command-line interface
+## Command-line interface
 
-The binary `weechat-relay-cli` can be used to debug communication between
-a client and WeeChat relay.
+The binary `weechat-relay-cli` can be used to debug communication between a client and WeeChat relay.
 
 For help:
 
-----
+```bash
 weechat-relay-cli --help
-----
+```
 
 Example:
 
-----
+```bash
 $ weechat-relay-cli -dd -s -p 12345 localhost
 Connected to 127.0.0.1 (SSL)
 weechat-relay> init password=my_secret_password
@@ -112,11 +104,11 @@ weechat-relay> info version
 weechat-relay> quit
 <-- quit (5 bytes)
       71 75 69 74 0A                                    q u i t .
-----
+```
 
-== Copyright
+## Copyright
 
-Copyright (C) 2019-2023 Sébastien Helleu <flashcode@flashtux.org>
+Copyright © 2019-2024 [Sébastien Helleu](https://github.com/flashcode)
 
 This file is part of WeeChat Relay.
 
