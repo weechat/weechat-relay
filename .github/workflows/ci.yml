@@ -5,7 +5,18 @@ on:
   - pull_request
 
 env:
-  WEECHAT_RELAY_DEPENDENCIES: asciidoctor cmake debhelper devscripts libcpputest-dev libgnutls28-dev lcov libreadline-dev libzstd-dev pkg-config zlib1g-dev
+  WEECHAT_RELAY_DEPS_UBUNTU: >-
+    asciidoctor
+    cmake
+    debhelper
+    devscripts
+    libcpputest-dev
+    libgnutls28-dev
+    lcov
+    libreadline-dev
+    libzstd-dev
+    pkg-config
+    zlib1g-dev
 
 jobs:
 
@@ -14,7 +25,7 @@ jobs:
     strategy:
       matrix:
         os:
-          - ubuntu-22.04
+          - ubuntu-24.04
         config:
           - { name: "gcc", cc: "gcc", cxx: "g++", cmake_options: "" }
           - { name: "gcc_coverage", cc: "gcc", cxx: "g++", cmake_options: "-DCODE_COVERAGE=ON" }
@@ -30,7 +41,7 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get update -qq
-          sudo apt-get --yes --no-install-recommends install ${{ env.WEECHAT_RELAY_DEPENDENCIES }}
+          sudo apt-get --yes --no-install-recommends install ${{ env.WEECHAT_RELAY_DEPS_UBUNTU }}
 
       - name: Build
         env:
@@ -116,7 +127,7 @@ jobs:
     strategy:
       matrix:
         os:
-          - ubuntu-22.04
+          - ubuntu-24.04
 
     name: "Build Debian on ${{ matrix.os }}"
     runs-on: ${{ matrix.os }}
@@ -128,13 +139,13 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get update -qq
-          sudo apt-get --yes --no-install-recommends install ${{ env.WEECHAT_RELAY_DEPENDENCIES }}
+          sudo apt-get --yes --no-install-recommends install ${{ env.WEECHAT_RELAY_DEPS_UBUNTU }}
 
       - name: Test Debian patches
         run: ./tools/build_debian.sh test-patches
 
       - name: Build Debian packages
-        run: ./tools/build_debian.sh devel ubuntu/jammy
+        run: ./tools/build_debian.sh devel ubuntu/noble
 
       - name: Install Debian packages
         run: sudo dpkg -i ../*weechatrelay*.deb
