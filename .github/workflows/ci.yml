@@ -32,7 +32,7 @@ jobs:
           - { name: "gcc_coverage", cc: "gcc", cxx: "g++", cmake_options: "-DCODE_COVERAGE=ON" }
           - { name: "clang", cc: "clang", cxx: "clang++", cmake_options: "" }
 
-    name: "Tests: ${{ matrix.config.name }} on ${{ matrix.os }}"
+    name: "${{ matrix.os }} (${{ matrix.config.name }})"
     runs-on: ${{ matrix.os }}
 
     steps:
@@ -88,7 +88,7 @@ jobs:
           - { name: "gcc", cc: "gcc", cxx: "g++", cmake_options: "" }
           - { name: "clang", cc: "clang", cxx: "clang++", cmake_options: "" }
 
-    name: "Tests: ${{ matrix.config.name }} on ${{ matrix.os }}"
+    name: "${{ matrix.os }} (${{ matrix.config.name }})"
     runs-on: ${{ matrix.os }}
 
     steps:
@@ -130,7 +130,7 @@ jobs:
         os:
           - ubuntu-24.04
 
-    name: "Build Debian on ${{ matrix.os }}"
+    name: "${{ matrix.os }} (build Debian)"
     runs-on: ${{ matrix.os }}
 
     steps:
