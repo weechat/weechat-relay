@@ -7,6 +7,7 @@ on:
 env:
   WEECHAT_RELAY_DEPS_UBUNTU: >-
     asciidoctor
+    build-essential
     cmake
     debhelper
     devscripts
