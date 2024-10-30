@@ -35,7 +35,7 @@
 
 # check git repository
 root_dir=$(git rev-parse --show-toplevel)
-if [ -z "${root_dir}" ] || [ ! -d "${root_dir}/.git" ]; then
+if [ -z "${root_dir}" ] || [ ! -e "${root_dir}/.git" ]; then
     echo "This script must be run from WeeChat Relay git repository."
     exit 1
 fi
