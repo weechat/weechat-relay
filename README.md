@@ -2,6 +2,7 @@
 
 [![CI](https://github.com/weechat/weechat-relay/workflows/CI/badge.svg)](https://github.com/weechat/weechat-relay/actions)
 [![Code coverage](https://codecov.io/gh/weechat/weechat-relay/branch/master/graph/badge.svg)](https://codecov.io/gh/weechat/weechat-relay)
+[![REUSE status](https://api.reuse.software/badge/github.com/weechat/weechat-relay)](https://api.reuse.software/info/github.com/weechat/weechat-relay)
 
 WeeChat Relay is a C library to communicate between WeeChat and a client using the "weechat" relay protocol.
 
