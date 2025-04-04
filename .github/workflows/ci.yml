@@ -16,6 +16,7 @@ env:
     lcov
     libreadline-dev
     libzstd-dev
+    pipx
     pkg-config
     zlib1g-dev
 
@@ -43,6 +44,10 @@ jobs:
         run: |
           sudo apt-get update -qq
           sudo apt-get --yes --no-install-recommends install ${{ env.WEECHAT_RELAY_DEPS_UBUNTU }}
+          pipx install reuse
+
+      - name: Check REUSE compliancy
+        run: reuse lint
 
       - name: Build
         env:
