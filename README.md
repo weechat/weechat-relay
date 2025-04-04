@@ -108,7 +108,7 @@ weechat-relay> quit
 
 ## Copyright
 
-Copyright © 2019-2024 [Sébastien Helleu](https://github.com/flashcode)
+Copyright © 2019-2025 [Sébastien Helleu](https://github.com/flashcode)
 
 This file is part of WeeChat Relay.
 

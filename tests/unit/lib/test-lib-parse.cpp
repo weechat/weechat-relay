@@ -1,7 +1,9 @@
 /*
  * test-lib-parse.cpp - test parsing of binary messages
  *
- * Copyright (C) 2019-2024 Sébastien Helleu <flashcode@flashtux.org>
+ * SPDX-FileCopyrightText: 2019-2025 Sébastien Helleu <flashcode@flashtux.org>
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  *
  * This file is part of WeeChat Relay.
  *

@@ -9,6 +9,9 @@
 :sectnumlevels: 3
 :docinfo1:
 
+// SPDX-FileCopyrightText: 2019-2025 Sébastien Helleu <flashcode@flashtux.org>
+//
+// SPDX-License-Identifier: GPL-3.0-or-later
 
 Ce manuel documente l'API de la bibliothèque WeeChat Relay.
 

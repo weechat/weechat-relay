@@ -1,7 +1,9 @@
 /*
  * parse.c - parse binary messages sent by WeeChat
  *
- * Copyright (C) 2019-2024 Sébastien Helleu <flashcode@flashtux.org>
+ * SPDX-FileCopyrightText: 2019-2025 Sébastien Helleu <flashcode@flashtux.org>
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  *
  * This file is part of WeeChat Relay.
  *

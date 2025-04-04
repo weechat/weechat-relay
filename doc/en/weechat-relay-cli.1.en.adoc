@@ -6,6 +6,10 @@
 :man manual: WeeChat Relay Manual
 :man source: WeeChat Relay {revnumber}
 
+// SPDX-FileCopyrightText: 2019-2025 Sébastien Helleu <flashcode@flashtux.org>
+//
+// SPDX-License-Identifier: GPL-3.0-or-later
+
 == NAME
 
 weechat-relay-cli - command line tool to test WeeChat relay connection
@@ -64,7 +68,7 @@ messages received from WeeChat.
 WeeChat Relay is written by Sébastien Helleu and contributors (complete list is
 in the AUTHORS.md file).
 
-Copyright (C) 2019-2024 {author}
+Copyright (C) 2019-2025 {author}
 
 WeeChat Relay is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
