@@ -13,7 +13,8 @@ path = [
     "CONTRIBUTING.md",
     "README.md",
     "UPGRADING.md",
-    "debian-*/**",
+    "debian-devel/**",
+    "debian-stable/**",
     "tools/debian/patches/**",
     "weechat-relay.pc.in",
 ]
