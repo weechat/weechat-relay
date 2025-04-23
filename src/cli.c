@@ -67,6 +67,7 @@ struct t_weechat_relay_session *relay_cli_session = NULL; /* relay session  */
 void
 relay_cli_display_copyright ()
 {
+    /* REUSE-IgnoreStart */
     printf ("\n");
     printf ("%s %s (%s) Copyright %s, compiled on %s %s\n"
             "Developed by Sébastien Helleu <flashcode@flashtux.org> "
@@ -79,6 +80,7 @@ relay_cli_display_copyright ()
             __TIME__,
             RELAY_CLI_WEB_SITE);
     printf ("\n");
+    /* REUSE-IgnoreEnd */
 }
 
 /*
