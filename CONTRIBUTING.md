@@ -1,3 +1,9 @@
+<!--
+SPDX-FileCopyrightText: 2019-2025 Sébastien Helleu <flashcode@flashtux.org>
+
+SPDX-License-Identifier: GPL-3.0-or-later
+-->
+
 # Contributing to WeeChat Relay
 
 ## Reporting bugs

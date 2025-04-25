@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2019-2025 Sébastien Helleu <flashcode@flashtux.org>
+# SPDX-FileCopyrightText: 2025 Sébastien Helleu <flashcode@flashtux.org>
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -6,13 +6,7 @@ version = 1
 
 [[annotations]]
 path = [
-    ".github/ISSUE_TEMPLATE/*",
-    ".gitignore",
-    "AUTHORS.md",
-    "CHANGELOG.md",
-    "CONTRIBUTING.md",
-    "README.md",
-    "UPGRADING.md",
+    ".github/ISSUE_TEMPLATE/*.md",
     "debian-devel/**",
     "debian-stable/**",
     "tools/debian/patches/**",

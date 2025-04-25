@@ -1,3 +1,9 @@
+<!--
+SPDX-FileCopyrightText: 2019-2025 Sébastien Helleu <flashcode@flashtux.org>
+
+SPDX-License-Identifier: GPL-3.0-or-later
+-->
+
 # WeeChat Relay
 
 [![CI](https://github.com/weechat/weechat-relay/workflows/CI/badge.svg)](https://github.com/weechat/weechat-relay/actions)
@@ -109,6 +115,7 @@ weechat-relay> quit
 
 ## Copyright
 
+<!-- REUSE-IgnoreStart -->
 Copyright © 2019-2025 [Sébastien Helleu](https://github.com/flashcode)
 
 This file is part of WeeChat Relay.
@@ -125,3 +132,4 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with WeeChat Relay.  If not, see <https://www.gnu.org/licenses/>.
+<!-- REUSE-IgnoreEnd -->

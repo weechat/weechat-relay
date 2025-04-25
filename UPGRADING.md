@@ -1,3 +1,9 @@
+<!--
+SPDX-FileCopyrightText: 2019-2025 Sébastien Helleu <flashcode@flashtux.org>
+
+SPDX-License-Identifier: GPL-3.0-or-later
+-->
+
 # WeeChat Relay Upgrade guidelines
 
 These upgrade guidelines only contain instructions for version upgrades which require manual actions.\
