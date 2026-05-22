@@ -1,5 +1,5 @@
 <!--
-SPDX-FileCopyrightText: 2019-2025 Sébastien Helleu <flashcode@flashtux.org>
+SPDX-FileCopyrightText: 2019-2026 Sébastien Helleu <flashcode@flashtux.org>
 
 SPDX-License-Identifier: GPL-3.0-or-later
 -->
@@ -13,8 +13,9 @@ SPDX-License-Identifier: GPL-3.0-or-later
 WeeChat Relay is a C library to communicate between WeeChat and a client using the "weechat" relay protocol.
 
 > [!IMPORTANT]
-> This library is under development, there is no stable version yet.\
-**DO NOT USE IN PRODUCTION!**
+> The relay "weechat" protocol has been superseded by "api", which provides many benefits (standard HTTP REST API, JSON).\
+> All relay clients should now use the "api" relay.\
+> **This project is archived and should no longer be used!**
 
 Homepage: [https://weechat.org/](https://weechat.org/)
 
@@ -116,7 +117,7 @@ weechat-relay> quit
 ## Copyright
 
 <!-- REUSE-IgnoreStart -->
-Copyright © 2019-2025 [Sébastien Helleu](https://github.com/flashcode)
+Copyright © 2019-2026 [Sébastien Helleu](https://github.com/flashcode)
 
 This file is part of WeeChat Relay.
 
